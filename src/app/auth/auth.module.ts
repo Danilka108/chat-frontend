@@ -12,14 +12,14 @@ import { AuthErrorComponent } from './components/auth-error/auth-error.component
 import { CompleteRegistrationComponent } from './pages/complete-registration/complete-registration.component'
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component'
 import { SignInComponent } from './pages/sign-in/sign-in.component'
-import { SignUpComponent } from './pages/sign-up/sign-up.component';
-import { EmailResetPasswordComponent } from './pages/email/email-reset-password/email-reset-password.component';
+import { SignUpComponent } from './pages/sign-up/sign-up.component'
+import { EmailResetPasswordComponent } from './pages/email/email-reset-password/email-reset-password.component'
 import { EmailConfirmEmailComponent } from './pages/email/email-confirm-email/email-confirm-email.component'
 import { AuthRoutingModule } from './auth-routing.module'
-import { AuthComponent } from './components/auth/auth.component';
-import { AuthLoadingComponent } from './components/auth-loading/auth-loading.component';
-import { ResetPasswordCheckEmailComponent } from './pages/reset-password-check-email/reset-password-check-email.component';
-import { PasswordResetedComponent } from './pages/email/password-reseted/password-reseted.component';
+import { AuthComponent } from './components/auth/auth.component'
+import { AuthLoadingComponent } from './components/auth-loading/auth-loading.component'
+import { ResetPasswordCheckEmailComponent } from './pages/reset-password-check-email/reset-password-check-email.component'
+import { PasswordResetedComponent } from './pages/email/password-reseted/password-reseted.component'
 
 @NgModule({
     declarations: [
@@ -39,17 +39,8 @@ import { PasswordResetedComponent } from './pages/email/password-reseted/passwor
         ResetPasswordCheckEmailComponent,
         PasswordResetedComponent,
     ],
-    imports: [
-        CommonModule,
-        FormsModule,
-        ReactiveFormsModule,
-        HttpClientModule,
-        MaterialModule,
-        AuthRoutingModule,
-    ],
+    imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule, MaterialModule, AuthRoutingModule],
     providers: [HttpService],
-    exports: [
-        AuthComponent
-    ],
+    exports: [AuthComponent],
 })
 export class AuthModule {}

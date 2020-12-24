@@ -29,7 +29,7 @@ export class HttpService {
                 },
                 error(error) {
                     observer.error(error.status)
-                }
+                },
             })
         })
     }
@@ -41,9 +41,13 @@ export class HttpService {
     emailResetPassword(id: string, token: string, newPassword: string) {
         const params = new HttpParams().set('id', id).set('token', token)
 
-        return this.post(`${environment.apiUrl}/email/reset-password`, {
-            newPassword
-        }, { params })
+        return this.post(
+            `${environment.apiUrl}/email/reset-password`,
+            {
+                newPassword,
+            },
+            { params }
+        )
     }
 
     confirmEmail(id: string, token: string) {

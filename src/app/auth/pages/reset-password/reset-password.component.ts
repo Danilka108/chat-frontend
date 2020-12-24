@@ -17,14 +17,14 @@ export class ResetPasswordComponent implements OnInit {
     constructor(
         private readonly fb: FormBuilder,
         private readonly httpService: HttpService,
-        private readonly router: Router,
+        private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
 
     ngOnInit(): void {
         this.formGroup = this.fb.group({
-            email: new FormControl(null, Validators.required)
+            email: new FormControl(null, Validators.required),
         })
     }
 
@@ -33,16 +33,15 @@ export class ResetPasswordComponent implements OnInit {
             this.loading = true
             const self = this
 
-            this.httpService.resetPassword(this.formGroup.controls.email.value)
-                .subscribe({
-                    next() {
-                        self.router.navigate(['/reset-password-check-email'])
-                    },
-                    error() {
-                        self.loading = false
-                        self.httpError = true
-                    }
-                })
+            this.httpService.resetPassword(this.formGroup.controls.email.value).subscribe({
+                next() {
+                    self.router.navigate(['/reset-password-check-email'])
+                },
+                error() {
+                    self.loading = false
+                    self.httpError = true
+                },
+            })
         }
     }
 }

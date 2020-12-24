@@ -28,7 +28,7 @@ export class SignUpComponent implements OnInit {
         private readonly fb: FormBuilder,
         private readonly httpService: HttpService,
         private readonly deviceService: DeviceDetectorService,
-        private readonly router: Router,
+        private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }

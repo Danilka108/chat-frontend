@@ -19,5 +19,5 @@ export const routes: Routes = [
     { path: 'email/confirm-email', component: EmailConfirmEmailComponent },
     { path: 'email/reset-password', component: EmailResetPasswordComponent },
     { path: 'email/password-reseted', component: PasswordResetedComponent },
-    { path: '**', component: PageNotFoundComponent, pathMatch: 'full' }
+    { path: '**', component: PageNotFoundComponent, pathMatch: 'full' },
 ]

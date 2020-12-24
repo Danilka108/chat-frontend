@@ -1,0 +1,79 @@
+<app-auth-loading *ngIf="loading"></app-auth-loading>
+<app-auth-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
+    <app-auth-header>
+        Registration
+    </app-auth-header>
+
+    <mat-form-field appearance="legacy">
+        <mat-label>Enter email</mat-label>
+        <input matInput formControlName="email" type="email">
+        <mat-error *ngIf="formGroup.controls.email.hasError('emailInUse')">
+            email already in use
+        </mat-error>
+        <mat-error *ngIf="formGroup.controls.email.hasError('pattern')">
+            Email must contain @ sybmol
+        </mat-error>
+    </mat-form-field>
+
+    <mat-form-field appearance="legacy">
+        <mat-label>Enter name</mat-label>
+        <input matInput formControlName="name">
+    </mat-form-field>
+
+    <mat-form-field appearance="legacy">
+        <mat-label>Enter password</mat-label>
+        <input
+            matInput
+            [type]="passwordHide ? 'password' : 'text'"
+            formControlName="password"
+        >
+        <mat-error *ngIf="formGroup.controls.password.hasError('minlength')">
+            Password must be longer than 8 characters
+        </mat-error>
+        <button 
+            mat-icon-button matSuffix
+            (click)="passwordHide = !passwordHide"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="passwordHide"
+        >
+            <mat-icon>
+                {{passwordHide ? 'visibility_off' : 'visibility'}}
+            </mat-icon>
+        </button>
+    </mat-form-field>
+
+    <mat-form-field appearance="legacy">
+        <mat-label>Confirm password</mat-label>
+        <input
+            matInput
+            [type]="confirmPasswordHide ? 'password' : 'text'"
+            formControlName="confirmPassword"
+            [errorStateMatcher]="matchPasswords"
+        >
+        <mat-error *ngIf="formGroup.hasError('passwordsMismatch')">
+            Passwords do not match
+        </mat-error>
+        <button
+            mat-icon-button
+            matSuffix
+            (click)="confirmPasswordHide = !confirmPasswordHide"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="confirmPasswordHide"
+        >
+            <mat-icon>
+                {{confirmPasswordHide ? 'visibility_off' : 'visibility'}}
+            </mat-icon>
+        </button>
+    </mat-form-field>
+
+    <app-auth-error [error]="httpError">{{httpErrorMessage}}</app-auth-error>
+    
+    <button
+        type="submit"
+        mat-flat-button
+        color="primary"
+        [disabled]="!formGroup.valid || loading"
+    >Registration</button>
+
+    <app-auth-redirect [link]="redirectLink">Sign in</app-auth-redirect>
+</app-auth-wrapper>

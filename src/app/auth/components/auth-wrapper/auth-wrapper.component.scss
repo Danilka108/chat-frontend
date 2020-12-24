@@ -1,0 +1,20 @@
+@import '~@angular/material/theming';
+@import '../../../styles/vars.scss';
+
+:host {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100vh;
+}
+
+form {
+    border: 0.15em solid map-get($custom-colors, grey);
+    border-radius: 0.5em;
+    width: 100%;
+    max-width: 300px;
+    display: flex;
+    flex-direction: column;
+    padding: 3em 2em;
+}

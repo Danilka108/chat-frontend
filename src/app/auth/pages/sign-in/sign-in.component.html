@@ -1,0 +1,46 @@
+<app-auth-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
+    <app-auth-header>Sign in</app-auth-header>
+
+    <mat-form-field appearance="legacy">
+        <mat-label>Enter your email</mat-label>
+        <input matInput formControlName="email" type="email">
+    </mat-form-field>
+    
+    <mat-form-field appearance="legacy">
+        <mat-label>Enter your password</mat-label>
+        <input
+            matInput
+            [type]="passwordHide ? 'password' : 'text'"
+            formControlName="password"
+        >
+        <button
+            mat-icon-button
+            matSuffix
+            (click)="passwordHide = !passwordHide"
+            [attr.aria-label]="'Hide password'"
+            [attr.aria-pressed]="passwordHide"
+        >
+            <mat-icon>{{passwordHide ? 'visibility_off' : 'visibility'}}</mat-icon>
+        </button>
+    </mat-form-field>
+
+    <app-auth-error [error]="httpError">
+        {{httpErrorMessage}}
+    </app-auth-error>
+
+    <app-auth-group>
+        <mat-checkbox formControlName="rememberMe" color="primary">
+            Remember me
+        </mat-checkbox>
+        <a mat-button [routerLink]="resetPasswordLink" color="primary">Reset password</a>
+    </app-auth-group>
+
+    <button
+        type="submit"
+        mat-flat-button
+        color="primary"
+        [disabled]="!formGroup.valid"
+    >Sign in</button>
+
+    <app-auth-redirect [link]="redirectLink">Sign up</app-auth-redirect>
+</app-auth-wrapper>

@@ -10,7 +10,13 @@ export const checkEmailAsyncValidator = (httpService: HttpService): AsyncValidat
             map(() => {
                 return null
             }),
-            catchError(() => of({ emailInUse: true }))
+            catchError((status) => {
+                if (status == 400) {
+                    return of({ emailInUse: true })
+                }
+
+                return of(null)
+            })
         )
     }
 }

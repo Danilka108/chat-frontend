@@ -6,7 +6,6 @@ import { MatIconModule } from '@angular/material/icon'
 import { MatButtonModule } from '@angular/material/button'
 import { MatCheckboxModule } from '@angular/material/checkbox'
 import { MatToolbarModule } from '@angular/material/toolbar'
-import { MatSnackBarModule } from '@angular/material/snack-bar'
 import { MatProgressBarModule } from '@angular/material/progress-bar'
 
 @NgModule({
@@ -19,11 +18,9 @@ import { MatProgressBarModule } from '@angular/material/progress-bar'
         MatButtonModule,
         MatCheckboxModule,
         MatToolbarModule,
-        MatSnackBarModule,
         MatProgressBarModule,
     ],
     exports: [
-        CommonModule,
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,

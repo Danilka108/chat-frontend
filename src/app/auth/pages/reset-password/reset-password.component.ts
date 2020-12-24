@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { HttpService } from '../../shared/http.service'
 import { MatSnackBar } from '@angular/material/snack-bar'
+import { Router } from '@angular/router'
 
 @Component({
     selector: 'app-reset-password',
@@ -10,17 +11,13 @@ import { MatSnackBar } from '@angular/material/snack-bar'
 })
 export class ResetPasswordComponent implements OnInit {
     formGroup!: FormGroup
-    emailSent = {
-        message: 'If the user is registered with this email address, the email will be sent to this email address',
-        errorMessage: 'Server error. Try later',
-        action: 'ok',
-        duration: 100000000
-    }
+    loading = false
+    httpError = false
 
     constructor(
         private readonly fb: FormBuilder,
         private readonly httpService: HttpService,
-        private readonly snackBar: MatSnackBar
+        private readonly router: Router,
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
@@ -32,21 +29,18 @@ export class ResetPasswordComponent implements OnInit {
     }
 
     onSubmit() {
-        if (this.formGroup.valid) {
+        if (this.formGroup.valid && !this.loading) {
+            this.loading = true
             const self = this
 
             this.httpService.resetPassword(this.formGroup.controls.email.value)
                 .subscribe({
                     next() {
-                        self.snackBar.open(self.emailSent.message, self.emailSent.action, {
-                            duration: self.emailSent.duration
-                        })
+                        self.router.navigate(['/reset-password-check-email'])
                     },
                     error() {
-                        self.snackBar.open(self.emailSent.errorMessage, self.emailSent.action, {
-                            duration: self.emailSent.duration,
-                            panelClass: 'error-snackbar'
-                        })
+                        self.loading = false
+                        self.httpError = true
                     }
                 })
         }

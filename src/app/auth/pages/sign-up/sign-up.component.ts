@@ -49,33 +49,30 @@ export class SignUpComponent implements OnInit {
             },
             { validators: matchPasswordsValidator('password', 'confirmPassword') }
         )
-
-        this.formGroup.valueChanges.subscribe(() => {
-            console.log(this.formGroup)
-        })
     }
 
     onSubmit() {
         if (this.formGroup.valid && !this.loading) {
             const deviceInfo = this.deviceService.getDeviceInfo()
             const self = this
+            this.loading = true
 
             this.httpService
                 .signUp({
-                    email: this.formGroup.get('email')?.value,
-                    name: this.formGroup.get('name')?.value,
-                    password: this.formGroup.get('password')?.value,
+                    email: this.formGroup.controls['email'].value,
+                    name: this.formGroup.controls['name'].value,
+                    password: this.formGroup.controls['password'].value,
                     os: deviceInfo.os,
                     browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
                 })
                 .subscribe({
                     next() {
-                        self.loading = true
                         self.router.navigate([self.completeLink])
                     },
                     error(errorMsg) {
                         self.httpError = true
                         self.httpErrorMessage = errorMsg
+                        self.loading = false
                     },
                 })
         }

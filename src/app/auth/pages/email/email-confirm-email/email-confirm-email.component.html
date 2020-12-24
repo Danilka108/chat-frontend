@@ -1,4 +1,10 @@
-<app-auth-header>
+<app-auth-loading *ngIf="loading"></app-auth-loading>
+
+<app-auth-header *ngIf="!isInvalid && !loading">
     Registration completed.
+</app-auth-header>
+
+<app-auth-header class="invalid" *ngIf="isInvalid  && !loading">
+    Link is not valid!
 </app-auth-header>
 <a mat-stroked-button href="/">Sign in</a>

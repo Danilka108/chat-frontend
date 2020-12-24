@@ -1,6 +1,3 @@
-@import '~@angular/material/theming';
-@import '../../../../styles/vars';
-
 :host {
     display: flex;
     align-items: center;
@@ -10,7 +7,13 @@
     flex-direction: column;
 }
 
-.link-invalid {
-    font-size: 1.2em;
-    color: mat-color($warn);
+h1 {
+    font-size: 3.25em;
+    text-transform: uppercase;
+    font-weight: 500;
+    margin-bottom: 0.5em;
+}
+
+p {
+    font-size: 2em;
 }

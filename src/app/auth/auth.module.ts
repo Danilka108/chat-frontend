@@ -17,7 +17,9 @@ import { EmailResetPasswordComponent } from './pages/email/email-reset-password/
 import { EmailConfirmEmailComponent } from './pages/email/email-confirm-email/email-confirm-email.component'
 import { AuthRoutingModule } from './auth-routing.module'
 import { AuthComponent } from './components/auth/auth.component';
-import { AuthLoadingComponent } from './components/auth-loading/auth-loading.component'
+import { AuthLoadingComponent } from './components/auth-loading/auth-loading.component';
+import { ResetPasswordCheckEmailComponent } from './pages/reset-password-check-email/reset-password-check-email.component';
+import { PasswordResetedComponent } from './pages/email/password-reseted/password-reseted.component';
 
 @NgModule({
     declarations: [
@@ -34,6 +36,8 @@ import { AuthLoadingComponent } from './components/auth-loading/auth-loading.com
         EmailConfirmEmailComponent,
         AuthComponent,
         AuthLoadingComponent,
+        ResetPasswordCheckEmailComponent,
+        PasswordResetedComponent,
     ],
     imports: [
         CommonModule,

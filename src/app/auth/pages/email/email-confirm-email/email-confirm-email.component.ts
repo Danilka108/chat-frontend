@@ -12,10 +12,12 @@ export class EmailConfirmEmailComponent implements OnInit {
     loading = true
     isInvalid = false
 
-    constructor(private readonly activatedRoute: ActivatedRoute, private readonly httpService: HttpService) {}
+    constructor(
+        private readonly activatedRoute: ActivatedRoute,
+        private readonly httpService: HttpService
+    ) {}
 
     ngOnInit(): void {
-        const self = this
         this.activatedRoute.queryParams
             .pipe(
                 map((v) => {
@@ -26,17 +28,15 @@ export class EmailConfirmEmailComponent implements OnInit {
                     return v
                 }),
                 mergeMap((v) => {
-                    return self.httpService.confirmEmail(v.id, v.token)
+                    return this.httpService.confirmEmail(v.id, v.token)
                 })
             )
-            .subscribe({
-                next() {
-                    self.loading = false
-                },
-                error() {
-                    self.loading = false
-                    self.isInvalid = true
-                },
-            })
+            .subscribe(
+                () => this.loading = false,
+                () => {
+                    this.loading = false
+                    this.isInvalid = true
+                }
+            )
     }
 }

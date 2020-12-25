@@ -6,7 +6,5 @@ import { Component, Input } from '@angular/core'
     styleUrls: ['./auth-error.component.scss'],
 })
 export class AuthErrorComponent {
-    @Input() error!: boolean
-
     constructor() {}
 }

@@ -4,6 +4,8 @@ import { ActivatedRoute, Router } from '@angular/router'
 import { MatchPasswords } from 'src/app/auth/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/auth/validators/match-passwords.validator'
 import { HttpService } from 'src/app/auth/shared/http.service'
+import { of } from 'rxjs'
+import { catchError, map } from 'rxjs/operators'
 
 @Component({
     selector: 'app-email-reset-password',
@@ -14,11 +16,18 @@ export class EmailResetPasswordComponent implements OnInit {
     formGroup!: FormGroup
     newPasswordHide = true
     confirmNewPasswordHide = true
-    matchPasswords!: MatchPasswords
+
+    matchPasswords = new MatchPasswords()
+
     httpError = false
     httpErrorMessage = ''
+
     linkError = false
     loading = false
+
+    httpError$ = of(false)
+    httpErrorMessage$ = of('')
+
     params: {
         id: string
         token: string
@@ -26,6 +35,7 @@ export class EmailResetPasswordComponent implements OnInit {
         id: '',
         token: '',
     }
+
     passResetedLink = '/email/password-reseted'
 
     constructor(
@@ -47,8 +57,6 @@ export class EmailResetPasswordComponent implements OnInit {
             }
         })
 
-        this.matchPasswords = new MatchPasswords()
-
         this.formGroup = this.fb.group(
             {
                 newPassword: new FormControl(null, [Validators.required, Validators.minLength(8)]),
@@ -60,21 +68,35 @@ export class EmailResetPasswordComponent implements OnInit {
 
     onSubmit() {
         if (this.formGroup.valid && !this.loading && !this.linkError) {
-            const self = this
+
             this.loading = true
 
-            this.httpService
-                .emailResetPassword(this.params.id, this.params.token, this.formGroup.controls['newPassword'].value)
-                .subscribe({
-                    next() {
-                        self.router.navigate([self.passResetedLink])
-                    },
-                    error(error) {
-                        self.httpError = true
-                        self.httpErrorMessage = error
-                        self.loading = false
-                    },
+            const req$ = this.httpService.emailResetPassword(
+                this.params.id,
+                this.params.token,
+                this.formGroup.controls['newPassword'].value
+            )
+
+            this.httpError$ = req$.pipe(
+                map(() => false),
+                catchError(() => of(true))
+            )
+
+            this.httpErrorMessage$ = req$.pipe(
+                map(() => ''),
+                catchError((error) => {
+                    if (error?.message) {
+                        return of(error.message)
+                    }
+
+                    return of(error)
                 })
+            )
+
+            req$.subscribe(
+                () => this.router.navigate([this.passResetedLink]),
+                () => this.loading = false
+            )
         }
     }
 }

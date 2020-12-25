@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { DeviceDetectorService } from 'ngx-device-detector'
+import { Observable, of } from 'rxjs'
+import { catchError, map } from 'rxjs/operators'
+import { MatchPasswords } from '../../matchers/match-passwords.matcher'
 import { HttpService } from '../../shared/http.service'
 
 @Component({
@@ -9,16 +12,18 @@ import { HttpService } from '../../shared/http.service'
 })
 export class SignInComponent implements OnInit {
     passwordHide = true
-    httpError = false
-    httpErrorMessage = ''
     formGroup!: FormGroup
+
     redirectLink = '/sign-up'
     resetPasswordLink = '/reset-password'
+
+    httpError$ = of(false)
+    httpErrorMessage$ = of('')
 
     constructor(
         private readonly fb: FormBuilder,
         private readonly httpService: HttpService,
-        private readonly deviceService: DeviceDetectorService
+        private readonly deviceService: DeviceDetectorService,
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
@@ -35,21 +40,32 @@ export class SignInComponent implements OnInit {
         if (this.formGroup.valid) {
             const deviceInfo = this.deviceService.getDeviceInfo()
 
-            const self = this
+            const req$ = this.httpService.signIn({
+                email: this.formGroup.controls['email'].value,
+                password: this.formGroup.controls['password'].value,
+                os: deviceInfo.os,
+                browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
+            })
+    
+            this.httpError$ = req$.pipe(
+                map(() => false),
+                catchError(() => of(true))
+            )
+    
+            this.httpErrorMessage$ = req$.pipe(
+                map(() => ''),
+                catchError((error) => {
+                    if (error?.message) {
+                        return of(error.message)
+                    }
 
-            this.httpService
-                .signIn({
-                    email: this.formGroup.get('email')?.value,
-                    password: this.formGroup.get('password')?.value,
-                    os: deviceInfo.os,
-                    browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
+                    return of(error)
                 })
-                .subscribe({
-                    error(errorMsg) {
-                        self.httpError = true
-                        self.httpErrorMessage = errorMsg
-                    },
-                })
+            )
+            
+            req$.subscribe(() => {
+                console.log('ok')
+            })
         }
     }
 }

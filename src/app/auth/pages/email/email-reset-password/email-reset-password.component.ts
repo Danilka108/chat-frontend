@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
 import { MatchPasswords } from 'src/app/auth/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/auth/validators/match-passwords.validator'
-import { HttpService } from 'src/app/auth/shared/http.service'
-import { of } from 'rxjs'
+import { AuthHttpService } from 'src/app/auth/auth-http.service'
+import { of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
+import { emailPasswordResetedPath } from 'src/app/routes.constants'
 
 @Component({
     selector: 'app-email-reset-password',
@@ -36,12 +37,12 @@ export class EmailResetPasswordComponent implements OnInit {
         token: '',
     }
 
-    passResetedLink = '/email/password-reseted'
+    passResetedLink = emailPasswordResetedPath.full
 
     constructor(
         private readonly fb: FormBuilder,
         private readonly activatedRoute: ActivatedRoute,
-        private readonly httpService: HttpService,
+        private readonly authHttpService: AuthHttpService,
         private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)
@@ -71,7 +72,7 @@ export class EmailResetPasswordComponent implements OnInit {
 
             this.loading = true
 
-            const req$ = this.httpService.emailResetPassword(
+            const req$ = this.authHttpService.emailResetPassword(
                 this.params.id,
                 this.params.token,
                 this.formGroup.controls['newPassword'].value

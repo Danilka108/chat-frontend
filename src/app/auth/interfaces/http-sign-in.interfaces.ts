@@ -9,7 +9,7 @@ export interface IHttpSingInResponse {
     statusCode: number,
     message: string,
     data: {
-        id: number,
+        userID: number,
         accessToken: string,
         refreshToken: string,
     }

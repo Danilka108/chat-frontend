@@ -1,8 +1,8 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
-import { HttpService } from '../../shared/http.service'
+import { AuthHttpService } from '../../auth-http.service'
 import { Router } from '@angular/router'
-import { of } from 'rxjs'
+import { of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 
 @Component({
@@ -18,7 +18,7 @@ export class ResetPasswordComponent implements OnInit {
 
     constructor(
         private readonly fb: FormBuilder,
-        private readonly httpService: HttpService,
+        private readonly authHttpService: AuthHttpService,
         private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)
@@ -34,7 +34,7 @@ export class ResetPasswordComponent implements OnInit {
         if (this.formGroup.valid && !this.loading) {
             this.loading = true
 
-            const req$ = this.httpService.resetPassword(this.formGroup.controls['email'].value)
+            const req$ = this.authHttpService.resetPassword(this.formGroup.controls['email'].value)
 
             this.httpError$ = req$.pipe(
                 map(() => false),

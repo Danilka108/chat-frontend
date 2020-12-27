@@ -3,13 +3,11 @@ import { Injectable } from '@angular/core'
 import { Observable } from 'rxjs'
 import { map, catchError, refCount, publish } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
-import { IHttpSignInBody, IHttpSingInResponse } from '../interfaces/http-sign-in.interfaces'
-import { IHttpSignUpBody, IHttpSignUpResponse } from '../interfaces/http-sign-up.interfaces'
+import { IHttpSignInBody, IHttpSingInResponse } from './interfaces/http-sign-in.interfaces'
+import { IHttpSignUpBody, IHttpSignUpResponse } from './interfaces/http-sign-up.interfaces'
 
-@Injectable({
-    providedIn: 'root',
-})
-export class HttpService {
+@Injectable()
+export class AuthHttpService {
     constructor(private httpClient: HttpClient) {}
 
     private error() {

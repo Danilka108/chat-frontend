@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
+import { Subscription } from 'rxjs'
 import { mergeMap, map } from 'rxjs/operators'
-import { HttpService } from 'src/app/auth/shared/http.service'
+import { AuthHttpService } from 'src/app/auth/auth-http.service'
 
 @Component({
     selector: 'app-email-confirm-email',
@@ -14,7 +15,7 @@ export class EmailConfirmEmailComponent implements OnInit {
 
     constructor(
         private readonly activatedRoute: ActivatedRoute,
-        private readonly httpService: HttpService
+        private readonly authHttpService: AuthHttpService
     ) {}
 
     ngOnInit(): void {
@@ -28,7 +29,7 @@ export class EmailConfirmEmailComponent implements OnInit {
                     return v
                 }),
                 mergeMap((v) => {
-                    return this.httpService.confirmEmail(v.id, v.token)
+                    return this.authHttpService.confirmEmail(v.id, v.token)
                 })
             )
             .subscribe(

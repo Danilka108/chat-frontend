@@ -5,7 +5,7 @@ import { routes } from './auth.routes'
 
 @NgModule({
     declarations: [],
-    imports: [CommonModule, RouterModule.forRoot(routes)],
+    imports: [CommonModule, RouterModule.forChild(routes)],
     exports: [RouterModule],
 })
 export class AuthRoutingModule {}

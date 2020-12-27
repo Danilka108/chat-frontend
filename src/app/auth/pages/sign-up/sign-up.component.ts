@@ -1,11 +1,12 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { DeviceDetectorService } from 'ngx-device-detector'
-import { combineLatest, of } from 'rxjs'
+import { combineLatest, of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
+import { completeRegistrationPath, signInPath } from 'src/app/routes.constants'
 import { MatchPasswords } from '../../matchers/match-passwords.matcher'
-import { HttpService } from '../../shared/http.service'
+import { AuthHttpService } from '../../auth-http.service'
 import { checkEmailAsyncValidator } from '../../validators/check-email-async.validator'
 import { matchPasswordsValidator } from '../../validators/match-passwords.validator'
 
@@ -25,12 +26,12 @@ export class SignUpComponent implements OnInit {
 
     loading = false
 
-    redirectLink = '/sign-in'
-    completeLink = '/complete-registration'
+    redirectLink = signInPath.full
+    completeLink = completeRegistrationPath.full
 
     constructor(
         private readonly fb: FormBuilder,
-        private readonly httpService: HttpService,
+        private readonly authHttpService: AuthHttpService,
         private readonly deviceService: DeviceDetectorService,
         private readonly router: Router,
     ) {
@@ -43,7 +44,7 @@ export class SignUpComponent implements OnInit {
                 email: new FormControl(
                     null,
                     [Validators.required, Validators.pattern(/@/)],
-                    [checkEmailAsyncValidator(this.httpService)]
+                    [checkEmailAsyncValidator(this.authHttpService)]
                 ),
                 name: new FormControl(null, [Validators.required, Validators.minLength(2)]),
                 password: new FormControl(null, [Validators.required, Validators.minLength(8)]),
@@ -59,7 +60,7 @@ export class SignUpComponent implements OnInit {
 
             const deviceInfo = this.deviceService.getDeviceInfo()
 
-            const req$ = this.httpService.signUp({
+            const req$ = this.authHttpService.signUp({
                 email: this.formGroup.controls['email'].value,
                 name: this.formGroup.controls['name'].value,
                 password: this.formGroup.controls['password'].value,

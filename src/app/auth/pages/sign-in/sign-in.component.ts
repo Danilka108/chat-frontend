@@ -1,10 +1,13 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
+import { Router } from '@angular/router'
 import { DeviceDetectorService } from 'ngx-device-detector'
-import { Observable, of } from 'rxjs'
+import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
-import { MatchPasswords } from '../../matchers/match-passwords.matcher'
-import { HttpService } from '../../shared/http.service'
+import { AuthStore } from 'src/app/auth.store'
+import { LocalStorageService } from 'src/app/services/local-storage.service'
+import { mainPath, resetPasswordPath, signUpPath } from 'src/app/routes.constants'
+import { AuthHttpService } from '../../auth-http.service'
 
 @Component({
     selector: 'app-sign-in',
@@ -14,16 +17,19 @@ export class SignInComponent implements OnInit {
     passwordHide = true
     formGroup!: FormGroup
 
-    redirectLink = '/sign-up'
-    resetPasswordLink = '/reset-password'
+    redirectLink = signUpPath.full
+    resetPasswordLink = resetPasswordPath.full
 
     httpError$ = of(false)
     httpErrorMessage$ = of('')
 
     constructor(
         private readonly fb: FormBuilder,
-        private readonly httpService: HttpService,
+        private readonly authHttpService: AuthHttpService,
         private readonly deviceService: DeviceDetectorService,
+        private readonly localStorageService: LocalStorageService,
+        private readonly authStore: AuthStore,
+        private readonly router: Router,
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
@@ -40,7 +46,7 @@ export class SignInComponent implements OnInit {
         if (this.formGroup.valid) {
             const deviceInfo = this.deviceService.getDeviceInfo()
 
-            const req$ = this.httpService.signIn({
+            const req$ = this.authHttpService.signIn({
                 email: this.formGroup.controls['email'].value,
                 password: this.formGroup.controls['password'].value,
                 os: deviceInfo.os,
@@ -63,8 +69,14 @@ export class SignInComponent implements OnInit {
                 })
             )
             
-            req$.subscribe(() => {
-                console.log('ok')
+            req$.subscribe(({ data }) => {
+                this.localStorageService.setRefreshToken(data.refreshToken)
+                this.localStorageService.setUserID(data.userID)
+
+                this.authStore.setAccessToken(data.accessToken)
+                this.authStore.setUserID(data.userID)
+
+                this.router.navigateByUrl(mainPath.full)
             })
         }
     }

@@ -5,8 +5,6 @@ import { Component, OnInit } from '@angular/core'
     templateUrl: './reset-password-check-email.component.html',
     styleUrls: ['./reset-password-check-email.component.scss'],
 })
-export class ResetPasswordCheckEmailComponent implements OnInit {
+export class ResetPasswordCheckEmailComponent {
     constructor() {}
-
-    ngOnInit(): void {}
 }

@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
-import { HttpService } from './shared/http.service'
+import { AuthHttpService } from './auth-http.service'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { HttpClientModule } from '@angular/common/http'
 import { AuthWrapperComponent } from './components/auth-wrapper/auth-wrapper.component'
@@ -40,7 +40,6 @@ import { PasswordResetedComponent } from './pages/email/password-reseted/passwor
         PasswordResetedComponent,
     ],
     imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule, MaterialModule, AuthRoutingModule],
-    providers: [HttpService],
-    exports: [AuthComponent],
+    providers: [AuthHttpService],
 })
 export class AuthModule {}

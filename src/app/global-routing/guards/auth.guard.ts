@@ -3,15 +3,15 @@ import { CanActivateChild, CanLoad, Route, UrlSegment } from '@angular/router';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { Observable, observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-import { AuthStore } from 'src/app/auth.store';
 import { LocalStorageService } from '../../services/local-storage.service';
 import { HttpService, IRefreshTokenResponse } from '../../services/http.service'
+import { AuthStoreService } from 'src/app/store/auth/auth-store.service';
 
 @Injectable()
 export class AuthGuard implements CanLoad, CanActivateChild {
     constructor(
         private readonly localStorageService: LocalStorageService,
-        private readonly authStore: AuthStore,
+        private readonly authStore: AuthStoreService,
         private readonly httpService: HttpService,
         private readonly deviceService: DeviceDetectorService,
     ) {}

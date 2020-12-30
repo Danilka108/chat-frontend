@@ -20,7 +20,9 @@ export interface IRefreshTokenResponse {
     }
 }
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class HttpService {
     constructor(
         private readonly httpClient: HttpClient,

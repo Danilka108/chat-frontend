@@ -1,15 +1,13 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export interface IAuthStore {
+interface IAuthStore {
   userID: number | null,
   accessToken: string | null,
 }
 
-@Injectable({
-  providedIn: 'root'
-})
-export class AuthStore {
+@Injectable()
+export class AuthStoreService {
   private readonly auth = new BehaviorSubject<IAuthStore>({
     userID: null,
     accessToken: null

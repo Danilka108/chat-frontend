@@ -4,10 +4,10 @@ import { Router } from '@angular/router'
 import { DeviceDetectorService } from 'ngx-device-detector'
 import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
-import { AuthStore } from 'src/app/auth.store'
 import { LocalStorageService } from 'src/app/services/local-storage.service'
 import { mainPath, resetPasswordPath, signUpPath } from 'src/app/routes.constants'
 import { AuthHttpService } from '../../auth-http.service'
+import { AuthStoreService } from 'src/app/store/auth/auth-store.service'
 
 @Component({
     selector: 'app-sign-in',
@@ -28,7 +28,7 @@ export class SignInComponent implements OnInit {
         private readonly authHttpService: AuthHttpService,
         private readonly deviceService: DeviceDetectorService,
         private readonly localStorageService: LocalStorageService,
-        private readonly authStore: AuthStore,
+        private readonly authStore: AuthStoreService,
         private readonly router: Router,
     ) {
         this.onSubmit = this.onSubmit.bind(this)

@@ -7,8 +7,7 @@ import { AuthModule } from './auth/auth.module'
 import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component'
 import { GlobalRoutingModule } from './global-routing/global-routing.module'
 import { MainModule } from './main/main.module'
-import { HttpService } from './services/http.service'
-import { LocalStorageService } from './services/local-storage.service'
+import { AuthStoreModule } from './store/auth/auth-store.module'
 
 @NgModule({
     declarations: [AppComponent, PageNotFoundComponent],
@@ -19,11 +18,9 @@ import { LocalStorageService } from './services/local-storage.service'
         GlobalRoutingModule,
         AuthModule,
         MainModule,
+        AuthStoreModule,
     ],
-    providers: [
-        HttpService,
-        LocalStorageService,
-    ],
+    providers: [],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

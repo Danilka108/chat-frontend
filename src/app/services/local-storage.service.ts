@@ -3,7 +3,9 @@ import { Injectable } from '@angular/core';
 const localStorageUserID = 'LOCAL_STORAGE_AUTH_USER_ID'
 const localStorageRefreshToken = 'LOCAL_STORAGE_AUTH_REFRESH_TOKEN'
 
-@Injectable()
+@Injectable({
+    providedIn: 'root'
+})
 export class LocalStorageService {
     private getData(name: string) {
         const data = localStorage.getItem(name)

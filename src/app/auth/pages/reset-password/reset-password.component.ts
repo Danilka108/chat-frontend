@@ -1,9 +1,10 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { AuthHttpService } from '../../auth-http.service'
 import { Router } from '@angular/router'
-import { of, Subscription } from 'rxjs'
+import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
+import { authResetPasswordCheckEmailPath } from 'src/app/routes.constants'
 
 @Component({
     selector: 'app-reset-password',
@@ -11,7 +12,7 @@ import { catchError, map } from 'rxjs/operators'
 })
 export class ResetPasswordComponent implements OnInit {
     formGroup!: FormGroup
-    
+
     loading = false
 
     httpError$ = of(false)
@@ -38,12 +39,12 @@ export class ResetPasswordComponent implements OnInit {
 
             this.httpError$ = req$.pipe(
                 map(() => false),
-                catchError(() => of(false))
+                catchError(() => of(true))
             )
 
             req$.subscribe(
-                () => this.router.navigate(['/reset-password-check-email']),
-                () => this.loading = false
+                () => this.router.navigate([authResetPasswordCheckEmailPath.full]),
+                () => (this.loading = false)
             )
         }
     }

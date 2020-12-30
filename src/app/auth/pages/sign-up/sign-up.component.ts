@@ -2,13 +2,13 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { DeviceDetectorService } from 'ngx-device-detector'
-import { combineLatest, of, Subscription } from 'rxjs'
+import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
-import { completeRegistrationPath, signInPath } from 'src/app/routes.constants'
-import { MatchPasswords } from '../../matchers/match-passwords.matcher'
+import { MatchPasswords } from '../../../matchers/match-passwords.matcher'
 import { AuthHttpService } from '../../auth-http.service'
 import { checkEmailAsyncValidator } from '../../validators/check-email-async.validator'
-import { matchPasswordsValidator } from '../../validators/match-passwords.validator'
+import { matchPasswordsValidator } from 'src/app/validators/match-password.validator'
+import { authCompleteRegistrationPath, authSignInPath } from 'src/app/routes.constants'
 
 @Component({
     selector: 'app-sign-up',
@@ -26,14 +26,14 @@ export class SignUpComponent implements OnInit {
 
     loading = false
 
-    redirectLink = signInPath.full
-    completeLink = completeRegistrationPath.full
+    redirectLink = authSignInPath.full
+    completeLink = authCompleteRegistrationPath.full
 
     constructor(
         private readonly fb: FormBuilder,
         private readonly authHttpService: AuthHttpService,
         private readonly deviceService: DeviceDetectorService,
-        private readonly router: Router,
+        private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
@@ -86,7 +86,7 @@ export class SignUpComponent implements OnInit {
 
             req$.subscribe(
                 () => this.router.navigate([this.completeLink]),
-                () => this.loading = false
+                () => (this.loading = false)
             )
         }
     }

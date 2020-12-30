@@ -1,5 +1,7 @@
-<app-auth-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
-    <app-auth-header>Sign in</app-auth-header>
+<app-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
+    <app-header>
+        Sign in
+    </app-header>
 
     <mat-form-field appearance="legacy">
         <mat-label>Enter your email</mat-label>
@@ -24,16 +26,16 @@
         </button>
     </mat-form-field>
 
-    <app-auth-error *ngIf="httpError$ | async">
+    <app-error *ngIf="httpError$ | async">
         {{httpErrorMessage$ | async}}
-    </app-auth-error>
+    </app-error>
 
-    <app-auth-group>
+    <div class="group">
         <mat-checkbox formControlName="rememberMe" color="primary">
             Remember me
         </mat-checkbox>
         <a mat-button [routerLink]="resetPasswordLink" color="primary">Reset password</a>
-    </app-auth-group>
+    </div>
 
     <button
         type="submit"
@@ -43,4 +45,4 @@
     >Sign in</button>
 
     <app-auth-redirect [link]="redirectLink">Sign up</app-auth-redirect>
-</app-auth-wrapper>
+</app-wrapper>

@@ -5,20 +5,21 @@ import { DeviceDetectorService } from 'ngx-device-detector'
 import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { LocalStorageService } from 'src/app/services/local-storage.service'
-import { mainPath, resetPasswordPath, signUpPath } from 'src/app/routes.constants'
+import { authResetPasswordPath, authSignUpPath, mainPath } from 'src/app/routes.constants'
 import { AuthHttpService } from '../../auth-http.service'
 import { AuthStoreService } from 'src/app/store/auth/auth-store.service'
 
 @Component({
     selector: 'app-sign-in',
     templateUrl: './sign-in.component.html',
+    styleUrls: ['./sign-in.component.scss'],
 })
 export class SignInComponent implements OnInit {
     passwordHide = true
     formGroup!: FormGroup
 
-    redirectLink = signUpPath.full
-    resetPasswordLink = resetPasswordPath.full
+    redirectLink = authSignUpPath.full
+    resetPasswordLink = authResetPasswordPath.full
 
     httpError$ = of(false)
     httpErrorMessage$ = of('')
@@ -29,7 +30,7 @@ export class SignInComponent implements OnInit {
         private readonly deviceService: DeviceDetectorService,
         private readonly localStorageService: LocalStorageService,
         private readonly authStore: AuthStoreService,
-        private readonly router: Router,
+        private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
@@ -52,12 +53,12 @@ export class SignInComponent implements OnInit {
                 os: deviceInfo.os,
                 browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
             })
-    
+
             this.httpError$ = req$.pipe(
                 map(() => false),
                 catchError(() => of(true))
             )
-    
+
             this.httpErrorMessage$ = req$.pipe(
                 map(() => ''),
                 catchError((error) => {
@@ -68,7 +69,7 @@ export class SignInComponent implements OnInit {
                     return of(error)
                 })
             )
-            
+
             req$.subscribe(({ data }) => {
                 this.localStorageService.setRefreshToken(data.refreshToken)
                 this.localStorageService.setUserID(data.userID)

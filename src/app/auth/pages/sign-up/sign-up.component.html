@@ -1,8 +1,7 @@
-<app-auth-loading *ngIf="loading"></app-auth-loading>
-<app-auth-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
-    <app-auth-header>
-        Registration
-    </app-auth-header>
+<app-loading *ngIf="loading"></app-loading>
+
+<app-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
+    <app-header>Sign up</app-header>
 
     <mat-form-field appearance="legacy">
         <mat-label>Enter email</mat-label>
@@ -66,14 +65,14 @@
         </button>
     </mat-form-field>
 
-    <app-auth-error *ngIf="httpError$ | async">{{httpErrorMessage$ | async}}</app-auth-error>
+    <app-error *ngIf="httpError$ | async">{{httpErrorMessage$ | async}}</app-error>
     
     <button
         type="submit"
         mat-flat-button
         color="primary"
         [disabled]="!formGroup.valid || loading"
-    >Registration</button>
+    >Sign up</button>
 
     <app-auth-redirect [link]="redirectLink">Sign in</app-auth-redirect>
-</app-auth-wrapper>
+</app-wrapper>

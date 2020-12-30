@@ -58,31 +58,6 @@ export class AuthHttpService {
     }
 
     resetPassword(email: string) {
-        return this.httpClient.post(`${environment.apiUrl}/user/reset-password`, { email }).pipe(
-            publish(),
-            refCount(),
-        )
-    }
-
-    emailResetPassword(id: string, token: string, newPassword: string) {
-        const params = new HttpParams().set('id', id).set('token', token)
-
-        return this.httpClient.post(
-            `${environment.apiUrl}/email/reset-password`,
-            {
-                newPassword,
-            },
-            { params }
-        ).pipe(
-            publish(),
-            refCount(),
-            catchError(this.error())
-        )
-    }
-
-    confirmEmail(id: string, token: string) {
-        const params = new HttpParams().set('id', id).set('token', token)
-
-        return this.httpClient.get(`${environment.apiUrl}/email/confirm-email`, { params })
+        return this.httpClient.post(`${environment.apiUrl}/user/reset-password`, { email }).pipe(publish(), refCount())
     }
 }

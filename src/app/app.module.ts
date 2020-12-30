@@ -8,10 +8,13 @@ import { PageNotFoundComponent } from './components/page-not-found/page-not-foun
 import { GlobalRoutingModule } from './global-routing/global-routing.module'
 import { MainModule } from './main/main.module'
 import { AuthStoreModule } from './store/auth/auth-store.module'
+import { GlobalComponentsModule } from './global-components/global-components.module'
+import { EmailModule } from './email/email.module'
 
 @NgModule({
     declarations: [AppComponent, PageNotFoundComponent],
     imports: [
+        GlobalComponentsModule,
         BrowserModule,
         BrowserAnimationsModule,
         MaterialModule,
@@ -19,6 +22,7 @@ import { AuthStoreModule } from './store/auth/auth-store.module'
         AuthModule,
         MainModule,
         AuthStoreModule,
+        EmailModule,
     ],
     providers: [],
     bootstrap: [AppComponent],

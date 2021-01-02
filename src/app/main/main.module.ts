@@ -5,6 +5,6 @@ import { RouterModule } from '@angular/router'
 
 @NgModule({
     declarations: [MainComponent],
-    imports: [CommonModule, RouterModule.forChild([{ path: 'main', component: MainComponent }])],
+    imports: [CommonModule, RouterModule.forChild([{ path: '', component: MainComponent }])],
 })
 export class MainModule {}

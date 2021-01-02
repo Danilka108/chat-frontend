@@ -4,7 +4,6 @@ import { AppComponent } from './app.component'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { MaterialModule } from './material/material.module'
 import { AuthModule } from './auth/auth.module'
-import { PageNotFoundComponent } from './components/page-not-found/page-not-found.component'
 import { GlobalRoutingModule } from './global-routing/global-routing.module'
 import { MainModule } from './main/main.module'
 import { AuthStoreModule } from './store/auth/auth-store.module'
@@ -12,7 +11,7 @@ import { GlobalComponentsModule } from './global-components/global-components.mo
 import { EmailModule } from './email/email.module'
 
 @NgModule({
-    declarations: [AppComponent, PageNotFoundComponent],
+    declarations: [AppComponent],
     imports: [
         GlobalComponentsModule,
         BrowserModule,

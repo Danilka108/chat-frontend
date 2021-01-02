@@ -1,3 +1,5 @@
+<app-loading *ngIf="loading"></app-loading>
+
 <app-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
     <app-header>
         Sign in
@@ -41,7 +43,7 @@
         type="submit"
         mat-flat-button
         color="primary"
-        [disabled]="!formGroup.valid"
+        [disabled]="!formGroup.valid || loading"
     >Sign in</button>
 
     <app-auth-redirect [link]="redirectLink">Sign up</app-auth-redirect>

@@ -1,11 +1,11 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnInit } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { DeviceDetectorService } from 'ngx-device-detector'
 import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { LocalStorageService } from 'src/app/services/local-storage.service'
-import { authResetPasswordPath, authSignUpPath, mainPath } from 'src/app/routes.constants'
+import { authResetPasswordPath, authSignUpPath } from 'src/app/routes.constants'
 import { AuthHttpService } from '../../auth-http.service'
 import { AuthStoreService } from 'src/app/store/auth/auth-store.service'
 
@@ -23,6 +23,8 @@ export class SignInComponent implements OnInit {
 
     httpError$ = of(false)
     httpErrorMessage$ = of('')
+
+    loading = false
 
     constructor(
         private readonly fb: FormBuilder,
@@ -44,7 +46,9 @@ export class SignInComponent implements OnInit {
     }
 
     onSubmit() {
-        if (this.formGroup.valid) {
+        if (this.formGroup.valid && !this.loading) {
+            this.loading = true
+
             const deviceInfo = this.deviceService.getDeviceInfo()
 
             const req$ = this.authHttpService.signIn({
@@ -70,15 +74,18 @@ export class SignInComponent implements OnInit {
                 })
             )
 
-            req$.subscribe(({ data }) => {
-                this.localStorageService.setRefreshToken(data.refreshToken)
-                this.localStorageService.setUserID(data.userID)
+            req$.subscribe(
+                ({ data }) => {
+                    this.localStorageService.setRefreshToken(data.refreshToken)
+                    this.localStorageService.setUserID(data.userID)
 
-                this.authStore.setAccessToken(data.accessToken)
-                this.authStore.setUserID(data.userID)
+                    this.authStore.setAccessToken(data.accessToken)
+                    this.authStore.setUserID(data.userID)
 
-                this.router.navigateByUrl(mainPath.full)
-            })
+                    this.router.navigateByUrl('')
+                },
+                () => this.loading = false
+            )
         }
     }
 }

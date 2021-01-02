@@ -31,6 +31,10 @@ export class LocalStorageService {
         return userID
     }
 
+    removeUserID() {
+        localStorage.setItem(localStorageUserID, '')
+    }
+
     setRefreshToken(refreshToken: string) {
         localStorage.setItem(localStorageRefreshToken, JSON.stringify(refreshToken))
     }
@@ -43,5 +47,9 @@ export class LocalStorageService {
         }
 
         return refreshToken
+    }
+
+    removeRefreshToken() {
+        localStorage.setItem(localStorageRefreshToken, '')
     }
 }

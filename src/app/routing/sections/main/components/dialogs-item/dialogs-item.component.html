@@ -1,0 +1,16 @@
+<button matRipple [class]="active ? 'active' : ''" (click)="toogle()">
+    <div class="photo"></div>
+    <div class="info">
+        <div class="top">
+            <div class="receiver">
+                {{receiver}}
+            </div>
+            <div class="time">{{date}}</div>
+        </div>
+        <div class="bottom">
+            <div class="last-message">
+                {{message}}
+            </div>
+        </div>
+    </div>
+</button>

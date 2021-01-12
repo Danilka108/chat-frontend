@@ -1,13 +1,19 @@
 @import '~@angular/material/theming';
 
-$primary: mat-palette($mat-blue, 800, 500, 900);
-$accent:  mat-palette($mat-blue, A200, A100, A400);
-$warn: mat-palette($mat-red);
+$app-primary: mat-palette($mat-blue, 800, 500, 900);
+$app-accent:  mat-palette($mat-blue, A200, A100, A400);
+$app-warn: mat-palette($mat-red);
+
+$primary: mat-color($app-primary);
+$accent: mat-color($app-accent);
+$warn: mat-color($app-warn);
 
 $custom-colors: (
-    grey: mat-color($mat-grey, 200)
+    grey: mat-color($mat-grey, 200),
+    active-grey: mat-color($mat-grey, 300),
+    text-grey: mat-color($mat-grey, 600)
 );
 
-$theme: mat-light-theme($primary, $accent, $warn);
+$theme: mat-light-theme($app-primary, $app-accent, $app-warn);
 
 $theme: map-merge($theme, (custom-colors: $custom-colors));

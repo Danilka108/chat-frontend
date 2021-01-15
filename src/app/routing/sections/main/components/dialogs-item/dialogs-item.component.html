@@ -1,6 +1,6 @@
-<button matRipple [class]="active ? 'active' : ''" (click)="toogle()">
+<button matRipple [ngClass]="active ? 'active' : ''" (click)="onClick()">
     <div class="photo"></div>
-    <div class="info">
+    <div *ngIf="!isSmallSize" class="info">
         <div class="top">
             <div class="receiver">
                 {{receiver}}

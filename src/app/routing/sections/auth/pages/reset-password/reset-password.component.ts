@@ -4,7 +4,7 @@ import { AuthSectionHttpService } from '../../services/auth-section-http.service
 import { Router } from '@angular/router'
 import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
-import { authResetPasswordCheckEmailPath } from 'src/app/routes.constants'
+import { authSectionResetPasswordCheckEmailPath } from 'src/app/routing/routing.constants'
 
 @Component({
     selector: 'app-reset-password',
@@ -36,9 +36,9 @@ export class ResetPasswordComponent {
                 map(() => false),
                 catchError(() => of(true))
             )
-
+            
             req$.subscribe(
-                () => this.router.navigateByUrl(authResetPasswordCheckEmailPath.full),
+                () => this.router.navigateByUrl(authSectionResetPasswordCheckEmailPath.full),
                 () => (this.loading = false)
             )
         }

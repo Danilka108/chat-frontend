@@ -1,10 +1,15 @@
-import { Routes } from "@angular/router";
-import { mainSectionPath } from "../../routing.constants";
-import { MainComponent } from "./pages/main/main.component";
+import { Routes } from '@angular/router';
+import { mainSectionDialogsPath } from '../../routing.constants';
+import { DialogsComponent } from './pages/dialogs/dialogs.component';
 
 export const routes: Routes = [
     {
         path: '',
-        component: MainComponent,
+        pathMatch: 'full',
+        redirectTo: mainSectionDialogsPath.full
+    },
+    {
+        path: mainSectionDialogsPath.relative,
+        component: DialogsComponent,
     }
 ]

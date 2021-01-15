@@ -3,7 +3,8 @@ import { BehaviorSubject } from 'rxjs';
 
 interface IAuthStore {
     userID: number | null
-    accessToken: string | null
+    accessToken: string | null,
+    connectionError: boolean,
 }
 
 @Injectable({
@@ -13,6 +14,7 @@ export class AuthStore {
     private readonly auth = new BehaviorSubject<IAuthStore>({
         userID: null,
         accessToken: null,
+        connectionError: false,
     })
     readonly auth$ = this.auth.asObservable()
 
@@ -36,5 +38,16 @@ export class AuthStore {
 
     getAccessToken() {
         return this.auth.getValue().accessToken
+    }
+
+    setConnectionError(isError: boolean) {
+        this.auth.next({
+            ...this.auth.getValue(),
+            connectionError: isError,
+        })
+    }
+
+    getConnectionError() {
+        return this.auth.getValue().connectionError
     }
 }

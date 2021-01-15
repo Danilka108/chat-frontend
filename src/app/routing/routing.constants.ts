@@ -63,3 +63,8 @@ export const mainSectionPath: IRoutingPath = {
     full: `/${mainSectionPrefix}`,
     relative: `${mainSectionPrefix}`,
 }
+
+export const mainSectionDialogsPath: IRoutingPath = {
+    full: `/${mainSectionPrefix}/dialogs`,
+    relative: `dialogs`,
+}

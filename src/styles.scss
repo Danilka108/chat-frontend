@@ -1,10 +1,13 @@
 @import './app/styles/theme.scss';
 
 
-html, body {
-    height: 100%;
+* {
+    box-sizing: border-box;
 }
 
-body {
-    margin: 0;
+
+html {
+    // font-size: calc(14px + (26 - 14) * ((100vw - 300px) / (1600 - 300)));
 }
+html, body { height: 100%; }
+body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }

@@ -1,0 +1,10 @@
+<ngx-simplebar>
+    <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
+        [message]="dialog.latestMessage"
+        [date]="parseDate(dialog.createdAt)"
+        [receiver]="dialog.receiverName"
+        [active]="activatedReceiverID === dialog.receiverID ? true : false"
+        (click)="onClick(dialog.receiverID)"
+        [isSmallSize]="isSmallSize"
+    ></app-main-dialogs-item>
+</ngx-simplebar>

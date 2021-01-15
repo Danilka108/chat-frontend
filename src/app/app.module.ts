@@ -11,7 +11,6 @@ import { RoutingModule } from './routing/routing.module'
         BrowserAnimationsModule,
         RoutingModule,
     ],
-    providers: [],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

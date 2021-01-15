@@ -1,17 +1,20 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, Input } from '@angular/core';
 
 @Component({
-  selector: 'app-main-dialog',
-  templateUrl: './main-dialog.component.html',
-  styleUrls: ['./main-dialog.component.scss']
+  selector: 'app-main-dialogs-item',
+  templateUrl: './dialogs-item.component.html',
+  styleUrls: ['./dialogs-item.component.scss']
 })
 export class DialogsItemComponent {
-  @Input() active!: boolean
-  @Input() toggle!: () => {}
+  click = new EventEmitter<null>()
 
+  @Input() active!: boolean
   @Input() receiver!: string
   @Input() date!: string
   @Input() message!: string
+  @Input() isSmallSize!: boolean
 
-  constructor() { }
+  onClick() {
+    this.click.emit()
+  }
 }

@@ -1,5 +1,5 @@
 import { Component } from '@angular/core'
-import { authSignInPath } from 'src/app/routes.constants'
+import { authSectionSignInPath } from 'src/app/routing/routing.constants'
 
 @Component({
     selector: 'app-complete-registration',
@@ -7,7 +7,7 @@ import { authSignInPath } from 'src/app/routes.constants'
     styleUrls: ['./complete-registration.component.scss'],
 })
 export class CompleteRegistrationComponent {
-    redirectLink = authSignInPath.full
+    redirectLink = authSectionSignInPath.full
 
     constructor() {}
 }

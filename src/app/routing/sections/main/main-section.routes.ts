@@ -11,5 +11,9 @@ export const routes: Routes = [
     {
         path: mainSectionDialogsPath.relative,
         component: DialogsComponent,
+    },
+    {
+        path: mainSectionDialogsPath.relative + '/:id',
+        component: DialogsComponent,
     }
 ]

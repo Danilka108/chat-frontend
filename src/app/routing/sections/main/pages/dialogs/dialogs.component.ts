@@ -11,33 +11,19 @@ import { MainSectionHttpService } from '../../main-section-http.service';
     styleUrls: ['./dialogs.component.scss'],
 })
 export class DialogsComponent implements OnInit {
-    dialogs$: Observable<IDialog[]> = of([])
-
     constructor(
         private readonly httpService: MainSectionHttpService,
         private readonly mainStore: MainStore,
     ) {}
 
     ngOnInit() {
-        this.dialogs$ = this.httpService.getDialogs().pipe(
-            map((value) => {
-                if (!value) {
-                    return []
-                } else {
-                    return value
-                }
+        this.httpService.getDialogs().pipe(
+            map((dialogs) => {
+                if (dialogs === null) return []
+                return dialogs
             })
-        )
-
-        this.dialogs$.pipe(
-            map((value) => {
-                this.mainStore.setDialogs(value)
-                return value
-            })
-        )
-    }
-
-    onChange(receiverID: number) {
-        this.mainStore.setActiveReceiverID(receiverID)
+        ).subscribe(dialogs => {
+          this.mainStore.setDialogs(dialogs)  
+        })
     }
 }

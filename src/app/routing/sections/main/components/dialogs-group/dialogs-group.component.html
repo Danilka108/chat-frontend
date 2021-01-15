@@ -1,5 +1,5 @@
 <ngx-simplebar>
-    <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
+    <app-main-dialogs-item *ngFor="let dialog of dialogs"
         [message]="dialog.latestMessage"
         [date]="parseDate(dialog.createdAt)"
         [receiver]="dialog.receiverName"

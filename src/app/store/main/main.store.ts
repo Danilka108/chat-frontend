@@ -15,6 +15,7 @@ export class MainStore {
         activeReceiverID: null,
         dialogs: [],
     })
+    readonly main$ = this.main.asObservable()
 
     setActiveReceiverID(activeReceiverID: number) {
         this.main.next({

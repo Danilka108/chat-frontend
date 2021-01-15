@@ -16,7 +16,6 @@ export class AuthStore {
         accessToken: null,
         connectionError: false,
     })
-    readonly auth$ = this.auth.asObservable()
 
     setUserID(userID: number) {
         this.auth.next({

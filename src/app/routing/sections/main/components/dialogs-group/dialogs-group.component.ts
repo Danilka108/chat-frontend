@@ -1,22 +1,40 @@
-import { Component, EventEmitter, HostBinding, HostListener, Input, OnInit, Output } from '@angular/core';
-import { Observable } from 'rxjs';;
+import { Component, HostBinding, HostListener, OnInit } from '@angular/core';
 import * as moment from 'moment'
 import { IDialog } from '../../interface/dialog.interface';
+import { MainStore } from 'src/app/store/main/main.store';
+import { ActivatedRoute, Router } from '@angular/router';
+import { mainSectionDialogsPath } from 'src/app/routing/routing.constants';
 
 @Component({
   selector: 'app-main-dialogs-group',
   templateUrl: './dialogs-group.component.html',
   styleUrls: ['./dialogs-group.component.scss'],
 })
-export class DialogsGroupComponent implements OnInit{
-  @Input() dialogs$!: Observable<IDialog[]>
-  @Output() receiverChange = new EventEmitter<number>()
+export class DialogsGroupComponent implements OnInit {
+  dialogs!: IDialog[]
+  activatedReceiverID: null | number = null
   @HostBinding('class.small') isSmallSize = false
-
-  activatedReceiverID: null | number = null  
   smallSizeMax = 800
 
+  constructor(
+    private readonly mainStore: MainStore,
+    private readonly route: ActivatedRoute,
+    private readonly router: Router,
+  ) {}
+
   ngOnInit() {
+    this.mainStore.main$.subscribe(mainStore => {
+      this.dialogs = mainStore.dialogs
+      this.activatedReceiverID = mainStore.activeReceiverID
+    })
+
+    this.route.params.subscribe(params => {
+        const id = parseInt(params['id'])
+        if (!isNaN(id)) {
+            this.mainStore.setActiveReceiverID(id)
+        }
+    })
+
     this.onResize()
   }
 
@@ -46,8 +64,7 @@ export class DialogsGroupComponent implements OnInit{
 
   onClick(receiverID: number) {
     if (receiverID !== this.activatedReceiverID) {
-      this.receiverChange.emit(receiverID)
-      this.activatedReceiverID = receiverID
+      this.router.navigate([mainSectionDialogsPath.full, receiverID])
     }
   }
 }

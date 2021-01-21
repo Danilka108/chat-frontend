@@ -30,6 +30,9 @@ export class MainSectionHttpService {
                     return v.data
                 }),
             )
-        })
+        }).pipe(map(dialogs => {
+            if (!dialogs) return []
+            return dialogs
+        }))
     }
 }

@@ -11,6 +11,8 @@ import { DialogsGroupComponent } from './components/dialogs-group/dialogs-group.
 import { SectionComponent } from './components/section/section.component';
 import { SimplebarAngularModule } from 'simplebar-angular';
 import { DialogsDetailComponent } from './components/dialogs-detail/dialogs-detail.component';
+import { NoConnectionComponent } from './components/no-connection/no-connection.component';
+import { DialogsMessageComponent } from './components/dialogs-message/dialogs-message.component';
 
 @NgModule({
   declarations: [
@@ -19,6 +21,8 @@ import { DialogsDetailComponent } from './components/dialogs-detail/dialogs-deta
     DialogsDetailComponent,
     DialogsComponent,
     SectionComponent,
+    NoConnectionComponent,
+    DialogsMessageComponent,
   ],
   imports: [
     MaterialModule,

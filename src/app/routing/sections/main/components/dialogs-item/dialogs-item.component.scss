@@ -6,36 +6,59 @@
 
 button {
     width: 100%;
-    margin: 0.15em 0;
+    margin: 0.3rem 0;
     border: 0;
     background: none;
-    border-radius: 0.5em;
-    padding: 0.5em 0.5em;
+    border-radius: 0.3rem;
+    padding: 0.5rem 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.15s;
+    transition: background 0.25s;
+    position: relative;
 
-    &.active,
-    &:hover {
-        background-color: map-get($custom-colors, main-gray);
+    &.active {
+        background-color: map-get($basic-colors, primary);
+        
+        .receiver {
+            color: map-get($custom-colors, main);
+        }
+
+        .last-message {
+            color: map-get($custom-colors, main-gray);
+        }
+
+        .time {
+            color: map-get($custom-colors, light-gray);
+        }
     }
 
     &:focus {
         outline: none;
     }
+
+    &:not(.active):hover,
+    &:not(.active):focus {
+        background-color: map-get($custom-colors, light-gray);
+    }
+}
+
+.photo,
+.info {
+    position: relative;
+    z-index: 500;
 }
 
 .photo {
     border-radius: 50%;
-    width: 3em;
-    height: 3em;
+    width: 3rem;
+    height: 3rem;
     flex-shrink: 0;
     background-color: black;
 }
 
 .info {
-    margin-left: 1em;
+    margin-left: 1rem;
     min-width: 0;
     flex-grow: 1;
     display: flex;
@@ -44,7 +67,7 @@ button {
 }
 
 .top {
-    margin-bottom: 0.5em;
+    margin-bottom: 0.5rem;
     display: flex;
     align-items: center;
     line-height: 1;
@@ -57,8 +80,6 @@ button {
 
 .time {
     color: map-get($custom-colors, dark-gray);
-    font-weight: 400;
-    font-size: 0.8em;
 }
 
 .receiver,
@@ -72,10 +93,10 @@ button {
 }
 
 .receiver {
-    margin-right: 0.5em;
+    margin-right: 0.5rem;
 }
 
 .last-message {
     color: map-get($custom-colors, dark-gray);
-    font-weight: 400;
+    margin: 0 !important;
 }

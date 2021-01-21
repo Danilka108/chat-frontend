@@ -1,0 +1,43 @@
+@import '../../../../../styles/vars.scss';
+
+:host {
+    display: flex;
+    width: 100%;
+
+    justify-content: flex-start;
+
+    &.lastInGroup {
+
+    }
+
+    &.ownMsg {
+        justify-content: flex-end;
+        .wrapper {
+            background-color: map-get($basic-colors, primary);
+
+            color: map-get($custom-colors, main);
+        }
+    }
+}
+
+.wrapper {
+    max-width: 70%;
+    display: flex;
+    align-items: flex-end;
+    background-color: map-get($custom-colors, main);
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+}
+
+.text {
+    min-width: 0;
+    word-wrap: break-word;
+    margin: 0;
+    margin-right: 0.5rem;
+}
+
+.time {
+    flex-shrink: 0;
+    text-transform: uppercase;
+    line-height: 1;
+}

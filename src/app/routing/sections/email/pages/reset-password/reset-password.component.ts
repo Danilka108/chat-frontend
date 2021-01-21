@@ -1,7 +1,7 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
-import { of } from 'rxjs'
+import { of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator'
@@ -12,7 +12,7 @@ import { EmailSectionHttpService } from '../../email-section-http.service'
     templateUrl: './reset-password.component.html',
     styleUrls: ['./reset-password.component.scss'],
 })
-export class ResetPasswordComponent implements OnInit {
+export class ResetPasswordComponent implements OnInit, OnDestroy {
     formGroup = new FormGroup(
         {
             newPassword: new FormControl(null, [Validators.required, Validators.minLength(8)]),
@@ -44,6 +44,9 @@ export class ResetPasswordComponent implements OnInit {
 
     passResetedLink = emailSectionPasswordResetedPath.full
 
+    subsQuery!: Subscription
+    subsReq!: Subscription
+
     constructor(
         private readonly activatedRoute: ActivatedRoute,
         private readonly httpService: EmailSectionHttpService,
@@ -53,7 +56,7 @@ export class ResetPasswordComponent implements OnInit {
     }
 
     ngOnInit(): void {
-        this.activatedRoute.queryParams.subscribe((v) => {
+        this.subsQuery = this.activatedRoute.queryParams.subscribe((v) => {
             if (!v?.id || !v?.token) {
                 this.linkError = true
             } else {
@@ -61,8 +64,6 @@ export class ResetPasswordComponent implements OnInit {
                 this.params.token = v.token
             }
         })
-
-        this.httpError$.subscribe(console.log)
     }
 
     onSubmit() {
@@ -91,10 +92,18 @@ export class ResetPasswordComponent implements OnInit {
                 })
             )
 
-            req$.subscribe(
+            this.subsReq = req$.subscribe(
                 () => this.router.navigate([this.passResetedLink]),
-                () => (this.loading = false)
+                () => {
+                    console.log('sdfsdf')
+                    this.loading = false
+                }
             )
         }
+    }
+
+    ngOnDestroy() {
+        if (this.subsQuery) this.subsQuery.unsubscribe()
+        if (this.subsReq) this.subsReq.unsubscribe()
     }
 }

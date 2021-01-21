@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher';
 import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator';
@@ -13,7 +13,7 @@ import { checkEmailAsyncValidator } from '../../validators/check-email-async.val
     selector: 'app-auth-sign-up',
     templateUrl: './sign-up.component.html',
 })
-export class SignUpComponent {
+export class SignUpComponent implements OnDestroy {
     formGroup = new FormGroup(
         {
             email: new FormControl(
@@ -42,6 +42,8 @@ export class SignUpComponent {
 
     redirectLink = authSectionSignInPath.full
     completeLink = authSectionCompleteRegistrationPath.full
+
+    subs!: Subscription
 
     constructor(
         private readonly authHttpService: AuthSectionHttpService,
@@ -76,10 +78,14 @@ export class SignUpComponent {
                 })
             )
 
-            req$.subscribe(
+            this.subs = req$.subscribe(
                 () => this.router.navigateByUrl(this.completeLink),
                 () => (this.loading = false)
             )
         }
+    }
+
+    ngOnDestroy() {
+        if (this.subs) this.subs.unsubscribe()
     }
 }

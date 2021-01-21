@@ -9,11 +9,11 @@
 }
 
 form {
-    border: 0.15em solid map-get($custom-colors, light-gray);
+    border: 0.15rem solid map-get($custom-colors, light-gray);
     border-radius: 0.5em;
     width: 100%;
-    max-width: 350px;
+    max-width: 22rem;
     display: flex;
     flex-direction: column;
-    padding: 3em 2em;
+    padding: 3rem 2rem;
 }

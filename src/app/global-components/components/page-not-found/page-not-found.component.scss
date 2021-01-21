@@ -7,13 +7,11 @@
     flex-direction: column;
 }
 
-h1 {
-    font-size: 3.25em;
-    text-transform: uppercase;
-    font-weight: 500;
-    margin-bottom: 0.5em;
+h1, h2 {
+    line-height: 1 !important;
 }
 
-p {
-    font-size: 2em;
+h1 {
+    text-transform: uppercase;
+    margin-bottom: 0.5rem !important;
 }

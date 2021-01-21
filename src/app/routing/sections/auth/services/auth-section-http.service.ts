@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { DeviceDetectorService } from 'ngx-device-detector'
-import { Observable } from 'rxjs'
+import { Observable, of } from 'rxjs'
 import { map, catchError, refCount, publish } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 
@@ -85,16 +85,13 @@ export class AuthSectionHttpService {
     }
 
     checkEmail(email: string) {
-        return new Observable((observer) => {
-            this.httpClient.post(`${environment.apiUrl}/user/check-email`, { email }).subscribe({
-                next() {
-                    observer.next()
-                },
-                error(error) {
-                    observer.error(error.status)
-                },
+        return this.httpClient.post(`${environment.apiUrl}/user/check-email`, { email }).pipe(
+            map(() => true),
+            catchError((error) => {
+                if (error?.status === 400) return of(false)
+                return of(true)
             })
-        })
+        )
     }
 
     resetPassword(email: string) {

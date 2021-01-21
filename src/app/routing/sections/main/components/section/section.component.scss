@@ -2,7 +2,7 @@
 
 section {
     width: 100%;
-    max-width: 1200px;
+    max-width: 1600px;
     border: 1px solid map-get($custom-colors, main-gray);
     border-bottom: 0;
     border-top: 0;
@@ -10,5 +10,4 @@ section {
     margin: 0 auto;
     overflow: hidden;
     display: flex;
-    background-color: map-get($custom-colors, light-gray);
 }

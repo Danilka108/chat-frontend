@@ -9,11 +9,13 @@ import { MatToolbarModule } from '@angular/material/toolbar'
 import { MatProgressBarModule } from '@angular/material/progress-bar'
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
 import { MatRippleModule } from '@angular/material/core'
+import { MatDialogModule } from '@angular/material/dialog'
 
 @NgModule({
     declarations: [],
     imports: [
         CommonModule,
+        MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,
@@ -25,6 +27,7 @@ import { MatRippleModule } from '@angular/material/core'
         MatRippleModule,
     ],
     exports: [
+        MatDialogModule,
         MatFormFieldModule,
         MatInputModule,
         MatIconModule,

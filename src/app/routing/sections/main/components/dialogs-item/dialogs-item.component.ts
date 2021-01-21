@@ -14,6 +14,9 @@ export class DialogsItemComponent {
   @Input() message!: string
   @Input() isSmallSize!: boolean
 
+  rippleColorActive = 'rgba(220, 220, 220, 0.17)'
+  rippleColor = ''
+
   onClick() {
     this.click.emit()
   }

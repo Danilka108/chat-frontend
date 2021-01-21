@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { FormControl, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
-import { of } from 'rxjs';
+import { of, Subscription } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { AuthLocalStorageService } from 'src/app/auth/services/auth-local-storage.service';
 import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants';
@@ -13,7 +13,7 @@ import { AuthSectionHttpService } from '../../services/auth-section-http.service
     templateUrl: './sign-in.component.html',
     styleUrls: ['./sign-in.component.scss'],
 })
-export class SignInComponent {
+export class SignInComponent implements OnDestroy {
     passwordHide = true
 
     formGroup = new FormGroup({
@@ -29,6 +29,8 @@ export class SignInComponent {
     httpErrorMessage$ = of('')
 
     loading = false
+
+    subs!: Subscription
 
     constructor(
         private readonly httpService: AuthSectionHttpService,
@@ -64,7 +66,7 @@ export class SignInComponent {
                 })
             )
 
-            req$.subscribe(
+            this.subs = req$.subscribe(
                 ({ data }) => {
                     this.localStorageService.setRefreshToken(data.refreshToken)
                     this.localStorageService.setUserID(data.userID)
@@ -78,4 +80,8 @@ export class SignInComponent {
             )
         }
     }
+    
+    ngOnDestroy() {
+        if (this.subs) this.subs.unsubscribe()
+    }   
 }

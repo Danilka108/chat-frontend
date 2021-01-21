@@ -6,16 +6,9 @@ import { Observable, of } from 'rxjs'
 export const checkEmailAsyncValidator = (authHttpService: AuthSectionHttpService): AsyncValidatorFn => {
     return (control: AbstractControl): Observable<null | ValidationErrors> => {
         return authHttpService.checkEmail(control.value).pipe(
-            take(1),
-            map(() => {
-                return null
-            }),
-            catchError((status) => {
-                if (status == 400) {
-                    return of({ emailInUse: true })
-                }
-
-                return of(null)
+            map(result => {
+                if (result) return null
+                return { emailInUse: true }
             })
         )
     }

@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
+import { Subscription } from 'rxjs'
 import { map, mergeMap } from 'rxjs/operators'
 import { EmailSectionHttpService } from '../../email-section-http.service'
 
@@ -8,11 +9,13 @@ import { EmailSectionHttpService } from '../../email-section-http.service'
     templateUrl: './confirm-email.component.html',
     styleUrls: ['./confirm-email.component.scss'],
 })
-export class ConfirmEmailComponent implements OnInit {
+export class ConfirmEmailComponent implements OnInit, OnDestroy {
     loading = false
     isInvalid = false
 
     redirectLink = ''
+
+    subs!: Subscription
 
     constructor(
         private readonly httpService: EmailSectionHttpService,
@@ -20,7 +23,7 @@ export class ConfirmEmailComponent implements OnInit {
     ) {}
 
     ngOnInit(): void {
-        this.activatedRoute.queryParams
+        this.subs = this.activatedRoute.queryParams
             .pipe(
                 map((v) => {
                     if (!v?.id || !v?.token) {
@@ -40,5 +43,9 @@ export class ConfirmEmailComponent implements OnInit {
                     this.isInvalid = true
                 }
             )
+    }
+
+    ngOnDestroy() {
+        if (this.subs) this.subs.unsubscribe()
     }
 }

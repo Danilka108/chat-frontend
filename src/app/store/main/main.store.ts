@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface';
 
 interface IMainStore {
@@ -11,41 +12,53 @@ interface IMainStore {
     providedIn: 'root'
 })
 export class MainStore {
-    private readonly main = new BehaviorSubject<IMainStore>({
+    private readonly store = new BehaviorSubject<IMainStore>({
         activeReceiverID: null,
         dialogs: [],
     })
-    readonly main$ = this.main.asObservable()
+    readonly store$ = this.store.asObservable()
+
+    getActiveReceiverID$() {
+        return this.store$.pipe(map(store => store.activeReceiverID))
+    }
 
     setActiveReceiverID(activeReceiverID: number) {
-        this.main.next({
-            ...this.main.getValue(),
+        this.store.next({
+            ...this.store.getValue(),
             activeReceiverID,
         })
     }
 
     getActiveReceiverID() {
-        return this.main.getValue().activeReceiverID
+        return this.store.getValue().activeReceiverID
+    }
+
+    getDialogs$() {
+        return this.store$.pipe(map(store => store.dialogs))
+    }
+
+    getDialogs() {
+        return this.store.getValue().dialogs
     }
 
     setDialogs(dialogs: IDialog[]) {
-        this.main.next({
-            ...this.main.getValue(),
+        this.store.next({
+            ...this.store.getValue(),
             dialogs,
         })
     }
 
-    addDialog(dialog: IDialog) {
-        this.main.next({
-            ...this.main.getValue(),
-            dialogs: this.main.getValue().dialogs.concat(dialog)
-        })
-    }
+    // addDialog(dialog: IDialog) {
+    //     this.store.next({
+    //         ...this.store.getValue(),
+    //         dialogs: this.store.getValue().dialogs.concat(dialog)
+    //     })
+    // }
 
-    removeDialog(receiverID: number) {
-        this.main.next({
-            ...this.main.getValue(),
-            dialogs: this.main.getValue().dialogs.filter(key => key.receiverID !== receiverID)
-        })
-    }
+    // removeDialog(receiverID: number) {
+    //     this.store.next({
+    //         ...this.store.getValue(),
+    //         dialogs: this.store.getValue().dialogs.filter(key => key.receiverID !== receiverID)
+    //     })
+    // }
 }

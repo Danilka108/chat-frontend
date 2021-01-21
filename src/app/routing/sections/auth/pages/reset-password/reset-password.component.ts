@@ -1,8 +1,8 @@
-import { Component } from '@angular/core'
+import { Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { AuthSectionHttpService } from '../../services/auth-section-http.service'
 import { Router } from '@angular/router'
-import { of } from 'rxjs'
+import { of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { authSectionResetPasswordCheckEmailPath } from 'src/app/routing/routing.constants'
 
@@ -10,7 +10,7 @@ import { authSectionResetPasswordCheckEmailPath } from 'src/app/routing/routing.
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
 })
-export class ResetPasswordComponent {
+export class ResetPasswordComponent implements OnDestroy {
     formGroup = new FormGroup({
         email: new FormControl(null, Validators.required),
     })
@@ -18,6 +18,8 @@ export class ResetPasswordComponent {
     loading = false
 
     httpError$ = of(false)
+
+    subs!: Subscription
 
     constructor(
         private readonly httpService: AuthSectionHttpService,
@@ -37,10 +39,14 @@ export class ResetPasswordComponent {
                 catchError(() => of(true))
             )
             
-            req$.subscribe(
+            this.subs = req$.subscribe(
                 () => this.router.navigateByUrl(authSectionResetPasswordCheckEmailPath.full),
                 () => (this.loading = false)
             )
         }
+    }
+
+    ngOnDestroy() {
+        if (this.subs) this.subs.unsubscribe()
     }
 }

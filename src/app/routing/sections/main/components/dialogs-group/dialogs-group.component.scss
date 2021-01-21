@@ -3,8 +3,8 @@
 :host {
     display: block;
 
-    width: 20%;
-    padding: 0 0.5em;
+    width: 25%;
+    padding: 0 0.5rem;
 
     background-color: map-get($custom-colors, main);
 
@@ -22,7 +22,7 @@
     }
 
     &.small {
-        width: 4.8em;
+        width: 4.8rem;
 
         ngx-simplebar {
             box-sizing: content-box;

@@ -1,10 +1,18 @@
-<div class="wrapper">
-    <div *ngIf="!(isSelectedReceiver$ | async)">No selected dialog</div>
-    <app-main-dialogs-message
-        *ngFor="let message of (messages$ | async); let i = index"
-        [message]="message.message"
-        [date]="message.createdAt"
-        [isLastInGroup]="message.isLastInGroup"
-        [isOwnMsg]="message.senderID === getUserID() ? true : false"
-    ></app-main-dialogs-message>
+<div class="no-selected" *ngIf="!(isSelectedReceiver$ | async)">
+    <h2>Please select chat to start messaging</h2>
 </div>
+<ngx-simplebar *ngIf="isSelectedReceiver$ | async">
+    <div class="wrapper">
+        <ng-template ngFor let-message [ngForOf]="messages$ | async">
+            <app-main-dialogs-separator *ngIf="message.isDiffDays" [date]="message.diffDate"></app-main-dialogs-separator>
+            <app-main-dialogs-message
+                [message]="message.message"
+                [date]="message.createdAt"
+                [isLastInGroup]="message.isLastInGroup"
+                [isOwnMsg]="message.senderID === getUserID() ? true : false"
+            ></app-main-dialogs-message>
+        </ng-template>
+        
+    </div>
+</ngx-simplebar>
+<app-main-dialogs-input></app-main-dialogs-input>

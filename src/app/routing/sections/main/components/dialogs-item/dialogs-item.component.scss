@@ -39,7 +39,7 @@ button {
 
     &:not(.active):hover,
     &:not(.active):focus {
-        background-color: map-get($custom-colors, light-gray);
+        background-color: map-get($custom-colors, main-gray);
     }
 }
 

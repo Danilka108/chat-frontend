@@ -20,6 +20,19 @@ export class DateService {
         }
     }
 
+    parseDateWords(d: string) {
+        const now = moment()
+        const date = moment(d)
+
+        const diff = now.diff(date, 'days')
+
+        if (diff <= 30) {
+            return date.format('MMMM DD')
+        } else {
+            return date.format('MMMM DD, YYYY')
+        }
+    }
+
     parseDateOnlyTime(d: string) {
         const date = moment(d)
         return date.format('HH:mm')
@@ -41,5 +54,12 @@ export class DateService {
         if (dA > dB) return 1
         else if (dA === dB) return 0
         else return -1
+    }
+
+    isUnequalDays(dateA: string, dateB: string) {
+        const dA = moment(dateA).day()
+        const dB = moment(dateB).day()
+
+        return dA !== dB
     }
 }

@@ -1,6 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
-import { Subscription } from 'rxjs'
+import { Observable, Subscription } from 'rxjs'
+import { delay, startWith } from 'rxjs/operators'
 import { AuthStore } from 'src/app/store/auth/auth.store'
 import { MainStore } from 'src/app/store/main/main.store'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
@@ -15,6 +16,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
     subsReq!: Subscription
     subsNoConnection!: Subscription
     noConnectionDialog: MatDialogRef<NoConnectionComponent> | null = null
+    requestLoading$!: Observable<boolean>
 
     constructor(
         private readonly httpService: MainSectionHttpService,
@@ -24,7 +26,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        setInterval(() => this.httpService.getDialogs().subscribe(), 3000)
+        this.requestLoading$ = this.mainStore.getRequestLoading$().pipe(startWith(true), delay(0))
 
         this.subsNoConnection = this.authStore.getConnectionError$().subscribe((isError) => {
             if (!this.noConnectionDialog && isError) {

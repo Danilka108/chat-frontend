@@ -13,6 +13,9 @@ import { SimplebarAngularModule } from 'simplebar-angular'
 import { DialogsDetailComponent } from './components/dialogs-detail/dialogs-detail.component'
 import { NoConnectionComponent } from './components/no-connection/no-connection.component'
 import { DialogsMessageComponent } from './components/dialogs-message/dialogs-message.component'
+import { GlobalComponentsModule } from 'src/app/global-components/global-components.module'
+import { DialogsInputComponent } from './components/dialogs-input/dialogs-input.component'
+import { DialogsSeparatorComponent } from './components/dialogs-separator/dialogs-separator.component'
 
 @NgModule({
     declarations: [
@@ -23,8 +26,17 @@ import { DialogsMessageComponent } from './components/dialogs-message/dialogs-me
         SectionComponent,
         NoConnectionComponent,
         DialogsMessageComponent,
+        DialogsInputComponent,
+        DialogsSeparatorComponent,
     ],
-    imports: [MaterialModule, CommonModule, RouterModule.forChild(routes), AuthModule, SimplebarAngularModule],
+    imports: [
+        MaterialModule,
+        CommonModule,
+        RouterModule.forChild(routes),
+        AuthModule,
+        SimplebarAngularModule,
+        GlobalComponentsModule,
+    ],
     providers: [MainSectionHttpService],
 })
 export class MainSectionModule {}

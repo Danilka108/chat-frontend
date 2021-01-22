@@ -3,18 +3,18 @@
 :host {
     display: block;
 
-    width: 25%;
+    width: 23%;
     padding: 0 0.5rem;
 
     background-color: map-get($custom-colors, main);
 
     ngx-simplebar {
         box-sizing: content-box;
-        padding-right: 8px;
+        padding-right: 9px;
     }
 
     ngx-simplebar::ng-deep .simplebar-track  {
-        width: 8px;
+        width: 9px;
 
         .simplebar-scrollbar::before {
             background-color: map-get($custom-colors, dark-gray);
@@ -26,11 +26,11 @@
 
         ngx-simplebar {
             box-sizing: content-box;
-            padding-right: 7px;
+            padding-right: 9px;
         }
 
         ngx-simplebar::ng-deep .simplebar-track  {
-            width: 7px;
+            width: 8px;
         }
     }
 }

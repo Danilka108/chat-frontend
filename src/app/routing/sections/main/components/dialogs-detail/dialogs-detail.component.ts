@@ -9,6 +9,8 @@ import { MainSectionHttpService } from '../../main-section-http.service'
 
 interface IMessageWithIsLast extends IMessage {
     isLastInGroup: boolean
+    isDiffDays: boolean
+    diffDate: string
 }
 
 @Component({
@@ -20,6 +22,8 @@ export class DialogsDetailComponent implements OnInit {
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
     subs!: Subscription
+    take = 30
+    skip = 0
 
     constructor(
         private readonly mainStore: MainStore,
@@ -56,11 +60,9 @@ export class DialogsDetailComponent implements OnInit {
                 let messages$: Observable<IMessage[]>
 
                 if (dialogMessages === null) {
-                    messages$ = this.httpService.getMessages(activeReceiverID, 10, 0).pipe(
+                    messages$ = this.httpService.getMessages(activeReceiverID, this.take, this.skip).pipe(
                         tap((messages) => {
-                            messages.forEach((message) => {
-                                this.mainStore.addDialogMessage(activeReceiverID, message)
-                            })
+                            this.mainStore.addDialogMessages(activeReceiverID, ...messages)
                         })
                     )
                 } else {
@@ -93,23 +95,59 @@ export class DialogsDetailComponent implements OnInit {
         )
     }
 
+    parseDays(message: IMessage, arr: IMessage[], i: number) {
+        let isUnequalDays: boolean | null = null
+        let diffDate = ''
+
+        if (arr[i - 1]) {
+            isUnequalDays = this.dateService.isUnequalDays(message.createdAt, arr[i - 1].createdAt)
+
+            if (isUnequalDays) {
+                diffDate = message.createdAt
+            }
+        } else {
+            isUnequalDays = true
+            diffDate = message.createdAt
+        }
+
+        const result: [boolean, string] = [isUnequalDays, diffDate]
+        return result
+    }
+
     parseMessages(messages: IMessage[]): IMessageWithIsLast[] {
         return messages
             .sort((a, b) => this.dateService.compareDatesASC(a.createdAt, b.createdAt))
             .map((message, i, arr) => {
                 if (message.senderID !== arr[i + 1]?.senderID) {
+                    const [isUnequalDays, diffDate] = this.parseDays(message, arr, i)
+
                     const msg: IMessageWithIsLast = {
                         ...message,
                         isLastInGroup: true,
+                        isDiffDays: isUnequalDays,
+                        diffDate: diffDate,
                     }
                     return msg
                 } else {
+                    const [isUnequalDays, diffDate] = this.parseDays(message, arr, i)
+
                     const msg: IMessageWithIsLast = {
                         ...message,
                         isLastInGroup: false,
+                        isDiffDays: isUnequalDays,
+                        diffDate: diffDate,
                     }
                     return msg
                 }
+            })
+            .map((message) => {
+                const msg = message
+
+                if (msg.isDiffDays) {
+                    msg.isLastInGroup = true
+                }
+
+                return msg
             })
     }
 

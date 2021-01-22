@@ -8,7 +8,8 @@ $custom-colors: (
     light-gray: mat-color($mat-grey, 200),
     main-gray: mat-color($mat-grey, 300),
     dark-gray: mat-color($mat-grey, 600),
-    main: #fff
+    main: #fff,
+    secondary: #000,
 );
 
 $basic-colors: (

@@ -1,0 +1,18 @@
+@import '../../../../../styles/vars.scss';
+
+:host {
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+}
+
+span {
+    z-index: 500;
+    padding: 0 0.4rem;
+    text-align: center;
+    background-color: rgba($color: map-get($custom-colors, secondary), $alpha: 0.3);
+    color: map-get($custom-colors, main);
+    border-radius: 0.5rem;
+}

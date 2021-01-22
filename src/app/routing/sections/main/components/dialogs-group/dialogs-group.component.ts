@@ -38,6 +38,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         this.subs = this.route.params.subscribe((params) => {
             const id = parseInt(params['id'])
             if (!isNaN(id)) this.mainStore.setActiveReceiverID(id)
+            else this.mainStore.setActiveReceiverID(null)
         })
 
         this.onResize()

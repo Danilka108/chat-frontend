@@ -5,9 +5,28 @@
     background-color: map-get($custom-colors, light-gray);
     display: flex;
     flex-direction: column;
-    align-items: center;
 }
 
 .wrapper {
-    width: 90%;
+    width: 80%;
+    margin: 0 auto;
+}
+
+.no-selected {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    h2 {
+        color: map-get($custom-colors, dark-gray);
+        text-align: center;
+    }
+}
+
+ngx-simplebar {
+    width: 100%;
+    min-height: 0;
+    flex: 1;
 }

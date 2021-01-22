@@ -22,11 +22,14 @@ export class MainStore {
     private readonly dialogsMessages = new BehaviorSubject<IDialogMessages[]>([])
     private readonly dialogsMessages$ = this.dialogsMessages.asObservable()
 
+    private readonly requestLoading = new BehaviorSubject<boolean>(false)
+    private readonly requestLoading$ = this.requestLoading.asObservable()
+
     getActiveReceiverID$() {
         return this.activeReceiverID$
     }
 
-    setActiveReceiverID(activeReceiverID: number) {
+    setActiveReceiverID(activeReceiverID: number | null) {
         this.activeReceiverID.next(activeReceiverID)
     }
 
@@ -90,40 +93,87 @@ export class MainStore {
         return dialogMessages
     }
 
-    addDialogMessage(receiverID: number, message: IMessage) {
+    addDialogMessages(receiverID: number, ...messages: IMessage[]) {
         const dialogsMessages = this.dialogsMessages.getValue().concat()
 
-        const dialogMessagesIndex = dialogsMessages.findIndex((dialogMessages) => {
-            return dialogMessages.receiverID === receiverID ? true : false
-        })
+        const dialogMessagesIndex = dialogsMessages.findIndex(
+            (dialogMessages) => dialogMessages.receiverID === receiverID
+        )
 
         if (dialogMessagesIndex > -1) {
-            const messageIndex = dialogsMessages[dialogMessagesIndex].messages.findIndex((msg) => {
-                return msg.messageID === message.messageID ? true : false
-            })
+            messages.forEach((message) => {
+                const messageIndex = dialogsMessages[dialogMessagesIndex].messages.findIndex(
+                    (msg) => msg.messageID === message.messageID
+                )
 
-            if (messageIndex > -1) {
-                dialogsMessages[dialogMessagesIndex].messages[messageIndex] = message
-            } else {
-                dialogsMessages[dialogMessagesIndex].messages.push(message)
-            }
+                if (messageIndex > -1) {
+                    dialogsMessages[dialogMessagesIndex].messages[messageIndex] = message
+                } else {
+                    dialogsMessages[dialogMessagesIndex].messages.push(message)
+                }
+            })
 
             this.dialogsMessages.next(dialogsMessages)
         } else {
-            const isExist = this.getDialogs().find((dialog) => {
-                if (dialog.receiverID === receiverID) return true
-                return false
-            })
+            const index = this.getDialogs().findIndex((dialog) => dialog.receiverID === receiverID)
 
-            if (isExist) {
-                this.dialogsMessages.next([
-                    ...dialogsMessages,
-                    {
-                        receiverID,
-                        messages: [message],
-                    },
-                ])
+            if (index > -1) {
+                dialogsMessages.push({
+                    receiverID,
+                    messages,
+                })
+
+                this.dialogsMessages.next(dialogsMessages)
             }
         }
+    }
+
+    // addDialogMessage(receiverID: number, message: IMessage) {
+    //     const dialogsMessages = this.dialogsMessages.getValue().concat()
+
+    //     const dialogMessagesIndex = dialogsMessages.findIndex((dialogMessages) => {
+    //         return dialogMessages.receiverID === receiverID ? true : false
+    //     })
+
+    //     if (dialogMessagesIndex > -1) {
+    //         const messageIndex = dialogsMessages[dialogMessagesIndex].messages.findIndex((msg) => {
+    //             return msg.messageID === message.messageID ? true : false
+    //         })
+
+    //         if (messageIndex > -1) {
+    //             dialogsMessages[dialogMessagesIndex].messages[messageIndex] = message
+    //         } else {
+    //             dialogsMessages[dialogMessagesIndex].messages.push(message)
+    //         }
+
+    //         this.dialogsMessages.next(dialogsMessages)
+    //     } else {
+    //         const isExist = this.getDialogs().find((dialog) => {
+    //             if (dialog.receiverID === receiverID) return true
+    //             return false
+    //         })
+
+    //         if (isExist) {
+    //             this.dialogsMessages.next([
+    //                 ...dialogsMessages,
+    //                 {
+    //                     receiverID,
+    //                     messages: [message],
+    //                 },
+    //             ])
+    //         }
+    //     }
+    // }
+
+    getRequestLoading() {
+        return this.requestLoading.getValue()
+    }
+
+    getRequestLoading$() {
+        return this.requestLoading$
+    }
+
+    setRequestLoading(requestLoading: boolean) {
+        this.requestLoading.next(requestLoading)
     }
 }

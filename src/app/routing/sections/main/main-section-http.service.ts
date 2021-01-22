@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { map } from 'rxjs/operators'
+import { delay, map } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/services/auth.service'
+import { MainStore } from 'src/app/store/main/main.store'
 import { environment } from 'src/environments/environment'
 import { IDialog } from './interface/dialog.interface'
 import { IMessage } from './interface/message.interface'
@@ -20,9 +21,15 @@ interface IGetMessagesResponse {
 
 @Injectable()
 export class MainSectionHttpService {
-    constructor(private readonly authService: AuthService, private readonly httpClient: HttpClient) {}
+    constructor(
+        private readonly authService: AuthService,
+        private readonly httpClient: HttpClient,
+        private readonly mainStore: MainStore
+    ) {}
 
     getDialogs() {
+        this.mainStore.setRequestLoading(true)
+
         return this.authService
             .authRequest((accessToken) => {
                 return this.httpClient
@@ -40,6 +47,8 @@ export class MainSectionHttpService {
             })
             .pipe(
                 map((dialogs) => {
+                    this.mainStore.setRequestLoading(false)
+
                     if (!dialogs) return []
                     return dialogs
                 })
@@ -47,6 +56,8 @@ export class MainSectionHttpService {
     }
 
     getMessages(receiverID: number, take: number, skip: number) {
+        this.mainStore.setRequestLoading(true)
+
         const params = new HttpParams().set('take', `${take}`).set('skip', `${skip}`)
 
         return this.authService
@@ -67,6 +78,7 @@ export class MainSectionHttpService {
             })
             .pipe(
                 map((result) => {
+                    this.mainStore.setRequestLoading(false)
                     if (!result) return []
                     return result
                 })

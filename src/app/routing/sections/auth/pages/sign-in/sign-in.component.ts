@@ -1,12 +1,12 @@
-import { Component, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { of, Subscription } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { AuthLocalStorageService } from 'src/app/auth/services/auth-local-storage.service';
-import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants';
-import { AuthStore } from 'src/app/store/auth/auth.store';
-import { AuthSectionHttpService } from '../../services/auth-section-http.service';
+import { Component, OnDestroy } from '@angular/core'
+import { FormControl, FormGroup, Validators } from '@angular/forms'
+import { Router } from '@angular/router'
+import { of, Subscription } from 'rxjs'
+import { catchError, map } from 'rxjs/operators'
+import { AuthLocalStorageService } from 'src/app/auth/services/auth-local-storage.service'
+import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants'
+import { AuthStore } from 'src/app/store/auth/auth.store'
+import { AuthSectionHttpService } from '../../services/auth-section-http.service'
 
 @Component({
     selector: 'app-auth-sing-in',
@@ -76,12 +76,12 @@ export class SignInComponent implements OnDestroy {
 
                     this.router.navigateByUrl('')
                 },
-                () => this.loading = false
+                () => (this.loading = false)
             )
         }
     }
-    
+
     ngOnDestroy() {
         if (this.subs) this.subs.unsubscribe()
-    }   
+    }
 }

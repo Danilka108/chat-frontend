@@ -1,13 +1,13 @@
-import { Component, OnDestroy } from '@angular/core';
-import { FormControl, FormGroup, Validators } from '@angular/forms';
-import { Router } from '@angular/router';
-import { of, Subscription } from 'rxjs';
-import { catchError, map } from 'rxjs/operators';
-import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher';
-import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator';
-import { authSectionCompleteRegistrationPath, authSectionSignInPath } from 'src/app/routing/routing.constants';
-import { AuthSectionHttpService } from '../../services/auth-section-http.service';
-import { checkEmailAsyncValidator } from '../../validators/check-email-async.validator';
+import { Component, OnDestroy } from '@angular/core'
+import { FormControl, FormGroup, Validators } from '@angular/forms'
+import { Router } from '@angular/router'
+import { of, Subscription } from 'rxjs'
+import { catchError, map } from 'rxjs/operators'
+import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher'
+import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator'
+import { authSectionCompleteRegistrationPath, authSectionSignInPath } from 'src/app/routing/routing.constants'
+import { AuthSectionHttpService } from '../../services/auth-section-http.service'
+import { checkEmailAsyncValidator } from '../../validators/check-email-async.validator'
 
 @Component({
     selector: 'app-auth-sign-up',
@@ -45,10 +45,7 @@ export class SignUpComponent implements OnDestroy {
 
     subs!: Subscription
 
-    constructor(
-        private readonly authHttpService: AuthSectionHttpService,
-        private readonly router: Router,
-    ) {
+    constructor(private readonly authHttpService: AuthSectionHttpService, private readonly router: Router) {
         this.onSubmit = this.onSubmit.bind(this)
     }
 

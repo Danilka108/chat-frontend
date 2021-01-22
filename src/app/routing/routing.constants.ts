@@ -1,6 +1,6 @@
 interface IRoutingPath {
-    full: string,
-    relative: string,
+    full: string
+    relative: string
 }
 
 const authSectionPrefix = 'auth'
@@ -22,7 +22,7 @@ export const authSectionSignUpPath: IRoutingPath = {
 
 export const authSectionCompleteRegistrationPath: IRoutingPath = {
     full: `/${authSectionPrefix}/complete-registration`,
-    relative: `complete-registration`
+    relative: `complete-registration`,
 }
 
 export const authSectionResetPasswordPath: IRoutingPath = {

@@ -19,7 +19,7 @@ export class ConfirmEmailComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly httpService: EmailSectionHttpService,
-        private readonly activatedRoute: ActivatedRoute,
+        private readonly activatedRoute: ActivatedRoute
     ) {}
 
     ngOnInit(): void {

@@ -6,8 +6,8 @@ import { map, catchError, refCount, publish } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 
 interface ISignIn {
-    email: string,
-    password: string,
+    email: string
+    password: string
 }
 
 interface ISignInResponse {
@@ -21,9 +21,9 @@ interface ISignInResponse {
 }
 
 interface ISignUp {
-    email: string,
-    name: string,
-    password: string,
+    email: string
+    name: string
+    password: string
 }
 
 interface ISignUpResponse {
@@ -33,10 +33,7 @@ interface ISignUpResponse {
 
 @Injectable()
 export class AuthSectionHttpService {
-    constructor(
-        private readonly httpClient: HttpClient,
-        private readonly deviceService: DeviceDetectorService,
-    ) {}
+    constructor(private readonly httpClient: HttpClient, private readonly deviceService: DeviceDetectorService) {}
 
     private error() {
         return (error: any) => {
@@ -53,35 +50,39 @@ export class AuthSectionHttpService {
     signIn(body: ISignIn) {
         const deviceInfo = this.deviceService.getDeviceInfo()
 
-        return this.httpClient.post(`${environment.apiUrl}/auth/login`, {
-            ...body,
-            os: `${deviceInfo.os}/${deviceInfo.os_version}`,
-            browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
-        }).pipe(
-            publish(),
-            refCount(),
-            map((v) => {
-                return v as ISignInResponse
-            }),
-            catchError(this.error())
-        )
+        return this.httpClient
+            .post(`${environment.apiUrl}/auth/login`, {
+                ...body,
+                os: `${deviceInfo.os}/${deviceInfo.os_version}`,
+                browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
+            })
+            .pipe(
+                publish(),
+                refCount(),
+                map((v) => {
+                    return v as ISignInResponse
+                }),
+                catchError(this.error())
+            )
     }
 
     signUp(body: ISignUp) {
         const deviceInfo = this.deviceService.getDeviceInfo()
 
-        return this.httpClient.post(`${environment.apiUrl}/user`, {
-            ...body,
-            os: `${deviceInfo.os}/${deviceInfo.os_version}`,
-            browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
-        }).pipe(
-            publish(),
-            refCount(),
-            map((v) => {
-                return v as ISignUpResponse
-            }),
-            catchError(this.error())
-        )
+        return this.httpClient
+            .post(`${environment.apiUrl}/user`, {
+                ...body,
+                os: `${deviceInfo.os}/${deviceInfo.os_version}`,
+                browser: deviceInfo.browser + '/' + deviceInfo.browser_version,
+            })
+            .pipe(
+                publish(),
+                refCount(),
+                map((v) => {
+                    return v as ISignUpResponse
+                }),
+                catchError(this.error())
+            )
     }
 
     checkEmail(email: string) {

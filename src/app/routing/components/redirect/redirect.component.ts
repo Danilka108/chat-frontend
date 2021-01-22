@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component } from '@angular/core'
 
 @Component({
-  selector: 'app-redirect',
-  template: ``
+    selector: 'app-redirect',
+    template: ``,
 })
 export class RedirectComponent {}

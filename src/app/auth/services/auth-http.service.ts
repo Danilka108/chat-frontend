@@ -21,25 +21,24 @@ interface IRefreshTokenResponse {
 
 @Injectable()
 export class AuthHttpService {
-    constructor(
-        private readonly httpClient: HttpClient,
-        private readonly deviceService: DeviceDetectorService,
-    ) {}
+    constructor(private readonly httpClient: HttpClient, private readonly deviceService: DeviceDetectorService) {}
 
     refreshToken(body: IRefreshToken) {
         const deviceInfo = this.deviceService.getDeviceInfo()
 
-        return this.httpClient.post(`${environment.apiUrl}/auth/refresh-token`, {
-            ...body,
-            os: `${deviceInfo.os}/${deviceInfo.os_version}`,
-            browser: `${deviceInfo.browser}/${deviceInfo.browser_version}`,
-        }).pipe(
-            first(),
-            publish(),
-            refCount(),
-            map((v) => {
-                return v as IRefreshTokenResponse
+        return this.httpClient
+            .post(`${environment.apiUrl}/auth/refresh-token`, {
+                ...body,
+                os: `${deviceInfo.os}/${deviceInfo.os_version}`,
+                browser: `${deviceInfo.browser}/${deviceInfo.browser_version}`,
             })
-        )
+            .pipe(
+                first(),
+                publish(),
+                refCount(),
+                map((v) => {
+                    return v as IRefreshTokenResponse
+                })
+            )
     }
 }

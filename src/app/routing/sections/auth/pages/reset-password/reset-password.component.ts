@@ -21,10 +21,7 @@ export class ResetPasswordComponent implements OnDestroy {
 
     subs!: Subscription
 
-    constructor(
-        private readonly httpService: AuthSectionHttpService,
-        private readonly router: Router
-    ) {
+    constructor(private readonly httpService: AuthSectionHttpService, private readonly router: Router) {
         this.onSubmit = this.onSubmit.bind(this)
     }
 
@@ -38,7 +35,7 @@ export class ResetPasswordComponent implements OnDestroy {
                 map(() => false),
                 catchError(() => of(true))
             )
-            
+
             this.subs = req$.subscribe(
                 () => this.router.navigateByUrl(authSectionResetPasswordCheckEmailPath.full),
                 () => (this.loading = false)

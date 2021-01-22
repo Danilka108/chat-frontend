@@ -1,17 +1,22 @@
-import { Component, HostBinding, OnInit } from '@angular/core';
+import { Component, HostBinding, Input } from '@angular/core'
+import { Observable } from 'rxjs'
+import { DateService } from 'src/app/common/date.service'
 
 @Component({
-  selector: 'app-main-dialogs-message',
-  templateUrl: './dialogs-message.component.html',
-  styleUrls: ['./dialogs-message.component.scss']
+    selector: 'app-main-dialogs-message',
+    templateUrl: './dialogs-message.component.html',
+    styleUrls: ['./dialogs-message.component.scss'],
 })
-export class DialogsMessageComponent implements OnInit {
+export class DialogsMessageComponent {
+    @Input() @HostBinding('class.own-msg') isOwnMsg!: boolean
+    @Input() @HostBinding('class.last-in-group') isLastInGroup!: boolean
 
-  @HostBinding('class.ownMsg') isOwnMsg = true
+    @Input() message!: string
+    @Input() date!: string
 
-  constructor() { }
+    constructor(private readonly dateService: DateService) {}
 
-  ngOnInit(): void {
-  }
-
+    parseDate(date: string) {
+        return this.dateService.parseDateOnlyTime(date)
+    }
 }

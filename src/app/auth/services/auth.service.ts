@@ -1,10 +1,10 @@
-import { Injectable } from '@angular/core';
-import { Router } from '@angular/router';
-import { Observable, of } from 'rxjs';
-import { catchError, concatMap, map } from 'rxjs/operators';
-import { AuthStore } from 'src/app/store/auth/auth.store';
-import { AuthHttpService } from './auth-http.service';
-import { AuthLocalStorageService } from './auth-local-storage.service';
+import { Injectable } from '@angular/core'
+import { Router } from '@angular/router'
+import { Observable, of } from 'rxjs'
+import { catchError, concatMap, map } from 'rxjs/operators'
+import { AuthStore } from 'src/app/store/auth/auth.store'
+import { AuthHttpService } from './auth-http.service'
+import { AuthLocalStorageService } from './auth-local-storage.service'
 
 @Injectable()
 export class AuthService {
@@ -12,7 +12,7 @@ export class AuthService {
         private readonly authStore: AuthStore,
         private readonly localStorageService: AuthLocalStorageService,
         private readonly httpService: AuthHttpService,
-        private readonly router: Router,
+        private readonly router: Router
     ) {}
 
     private update() {
@@ -20,23 +20,25 @@ export class AuthService {
         const localStorageRefreshToken = this.localStorageService.getRefreshToken()
 
         if (localStorageRefreshToken && localStorageUserID) {
-            return this.httpService.refreshToken({
-                userID: localStorageUserID,
-                refreshToken: localStorageRefreshToken,
-            }).pipe(
-                map(({ data }) => {
-                    this.authStore.setAccessToken(data.accessToken)
-                    this.authStore.setUserID(data.userID)
-
-                    this.localStorageService.setUserID(data.userID)
-                    this.localStorageService.setRefreshToken(data.refreshToken)
-
-                    return true
-                }),
-                catchError(() => {
-                    return of(false)
+            return this.httpService
+                .refreshToken({
+                    userID: localStorageUserID,
+                    refreshToken: localStorageRefreshToken,
                 })
-            )
+                .pipe(
+                    map(({ data }) => {
+                        this.authStore.setAccessToken(data.accessToken)
+                        this.authStore.setUserID(data.userID)
+
+                        this.localStorageService.setUserID(data.userID)
+                        this.localStorageService.setRefreshToken(data.refreshToken)
+
+                        return true
+                    }),
+                    catchError(() => {
+                        return of(false)
+                    })
+                )
         } else {
             return of(false)
         }

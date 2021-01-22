@@ -5,10 +5,7 @@ import { RoutingVerifyService } from '../routing-verify.service'
 
 @Injectable()
 export class AuthSectionGuard implements CanActivate {
-    constructor(
-        private readonly router: Router,
-        private readonly verifyService: RoutingVerifyService
-    ) {}
+    constructor(private readonly router: Router, private readonly verifyService: RoutingVerifyService) {}
 
     canActivate(_: any) {
         return this.verifyService.verify().pipe(

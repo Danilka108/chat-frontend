@@ -6,21 +6,61 @@
 
     justify-content: flex-start;
 
-    &.lastInGroup {
+    &:not(.own-msg) {
+        &.last-in-group {
+            .last {
+                display: block;
+                background-color: map-get($custom-colors, main);
+                left: -0.7rem;
+                &:before {
+                    left: -100%;
+                }
+            }
+    
+            .wrapper {
+                border-bottom-left-radius: 0;
+            }
 
+            .avatar {
+                display: block;
+                left: -2.5rem;
+            }
+        }
+
+        .wrapper {
+            margin-left: 2.5rem;
+        }
     }
 
-    &.ownMsg {
+    &.own-msg {     
+        &.last-in-group {
+            .last {
+                display: block;
+            }
+        
+            .wrapper {
+                border-bottom-right-radius: 0;
+            }
+
+            .avatar {
+                display: block;
+            }
+        }
+
         justify-content: flex-end;
+
         .wrapper {
             background-color: map-get($basic-colors, primary);
-
             color: map-get($custom-colors, main);
+            margin-right: 2.5rem;
         }
     }
 }
 
 .wrapper {
+    margin-bottom: 0.1rem;
+    margin-top: 0.1rem;
+    position: relative;
     max-width: 70%;
     display: flex;
     align-items: flex-end;
@@ -40,4 +80,39 @@
     flex-shrink: 0;
     text-transform: uppercase;
     line-height: 1;
+}
+
+.last {
+    display: none;
+    position: absolute;
+    height: 1rem;
+    width: 0.7rem;
+    background-color: map-get($basic-colors, primary);
+    right: -0.7rem;
+    bottom: 0;
+
+    &:before {
+        position: absolute;
+        content: '';
+        display: block;
+        width: 200%;
+        height: 200%;
+        left: 0;
+        bottom: 0;
+        border-radius: 50%;
+        background-color: map-get($custom-colors, light-gray);
+    }
+}
+
+.avatar {
+    display: none;
+    width: 2rem;
+    height: 2rem;
+    background-color: #000;
+    z-index: 1000;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    right: -2.5rem;
+    border-radius: 50%;
 }

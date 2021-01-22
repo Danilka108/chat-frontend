@@ -10,9 +10,9 @@ export class RoutingVerifyService {
     constructor(
         private readonly authStore: AuthStore,
         private readonly localStorageService: AuthLocalStorageService,
-        private readonly httpService: AuthHttpService,
+        private readonly httpService: AuthHttpService
     ) {}
-    
+
     verify() {
         const userID = this.authStore.getUserID()
         const accessToken = this.authStore.getAccessToken()

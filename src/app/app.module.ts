@@ -6,11 +6,7 @@ import { RoutingModule } from './routing/routing.module'
 
 @NgModule({
     declarations: [AppComponent],
-    imports: [
-        BrowserModule,
-        BrowserAnimationsModule,
-        RoutingModule,
-    ],
+    imports: [BrowserModule, BrowserAnimationsModule, RoutingModule],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

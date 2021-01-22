@@ -5,15 +5,12 @@ import { RoutingVerifyService } from '../routing-verify.service'
 
 @Injectable()
 export class MainSectionGuard implements CanActivate {
-    constructor(
-        private readonly router: Router,
-        private readonly verifyService: RoutingVerifyService
-    ) {}
+    constructor(private readonly router: Router, private readonly verifyService: RoutingVerifyService) {}
 
     canActivate(_: any) {
         return this.verifyService.verify().pipe(
-            map(result => !result),
-            map(result => {
+            map((result) => !result),
+            map((result) => {
                 if (!result) {
                     this.router.navigateByUrl('')
                 }

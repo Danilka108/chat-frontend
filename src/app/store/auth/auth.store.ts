@@ -1,15 +1,15 @@
-import { Injectable } from '@angular/core';
-import { BehaviorSubject } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Injectable } from '@angular/core'
+import { BehaviorSubject } from 'rxjs'
+import { map } from 'rxjs/operators'
 
 interface IAuthStore {
     userID: number | null
-    accessToken: string | null,
-    connectionError: boolean,
+    accessToken: string | null
+    connectionError: boolean
 }
 
 @Injectable({
-    providedIn: 'root'
+    providedIn: 'root',
 })
 export class AuthStore {
     private readonly store = new BehaviorSubject<IAuthStore>({
@@ -53,6 +53,6 @@ export class AuthStore {
     }
 
     getConnectionError$() {
-        return this.store$.pipe(map(store => store.connectionError))
+        return this.store$.pipe(map((store) => store.connectionError))
     }
 }

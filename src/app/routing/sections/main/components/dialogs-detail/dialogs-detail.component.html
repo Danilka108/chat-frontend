@@ -1,3 +1,10 @@
 <div class="wrapper">
-    <app-main-dialogs-message></app-main-dialogs-message>
+    <div *ngIf="!(isSelectedReceiver$ | async)">No selected dialog</div>
+    <app-main-dialogs-message
+        *ngFor="let message of (messages$ | async); let i = index"
+        [message]="message.message"
+        [date]="message.createdAt"
+        [isLastInGroup]="message.isLastInGroup"
+        [isOwnMsg]="message.senderID === getUserID() ? true : false"
+    ></app-main-dialogs-message>
 </div>

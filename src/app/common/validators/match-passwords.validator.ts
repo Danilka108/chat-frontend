@@ -5,7 +5,7 @@ export const matchPasswordsValidator = (pass: string, confirmPass: string): Vali
         const password = control.get(pass)?.value
         const confirmPassword = control.get(confirmPass)?.value
 
-        if ((password !== confirmPassword) && password && confirmPassword) {
+        if (password !== confirmPassword && password && confirmPassword) {
             return { passwordsMismatch: true }
         }
 

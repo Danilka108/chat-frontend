@@ -38,7 +38,7 @@ export class DialogsDetailComponent implements OnInit {
     ngOnInit() {
         this.isSelectedReceiver$ = combineLatest([
             this.mainStore.select(getDialogs()),
-            this.mainStore.select(getActiveReceiverID())
+            this.mainStore.select(getActiveReceiverID()),
         ]).pipe(
             map(([dialogs, activeReceiverID]) => {
                 if (activeReceiverID === null) return false

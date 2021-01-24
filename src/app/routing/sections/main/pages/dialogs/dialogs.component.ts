@@ -24,7 +24,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
         private readonly httpService: MainSectionHttpService,
         private readonly mainStore: MainStore,
         private readonly authStore: AuthStore,
-        private readonly dialog: MatDialog,
+        private readonly dialog: MatDialog
     ) {}
 
     ngOnInit() {

@@ -5,7 +5,7 @@ export interface DispatchAction {
 }
 
 export interface SelectAction<T> {
-    filter([previousState, state]: [State, State]): boolean,
+    filter([previousState, state]: [State, State]): boolean
     select(state: State): T
 }
 
@@ -16,12 +16,10 @@ export const setActiveReceiverID = (activeReceiverID: number | null): DispatchAc
             main: {
                 ...state.main,
                 activeReceiverID,
-            }
+            },
         }
     }
 }
-
-
 
 // export const getActiveReceiverID: SelectAction<number | null> = () => ({
 //     filter: ([PreviousState, state]) => (

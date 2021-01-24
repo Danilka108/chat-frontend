@@ -11,9 +11,9 @@ import { ACTIVE_RECEIVER_ID, DIALOGS, DIALOGS_MESSAGES, REQUEST_LOADING } from '
 import { MainStoreDispatchActionsType, MainStoreSelectActionsType } from './types'
 
 export interface IMainStoreState {
-    [ACTIVE_RECEIVER_ID]: number | null,
-    [DIALOGS]: IDialog[],
-    [DIALOGS_MESSAGES]: IDialogMessages[],
+    [ACTIVE_RECEIVER_ID]: number | null
+    [DIALOGS]: IDialog[]
+    [DIALOGS_MESSAGES]: IDialogMessages[]
     [REQUEST_LOADING]: boolean
 }
 
@@ -21,7 +21,7 @@ const mainStoreInitialState: IMainStoreState = {
     [ACTIVE_RECEIVER_ID]: null,
     [DIALOGS]: [],
     [DIALOGS_MESSAGES]: [],
-    [REQUEST_LOADING]: false
+    [REQUEST_LOADING]: false,
 }
 
 @Injectable({
@@ -36,7 +36,7 @@ export class MainStore {
             case UPDATE_ACTIVE_RECEIVER_ID: {
                 this.state.next({
                     ...this.state.getValue(),
-                    [ACTIVE_RECEIVER_ID]: action.payload
+                    [ACTIVE_RECEIVER_ID]: action.payload,
                 })
                 break
             }
@@ -44,9 +44,7 @@ export class MainStore {
                 const dialogs = this.state.getValue()[DIALOGS].concat()
 
                 action.payload.dialogs.forEach((dialog) => {
-                    const dialogIndex = dialogs.findIndex((dlg) => (
-                        dlg.receiverID === dialog.receiverID
-                    ))
+                    const dialogIndex = dialogs.findIndex((dlg) => dlg.receiverID === dialog.receiverID)
 
                     if (dialogIndex > -1) {
                         dialogs[dialogIndex] = dialog
@@ -57,7 +55,7 @@ export class MainStore {
 
                 this.state.next({
                     ...this.state.getValue(),
-                    [DIALOGS]: dialogs
+                    [DIALOGS]: dialogs,
                 })
 
                 break
@@ -68,35 +66,35 @@ export class MainStore {
                 const dialogMessagesIndex = dialogsMessages.findIndex(
                     (dialogMessages) => dialogMessages.receiverID === action.payload.receiverID
                 )
-        
+
                 if (dialogMessagesIndex > -1) {
                     action.payload.messages.forEach((message) => {
                         const messageIndex = dialogsMessages[dialogMessagesIndex].messages.findIndex(
                             (msg) => msg.messageID === message.messageID
                         )
-        
+
                         if (messageIndex > -1) {
                             dialogsMessages[dialogMessagesIndex].messages[messageIndex] = message
                         } else {
                             dialogsMessages[dialogMessagesIndex].messages.push(message)
                         }
                     })
-        
+
                     this.state.next({
                         ...this.state.getValue(),
-                        [DIALOGS_MESSAGES]: dialogsMessages
+                        [DIALOGS_MESSAGES]: dialogsMessages,
                     })
                 } else {
-                    const dialogIndex = this.state.getValue()[DIALOGS].findIndex(
-                        (dialog) => dialog.receiverID === action.payload.receiverID
-                    )
-        
+                    const dialogIndex = this.state
+                        .getValue()
+                        [DIALOGS].findIndex((dialog) => dialog.receiverID === action.payload.receiverID)
+
                     if (dialogIndex > -1) {
                         dialogsMessages.push({
                             receiverID: action.payload.receiverID,
                             messages: action.payload.messages,
                         })
-        
+
                         this.state.next({
                             ...this.state.getValue(),
                             [DIALOGS_MESSAGES]: dialogsMessages,
@@ -109,7 +107,7 @@ export class MainStore {
             case UPDATE_REQUEST_LOADING: {
                 this.state.next({
                     ...this.state.getValue(),
-                    [REQUEST_LOADING]: action.payload
+                    [REQUEST_LOADING]: action.payload,
                 })
 
                 break

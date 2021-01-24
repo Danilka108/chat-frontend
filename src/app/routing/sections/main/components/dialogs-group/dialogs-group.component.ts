@@ -6,6 +6,8 @@ import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import { Observable, Subscription } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
+import { getActiveReceiverID, updateActiveReceiverID } from 'src/app/store/main/actions/active-receiver-id.actions'
+import { getDialogs } from 'src/app/store/main/actions/dialogs.actions'
 
 @Component({
     selector: 'app-main-dialogs-group',
@@ -28,17 +30,20 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.activeReceiverID$ = this.mainStore.getActiveReceiverID$()
-        this.dialogs$ = this.mainStore.getDialogs$().pipe(
+        this.activeReceiverID$ = this.mainStore.select(getActiveReceiverID())
+
+        this.activeReceiverID$.subscribe(console.log)
+
+        this.dialogs$ = this.mainStore.select(getDialogs()).pipe(
             map((dialogs) => {
                 return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
             })
         )
 
         this.subs = this.route.params.subscribe((params) => {
-            const id = parseInt(params['id'])
-            if (!isNaN(id)) this.mainStore.setActiveReceiverID(id)
-            else this.mainStore.setActiveReceiverID(null)
+            const id = Number(params['id'])
+            if (!isNaN(id)) this.mainStore.dispatch(updateActiveReceiverID(id))
+            else this.mainStore.dispatch(updateActiveReceiverID(null))
         })
 
         this.onResize()

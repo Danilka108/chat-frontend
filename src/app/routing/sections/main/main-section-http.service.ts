@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { delay, map } from 'rxjs/operators'
+import { map } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/services/auth.service'
+import { updateRequestLoading } from 'src/app/store/main/actions/request-loading.actions'
 import { MainStore } from 'src/app/store/main/main.store'
 import { environment } from 'src/environments/environment'
 import { IDialog } from './interface/dialog.interface'
@@ -28,7 +29,7 @@ export class MainSectionHttpService {
     ) {}
 
     getDialogs() {
-        this.mainStore.setRequestLoading(true)
+        this.mainStore.dispatch(updateRequestLoading(true))
 
         return this.authService
             .authRequest((accessToken) => {
@@ -47,7 +48,7 @@ export class MainSectionHttpService {
             })
             .pipe(
                 map((dialogs) => {
-                    this.mainStore.setRequestLoading(false)
+                    this.mainStore.dispatch(updateRequestLoading(false))
 
                     if (!dialogs) return []
                     return dialogs
@@ -56,7 +57,7 @@ export class MainSectionHttpService {
     }
 
     getMessages(receiverID: number, take: number, skip: number) {
-        this.mainStore.setRequestLoading(true)
+        this.mainStore.dispatch(updateRequestLoading(true))
 
         const params = new HttpParams().set('take', `${take}`).set('skip', `${skip}`)
 
@@ -78,7 +79,7 @@ export class MainSectionHttpService {
             })
             .pipe(
                 map((result) => {
-                    this.mainStore.setRequestLoading(false)
+                    this.mainStore.dispatch(updateRequestLoading(false))
                     if (!result) return []
                     return result
                 })

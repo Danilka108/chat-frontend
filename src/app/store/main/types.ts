@@ -13,11 +13,11 @@ export type MainStoreDispatchActionsType =
     | IAddDialogsMessagesDispatchAction
     | IUpdateRequestLoadingSelectAction
 
-export type MainStoreSelectActionsType<T> =
-    | IActiveReceiverIDSelectAction<T>
-    | IDialogsSelectAction<T>
-    | IDialogMessagesSelectAction<T>
-    | IRequestLoadingSelectAction<T>
+export type MainStoreSelectActionsType<State, Item> =
+    | IActiveReceiverIDSelectAction<State, Item>
+    | IDialogsSelectAction<State, Item>
+    | IDialogMessagesSelectAction<State, Item>
+    | IRequestLoadingSelectAction<State, Item>
 
 export type MainStoreKeysType =
     | typeof ACTIVE_RECEIVER_ID

@@ -1,5 +1,6 @@
-import { ISelectFn } from '../interfaces/select-fn-interface'
+import { ISelectFn } from '../../interfaces/select-fn.interface'
 import { ACTIVE_RECEIVER_ID } from '../keys'
+import { IMainStoreState } from '../main.store'
 
 export const DELETE_ACTIVE_RECEIVER_ID = 'DELETE_ACTIVE_RECEIVER_ID'
 export const UPDATE_ACTIVE_RECEIVER_ID = 'UPDATE_ACTIVE_RECEIVER_ID'
@@ -16,12 +17,12 @@ export const updateActiveReceiverID = (activeReceiverID: number | null): IUpdate
     }
 }
 
-export interface IActiveReceiverIDSelectAction<T> {
+export interface IActiveReceiverIDSelectAction<State, Item> {
     key: typeof ACTIVE_RECEIVER_ID
-    selectFn: ISelectFn<T>
+    selectFn: ISelectFn<State, Item>
 }
 
-export const getActiveReceiverID = (): IActiveReceiverIDSelectAction<number | null> => {
+export const getActiveReceiverID = (): IActiveReceiverIDSelectAction<IMainStoreState, number | null> => {
     return {
         key: ACTIVE_RECEIVER_ID,
         selectFn: (state) => {

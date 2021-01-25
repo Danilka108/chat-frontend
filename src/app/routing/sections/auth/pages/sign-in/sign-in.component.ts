@@ -5,6 +5,8 @@ import { of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { AuthLocalStorageService } from 'src/app/auth/services/auth-local-storage.service'
 import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants'
+import { updateAccessToken } from 'src/app/store/auth/actions/access-token.actions'
+import { updateUserID } from 'src/app/store/auth/actions/user-id.actions'
 import { AuthStore } from 'src/app/store/auth/auth.store'
 import { AuthSectionHttpService } from '../../services/auth-section-http.service'
 
@@ -71,8 +73,8 @@ export class SignInComponent implements OnDestroy {
                     this.localStorageService.setRefreshToken(data.refreshToken)
                     this.localStorageService.setUserID(data.userID)
 
-                    this.authStore.setAccessToken(data.accessToken)
-                    this.authStore.setUserID(data.userID)
+                    this.authStore.dispatch(updateAccessToken(data.accessToken))
+                    this.authStore.dispatch(updateUserID(data.userID))
 
                     this.router.navigateByUrl('')
                 },

@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core'
 import { combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
 import { catchError, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
+import { getUserID } from 'src/app/store/auth/actions/user-id.actions'
 import { AuthStore } from 'src/app/store/auth/auth.store'
 import { getActiveReceiverID } from 'src/app/store/main/actions/active-receiver-id.actions'
 import { addDialogsMessages, getDialogMessages } from 'src/app/store/main/actions/dialogs-messages.actions'
@@ -155,6 +156,6 @@ export class DialogsDetailComponent implements OnInit {
     }
 
     getUserID() {
-        return this.authStore.getUserID()
+        return this.authStore.selectSync(getUserID())
     }
 }

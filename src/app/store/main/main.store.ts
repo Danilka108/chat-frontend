@@ -17,7 +17,7 @@ export interface IMainStoreState {
     [REQUEST_LOADING]: boolean
 }
 
-const mainStoreInitialState: IMainStoreState = {
+const initialState: IMainStoreState = {
     [ACTIVE_RECEIVER_ID]: null,
     [DIALOGS]: [],
     [DIALOGS_MESSAGES]: [],
@@ -28,7 +28,7 @@ const mainStoreInitialState: IMainStoreState = {
     providedIn: 'root',
 })
 export class MainStore {
-    private readonly state = new BehaviorSubject<IMainStoreState>(mainStoreInitialState)
+    private readonly state = new BehaviorSubject<IMainStoreState>(initialState)
     private readonly state$ = this.state.asObservable().pipe()
 
     dispatch(action: MainStoreDispatchActionsType) {
@@ -115,7 +115,7 @@ export class MainStore {
         }
     }
 
-    select<T>({ key, selectFn }: MainStoreSelectActionsType<T>) {
+    select<Item>({ key, selectFn }: MainStoreSelectActionsType<IMainStoreState, Item>) {
         return this.state$.pipe(
             distinctUntilChanged((previousState, state) => {
                 return previousState[key] === state[key]
@@ -124,7 +124,7 @@ export class MainStore {
         )
     }
 
-    selectSync<T>({ selectFn }: MainStoreSelectActionsType<T>) {
+    selectSync<Item>({ selectFn }: MainStoreSelectActionsType<IMainStoreState, Item>) {
         return selectFn(Object.create(this.state.getValue()))
     }
 }

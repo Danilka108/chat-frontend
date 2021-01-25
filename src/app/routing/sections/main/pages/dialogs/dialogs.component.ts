@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 import { Observable, Subscription } from 'rxjs'
 import { delay, startWith } from 'rxjs/operators'
+import { getConnectionError } from 'src/app/store/auth/actions/connection-error.actions'
 import { AuthStore } from 'src/app/store/auth/auth.store'
 import { addDialogs } from 'src/app/store/main/actions/dialogs.actions'
 import { getRequestLoading } from 'src/app/store/main/actions/request-loading.actions'
@@ -30,7 +31,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.requestLoading$ = this.mainStore.select(getRequestLoading()).pipe(startWith(true), delay(0))
 
-        this.subsNoConnection = this.authStore.getConnectionError$().subscribe((isError) => {
+        this.subsNoConnection = this.authStore.select(getConnectionError()).subscribe((isError) => {
             if (!this.noConnectionDialog && isError) {
                 this.noConnectionDialog = this.dialog.open(NoConnectionComponent, {
                     closeOnNavigation: true,

@@ -1,8 +1,8 @@
-import { DialogsGroupComponent } from 'src/app/routing/sections/main/components/dialogs-group/dialogs-group.component'
 import { IMessage } from 'src/app/routing/sections/main/interface/message.interface'
+import { ISelectFn } from '../../interfaces/select-fn.interface'
 import { IDialogMessages } from '../interfaces/dialog-messages.interface'
-import { ISelectFn } from '../interfaces/select-fn-interface'
 import { DIALOGS_MESSAGES } from '../keys'
+import { IMainStoreState } from '../main.store'
 
 export const ADD_DIALOGS_MESSAGES = 'ADD_DIALOG_MESSAGES'
 
@@ -24,17 +24,14 @@ export const addDialogsMessages = (receiverID: number, ...messages: IMessage[]):
     }
 }
 
-export interface IDialogMessagesSelectActionSync<T> {
+export interface IDialogMessagesSelectAction<State, Item> {
     key: typeof DIALOGS_MESSAGES
-    selectFn: ISelectFn<T>
+    selectFn: ISelectFn<State, Item>
 }
 
-export interface IDialogMessagesSelectAction<T> {
-    key: typeof DIALOGS_MESSAGES
-    selectFn: ISelectFn<T>
-}
-
-export const getDialogMessages = (receiverID: number): IDialogMessagesSelectAction<IDialogMessages | null> => {
+export const getDialogMessages = (
+    receiverID: number
+): IDialogMessagesSelectAction<IMainStoreState, IDialogMessages | null> => {
     return {
         key: DIALOGS_MESSAGES,
         selectFn: (state) => {

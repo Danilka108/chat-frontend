@@ -1,6 +1,7 @@
 import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface'
-import { ISelectFn } from '../interfaces/select-fn-interface'
+import { ISelectFn } from '../../interfaces/select-fn.interface'
 import { DIALOGS } from '../keys'
+import { IMainStoreState } from '../main.store'
 
 export const ADD_DIALOGS = 'ADD_DIALOG'
 
@@ -20,12 +21,12 @@ export const addDialogs = (...dialogs: IDialog[]): IAddDialogsDispatchAction => 
     }
 }
 
-export interface IDialogsSelectAction<T> {
+export interface IDialogsSelectAction<State, Item> {
     key: typeof DIALOGS
-    selectFn: ISelectFn<T>
+    selectFn: ISelectFn<State, Item>
 }
 
-export const getDialogs = (): IDialogsSelectAction<IDialog[]> => {
+export const getDialogs = (): IDialogsSelectAction<IMainStoreState, IDialog[]> => {
     return {
         key: DIALOGS,
         selectFn: (state) => {

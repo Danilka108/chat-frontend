@@ -3,6 +3,8 @@ import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { AuthHttpService } from '../auth/services/auth-http.service'
 import { AuthLocalStorageService } from '../auth/services/auth-local-storage.service'
+import { getAccessToken, updateAccessToken } from '../store/auth/actions/access-token.actions'
+import { getUserID, updateUserID } from '../store/auth/actions/user-id.actions'
 import { AuthStore } from '../store/auth/auth.store'
 
 @Injectable()
@@ -14,8 +16,8 @@ export class RoutingVerifyService {
     ) {}
 
     verify() {
-        const userID = this.authStore.getUserID()
-        const accessToken = this.authStore.getAccessToken()
+        const userID = this.authStore.selectSync(getUserID())
+        const accessToken = this.authStore.selectSync(getAccessToken())
 
         const localStorageUserID = this.localStorageService.getUserID()
         const localStorageRefreshToken = this.localStorageService.getRefreshToken()
@@ -33,8 +35,8 @@ export class RoutingVerifyService {
                 })
                 .pipe(
                     map(({ data }) => {
-                        this.authStore.setAccessToken(data.accessToken)
-                        this.authStore.setUserID(data.userID)
+                        this.authStore.dispatch(updateAccessToken(data.accessToken))
+                        this.authStore.dispatch(updateUserID(data.userID))
 
                         this.localStorageService.setUserID(data.userID)
                         this.localStorageService.setRefreshToken(data.refreshToken)

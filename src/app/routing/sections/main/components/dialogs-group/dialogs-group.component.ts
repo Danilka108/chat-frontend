@@ -32,8 +32,6 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.activeReceiverID$ = this.mainStore.select(getActiveReceiverID())
 
-        this.activeReceiverID$.subscribe(console.log)
-
         this.dialogs$ = this.mainStore.select(getDialogs()).pipe(
             map((dialogs) => {
                 return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))

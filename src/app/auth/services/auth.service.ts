@@ -2,19 +2,19 @@ import { Injectable } from '@angular/core'
 import { Router } from '@angular/router'
 import { Observable, of } from 'rxjs'
 import { catchError, concatMap, map } from 'rxjs/operators'
-import { getAccessToken, updateAccessToken } from 'src/app/store/auth/actions/access-token.actions'
-import { updateConnectionError } from 'src/app/store/auth/actions/connection-error.actions'
-import { updateUserID } from 'src/app/store/auth/actions/user-id.actions'
-import { AuthStore } from 'src/app/store/auth/auth.store'
+import { updateAccessToken, updateConnectionError, updateUserID } from 'src/app/store/actions/auth.actions'
+import { Store } from 'src/app/store/core/store'
+import { getAccessToken } from 'src/app/store/selectors/auth.selectors'
+import { IAppState } from 'src/app/store/states/app.state'
 import { AuthHttpService } from './auth-http.service'
 import { AuthLocalStorageService } from './auth-local-storage.service'
 
 @Injectable()
 export class AuthService {
     constructor(
-        private readonly authStore: AuthStore,
         private readonly localStorageService: AuthLocalStorageService,
         private readonly httpService: AuthHttpService,
+        private readonly store: Store<IAppState>,
         private readonly router: Router
     ) {}
 
@@ -30,8 +30,8 @@ export class AuthService {
                 })
                 .pipe(
                     map(({ data }) => {
-                        this.authStore.dispatch(updateAccessToken(data.accessToken))
-                        this.authStore.dispatch(updateUserID(data.userID))
+                        this.store.dispatch(updateAccessToken(data.accessToken))
+                        this.store.dispatch(updateUserID(data.userID))
 
                         this.localStorageService.setUserID(data.userID)
                         this.localStorageService.setRefreshToken(data.refreshToken)
@@ -59,7 +59,7 @@ export class AuthService {
                 if (error?.status === 401) {
                     return this.update().pipe(
                         concatMap((result) => {
-                            const accessToken2 = this.authStore.selectSync(getAccessToken())
+                            const accessToken2 = this.store.selectSnapshot(getAccessToken())
 
                             if (result && accessToken2) {
                                 return request(accessToken2).pipe(
@@ -67,7 +67,7 @@ export class AuthService {
                                         if (error?.status === 401) {
                                             this.remove()
                                         } else {
-                                            this.authStore.dispatch(updateConnectionError(true))
+                                            this.store.dispatch(updateConnectionError(true))
                                         }
 
                                         return of(null)
@@ -80,7 +80,7 @@ export class AuthService {
                         })
                     )
                 } else {
-                    this.authStore.dispatch(updateConnectionError(true))
+                    this.store.dispatch(updateConnectionError(true))
                     return of(null)
                 }
             })
@@ -88,14 +88,14 @@ export class AuthService {
     }
 
     private authRequestCheckAccessToken<T>(request: (accessToken: string) => Observable<T>) {
-        const accessToken = this.authStore.selectSync(getAccessToken())
+        const accessToken = this.store.selectSnapshot(getAccessToken())
 
         if (accessToken) {
             return this.authRequestCatchError<T>(request, accessToken)
         } else {
             return this.update().pipe(
                 concatMap(() => {
-                    const accessToken2 = this.authStore.selectSync(getAccessToken())
+                    const accessToken2 = this.store.selectSnapshot(getAccessToken())
                     if (accessToken2) {
                         return this.authRequestCatchError<T>(request, accessToken2)
                     } else {
@@ -111,7 +111,7 @@ export class AuthService {
         return this.authRequestCheckAccessToken(request).pipe(
             map((result) => {
                 if (result !== null) {
-                    this.authStore.dispatch(updateConnectionError(false))
+                    this.store.dispatch(updateConnectionError(false))
                 }
 
                 return result

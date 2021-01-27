@@ -2,11 +2,11 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 import { Observable, Subscription } from 'rxjs'
 import { delay, startWith } from 'rxjs/operators'
-import { getConnectionError } from 'src/app/store/auth/actions/connection-error.actions'
-import { AuthStore } from 'src/app/store/auth/auth.store'
-import { addDialogs } from 'src/app/store/main/actions/dialogs.actions'
-import { getRequestLoading } from 'src/app/store/main/actions/request-loading.actions'
-import { MainStore } from 'src/app/store/main/main.store'
+import { addDialogs } from 'src/app/store/actions/main.actions'
+import { Store } from 'src/app/store/core/store'
+import { getConnectionError } from 'src/app/store/selectors/auth.selectors'
+import { getRequestLoading } from 'src/app/store/selectors/main.selectors'
+import { IAppState } from 'src/app/store/states/app.state'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
 import { MainSectionHttpService } from '../../main-section-http.service'
 
@@ -23,15 +23,14 @@ export class DialogsComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly httpService: MainSectionHttpService,
-        private readonly mainStore: MainStore,
-        private readonly authStore: AuthStore,
+        private readonly store: Store<IAppState>,
         private readonly dialog: MatDialog
     ) {}
 
     ngOnInit() {
-        this.requestLoading$ = this.mainStore.select(getRequestLoading()).pipe(startWith(true), delay(0))
+        this.requestLoading$ = this.store.select(getRequestLoading()).pipe(startWith(true), delay(0))
 
-        this.subsNoConnection = this.authStore.select(getConnectionError()).subscribe((isError) => {
+        this.subsNoConnection = this.store.select(getConnectionError()).subscribe((isError) => {
             if (!this.noConnectionDialog && isError) {
                 this.noConnectionDialog = this.dialog.open(NoConnectionComponent, {
                     closeOnNavigation: true,
@@ -43,7 +42,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
         })
 
         this.subsReq = this.httpService.getDialogs().subscribe((dialogs) => {
-            this.mainStore.dispatch(addDialogs(...dialogs))
+            this.store.dispatch(addDialogs(dialogs))
         })
     }
 

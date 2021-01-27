@@ -27,11 +27,19 @@ export class Store<StateType> {
         this.state.next(state)
     }
 
-    select<KeyType>(selectorFn: ISelectorFn<StateType, KeyType>): Observable<KeyType> {
-        return this.state$.pipe(map(selectorFn), distinctUntilChanged())
+    select(): Observable<StateType>
+    select<KeyType>(selectorFn: ISelectorFn<StateType, KeyType>): Observable<KeyType>
+    select<KeyType>(selectorFn?: ISelectorFn<StateType, KeyType>) {
+        if (selectorFn) {
+            return this.state$.pipe(map(selectorFn), distinctUntilChanged())
+        }
+        return this.state$
     }
 
-    selectSnapshot<KeyType>(selectorFn: ISelectFn<StateType, KeyType>): KeyType {
-        return selectorFn({ ...this.state.getValue() })
+    selectSnapshot(): StateType
+    selectSnapshot<KeyType>(selectorFn: ISelectFn<StateType, KeyType>): KeyType
+    selectSnapshot<KeyType>(selectorFn?: ISelectFn<StateType, KeyType>) {
+        if (selectorFn) return selectorFn({ ...this.state.getValue() })
+        return { ...this.state.getValue() }
     }
 }

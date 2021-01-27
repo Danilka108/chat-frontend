@@ -2,12 +2,11 @@ import { Component, OnInit } from '@angular/core'
 import { combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
 import { catchError, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { getUserID } from 'src/app/store/auth/actions/user-id.actions'
-import { AuthStore } from 'src/app/store/auth/auth.store'
-import { getActiveReceiverID } from 'src/app/store/main/actions/active-receiver-id.actions'
-import { addDialogsMessages, getDialogMessages } from 'src/app/store/main/actions/dialogs-messages.actions'
-import { getDialogs } from 'src/app/store/main/actions/dialogs.actions'
-import { MainStore } from 'src/app/store/main/main.store'
+import { addDialogMessages } from 'src/app/store/actions/main.actions'
+import { Store } from 'src/app/store/core/store'
+import { getUserID } from 'src/app/store/selectors/auth.selectors'
+import { getActiveReceiverID, getDialogMessages, getDialogs } from 'src/app/store/selectors/main.selectors'
+import { IAppState } from 'src/app/store/states/app.state'
 import { IMessage } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../main-section-http.service'
 
@@ -30,16 +29,15 @@ export class DialogsDetailComponent implements OnInit {
     skip = 0
 
     constructor(
-        private readonly mainStore: MainStore,
         private readonly httpService: MainSectionHttpService,
         private readonly dateService: DateService,
-        private readonly authStore: AuthStore
+        private readonly store: Store<IAppState>
     ) {}
 
     ngOnInit() {
         this.isSelectedReceiver$ = combineLatest([
-            this.mainStore.select(getDialogs()),
-            this.mainStore.select(getActiveReceiverID()),
+            this.store.select(getDialogs()),
+            this.store.select(getActiveReceiverID()),
         ]).pipe(
             map(([dialogs, activeReceiverID]) => {
                 if (activeReceiverID === null) return false
@@ -52,12 +50,12 @@ export class DialogsDetailComponent implements OnInit {
             })
         )
 
-        const msgs$ = this.mainStore.select(getActiveReceiverID()).pipe(
+        const msgs$ = this.store.select(getActiveReceiverID()).pipe(
             map((activeReceiverID) => {
                 if (!activeReceiverID) throw null
                 return {
                     activeReceiverID,
-                    dialogMessages: this.mainStore.selectSync(getDialogMessages(activeReceiverID)),
+                    dialogMessages: this.store.selectSnapshot(getDialogMessages(activeReceiverID)),
                 }
             }),
             switchMap(({ activeReceiverID, dialogMessages }) => {
@@ -66,7 +64,7 @@ export class DialogsDetailComponent implements OnInit {
                 if (dialogMessages === null) {
                     messages$ = this.httpService.getMessages(activeReceiverID, this.take, this.skip).pipe(
                         tap((messages) => {
-                            this.mainStore.dispatch(addDialogsMessages(activeReceiverID, ...messages))
+                            this.store.dispatch(addDialogMessages(activeReceiverID, messages))
                         })
                     )
                 } else {
@@ -79,7 +77,7 @@ export class DialogsDetailComponent implements OnInit {
                 })
             }),
             switchMap(({ activeReceiverID }) => {
-                return this.mainStore.select(getDialogMessages(activeReceiverID))
+                return this.store.select(getDialogMessages(activeReceiverID))
             }),
             map((dialogMessages) => {
                 if (dialogMessages) {
@@ -156,6 +154,6 @@ export class DialogsDetailComponent implements OnInit {
     }
 
     getUserID() {
-        return this.authStore.selectSync(getUserID())
+        return this.store.selectSnapshot(getUserID())
     }
 }

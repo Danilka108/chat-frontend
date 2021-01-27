@@ -1,13 +1,14 @@
 import { Component, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core'
 import { IDialog } from '../../interface/dialog.interface'
-import { MainStore } from 'src/app/store/main/main.store'
 import { ActivatedRoute, Router } from '@angular/router'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import { Observable, Subscription } from 'rxjs'
 import { map } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { getActiveReceiverID, updateActiveReceiverID } from 'src/app/store/main/actions/active-receiver-id.actions'
-import { getDialogs } from 'src/app/store/main/actions/dialogs.actions'
+import { Store } from 'src/app/store/core/store'
+import { IAppState } from 'src/app/store/states/app.state'
+import { getActiveReceiverID, getDialogs } from 'src/app/store/selectors/main.selectors'
+import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
 
 @Component({
     selector: 'app-main-dialogs-group',
@@ -23,16 +24,16 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     smallSizeMax = 800
 
     constructor(
-        private readonly mainStore: MainStore,
+        private readonly store: Store<IAppState>,
         private readonly route: ActivatedRoute,
         private readonly router: Router,
         private readonly dateService: DateService
     ) {}
 
     ngOnInit() {
-        this.activeReceiverID$ = this.mainStore.select(getActiveReceiverID())
+        this.activeReceiverID$ = this.store.select(getActiveReceiverID())
 
-        this.dialogs$ = this.mainStore.select(getDialogs()).pipe(
+        this.dialogs$ = this.store.select(getDialogs()).pipe(
             map((dialogs) => {
                 return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
             })
@@ -40,8 +41,8 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
 
         this.subs = this.route.params.subscribe((params) => {
             const id = Number(params['id'])
-            if (!isNaN(id)) this.mainStore.dispatch(updateActiveReceiverID(id))
-            else this.mainStore.dispatch(updateActiveReceiverID(null))
+            if (!isNaN(id)) this.store.dispatch(updateActiveReceiverID(id))
+            else this.store.dispatch(updateActiveReceiverID(null))
         })
 
         this.onResize()

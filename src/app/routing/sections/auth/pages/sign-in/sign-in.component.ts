@@ -5,9 +5,9 @@ import { of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { AuthLocalStorageService } from 'src/app/auth/services/auth-local-storage.service'
 import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants'
-import { updateAccessToken } from 'src/app/store/auth/actions/access-token.actions'
-import { updateUserID } from 'src/app/store/auth/actions/user-id.actions'
-import { AuthStore } from 'src/app/store/auth/auth.store'
+import { updateAccessToken, updateUserID } from 'src/app/store/actions/auth.actions'
+import { Store } from 'src/app/store/core/store'
+import { IAppState } from 'src/app/store/states/app.state'
 import { AuthSectionHttpService } from '../../services/auth-section-http.service'
 
 @Component({
@@ -37,7 +37,7 @@ export class SignInComponent implements OnDestroy {
     constructor(
         private readonly httpService: AuthSectionHttpService,
         private readonly localStorageService: AuthLocalStorageService,
-        private readonly authStore: AuthStore,
+        private readonly store: Store<IAppState>,
         private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)
@@ -73,8 +73,8 @@ export class SignInComponent implements OnDestroy {
                     this.localStorageService.setRefreshToken(data.refreshToken)
                     this.localStorageService.setUserID(data.userID)
 
-                    this.authStore.dispatch(updateAccessToken(data.accessToken))
-                    this.authStore.dispatch(updateUserID(data.userID))
+                    this.store.dispatch(updateAccessToken(data.accessToken))
+                    this.store.dispatch(updateUserID(data.userID))
 
                     this.router.navigateByUrl('')
                 },

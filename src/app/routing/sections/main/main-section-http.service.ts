@@ -2,8 +2,9 @@ import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { map } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/services/auth.service'
-import { updateRequestLoading } from 'src/app/store/main/actions/request-loading.actions'
-import { MainStore } from 'src/app/store/main/main.store'
+import { updateRequestLoading } from 'src/app/store/actions/main.actions'
+import { Store } from 'src/app/store/core/store'
+import { IAppState } from 'src/app/store/states/app.state'
 import { environment } from 'src/environments/environment'
 import { IDialog } from './interface/dialog.interface'
 import { IMessage } from './interface/message.interface'
@@ -25,11 +26,11 @@ export class MainSectionHttpService {
     constructor(
         private readonly authService: AuthService,
         private readonly httpClient: HttpClient,
-        private readonly mainStore: MainStore
+        private readonly store: Store<IAppState>
     ) {}
 
     getDialogs() {
-        this.mainStore.dispatch(updateRequestLoading(true))
+        this.store.dispatch(updateRequestLoading(true))
 
         return this.authService
             .authRequest((accessToken) => {
@@ -48,7 +49,7 @@ export class MainSectionHttpService {
             })
             .pipe(
                 map((dialogs) => {
-                    this.mainStore.dispatch(updateRequestLoading(false))
+                    this.store.dispatch(updateRequestLoading(false))
 
                     if (!dialogs) return []
                     return dialogs
@@ -57,7 +58,7 @@ export class MainSectionHttpService {
     }
 
     getMessages(receiverID: number, take: number, skip: number) {
-        this.mainStore.dispatch(updateRequestLoading(true))
+        this.store.dispatch(updateRequestLoading(true))
 
         const params = new HttpParams().set('take', `${take}`).set('skip', `${skip}`)
 
@@ -79,7 +80,7 @@ export class MainSectionHttpService {
             })
             .pipe(
                 map((result) => {
-                    this.mainStore.dispatch(updateRequestLoading(false))
+                    this.store.dispatch(updateRequestLoading(false))
                     if (!result) return []
                     return result
                 })

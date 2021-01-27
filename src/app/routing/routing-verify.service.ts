@@ -3,21 +3,22 @@ import { of } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
 import { AuthHttpService } from '../auth/services/auth-http.service'
 import { AuthLocalStorageService } from '../auth/services/auth-local-storage.service'
-import { getAccessToken, updateAccessToken } from '../store/auth/actions/access-token.actions'
-import { getUserID, updateUserID } from '../store/auth/actions/user-id.actions'
-import { AuthStore } from '../store/auth/auth.store'
+import { updateAccessToken, updateUserID } from '../store/actions/auth.actions'
+import { Store } from '../store/core/store'
+import { getAccessToken, getUserID } from '../store/selectors/auth.selectors'
+import { IAppState } from '../store/states/app.state'
 
 @Injectable()
 export class RoutingVerifyService {
     constructor(
-        private readonly authStore: AuthStore,
+        private readonly store: Store<IAppState>,
         private readonly localStorageService: AuthLocalStorageService,
         private readonly httpService: AuthHttpService
     ) {}
 
     verify() {
-        const userID = this.authStore.selectSync(getUserID())
-        const accessToken = this.authStore.selectSync(getAccessToken())
+        const userID = this.store.selectSnapshot(getUserID())
+        const accessToken = this.store.selectSnapshot(getAccessToken())
 
         const localStorageUserID = this.localStorageService.getUserID()
         const localStorageRefreshToken = this.localStorageService.getRefreshToken()
@@ -35,8 +36,8 @@ export class RoutingVerifyService {
                 })
                 .pipe(
                     map(({ data }) => {
-                        this.authStore.dispatch(updateAccessToken(data.accessToken))
-                        this.authStore.dispatch(updateUserID(data.userID))
+                        this.store.dispatch(updateAccessToken(data.accessToken))
+                        this.store.dispatch(updateUserID(data.userID))
 
                         this.localStorageService.setUserID(data.userID)
                         this.localStorageService.setRefreshToken(data.refreshToken)

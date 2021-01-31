@@ -1,10 +1,12 @@
-<ngx-simplebar>
-    <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
-        [message]="dialog.latestMessage"
-        [date]="parseDate(dialog.createdAt)"
-        [active]="(activeReceiverID$ | async) ===  dialog.receiverID"
-        [receiver]="dialog.receiverName"
-        (click)="onClick(dialog.receiverID)"
-        [isSmallSize]="isSmallSize"
-    ></app-main-dialogs-item>
-</ngx-simplebar>
+<app-scrollbar [config]="scrollbarConfig">
+    <div class="wrapper">
+            <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
+            [message]="dialog.latestMessage"
+            [date]="parseDate(dialog.createdAt)"
+            [active]="(activeReceiverID$ | async) ===  dialog.receiverID"
+            [receiver]="dialog.receiverName"
+            (click)="onClick(dialog.receiverID)"
+            [isSmallSize]="isSmallSize"
+        ></app-main-dialogs-item>
+    </div>
+</app-scrollbar>

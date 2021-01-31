@@ -1,0 +1,14 @@
+<app-scrollbar-view [config]="defaultConfig"
+                    [updateScrollbarEvent$]="updateScrollbar$"
+                    [trackDelta$]="trackDelta$"
+                    (scrollChange)="onScrollChange($event)"
+                    (sizeChange)="onSizeChange($event)"
+                    [isTrackScroll]="isTrackScroll">
+    <ng-content></ng-content>
+</app-scrollbar-view>
+<app-scrollbar-track [config]="defaultConfig"
+                     [viewSize]="viewSize"
+                     [scroll]="scroll"
+                     (trackDeltaChange)="onTrackDeltaChange($event)"
+                     (isTrackScrollChange)="onIsTrackScrollChange($event)">
+</app-scrollbar-track>

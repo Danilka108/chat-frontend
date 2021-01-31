@@ -9,6 +9,7 @@ import { Store } from 'src/app/store/core/store'
 import { IAppState } from 'src/app/store/states/app.state'
 import { getActiveReceiverID, getDialogs } from 'src/app/store/selectors/main.selectors'
 import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
+import { IScrollbarCfg } from 'src/app/scrollbar/interfaces/config.interface'
 
 @Component({
     selector: 'app-main-dialogs-group',
@@ -22,6 +23,18 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
 
     @HostBinding('class.small') isSmallSize = false
     smallSizeMax = 800
+
+    scrollbarConfig: IScrollbarCfg = {
+        isScroll: {
+            horizontal: false,
+        },
+        trackThickness: {
+            vertical: {
+                unit: 'rem',
+                value: 0.3,
+            },
+        },
+    }
 
     constructor(
         private readonly store: Store<IAppState>,

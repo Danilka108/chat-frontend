@@ -1,5 +1,4 @@
 import { Component, HostBinding, Input } from '@angular/core'
-import { Observable } from 'rxjs'
 import { DateService } from 'src/app/common/date.service'
 
 @Component({

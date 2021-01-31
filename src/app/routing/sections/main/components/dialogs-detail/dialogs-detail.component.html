@@ -1,10 +1,14 @@
-<div class="no-selected" *ngIf="!(isSelectedReceiver$ | async)">
+<div class="no-selected"
+     *ngIf="!(isSelectedReceiver$ | async)">
     <h2>Please select chat to start messaging</h2>
 </div>
-<ngx-simplebar *ngIf="isSelectedReceiver$ | async">
+<app-scrollbar [updateScrollbar$]="updateScrollbar.asObservable()"
+               [config]="scrollbarConfig">
     <div class="wrapper">
         <ng-template ngFor let-message [ngForOf]="messages$ | async">
-            <app-main-dialogs-separator *ngIf="message.isDiffDays" [date]="message.diffDate"></app-main-dialogs-separator>
+            <app-main-dialogs-separator *ngIf="message.isDiffDays"
+                                        [date]="message.diffDate">
+            </app-main-dialogs-separator>
             <app-main-dialogs-message
                 [message]="message.message"
                 [date]="message.createdAt"
@@ -13,5 +17,5 @@
             ></app-main-dialogs-message>
         </ng-template>
     </div>
-</ngx-simplebar>
+</app-scrollbar>
 <app-main-dialogs-input></app-main-dialogs-input>

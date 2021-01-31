@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core'
-import { combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
+import { Component, OnDestroy, OnInit } from '@angular/core'
+import { combineLatest, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
 import { catchError, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
+import { IScrollbarCfg } from 'src/app/scrollbar/interfaces/config.interface'
 import { addDialogMessages } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
@@ -21,12 +22,22 @@ interface IMessageWithIsLast extends IMessage {
     templateUrl: './dialogs-detail.component.html',
     styleUrls: ['./dialogs-detail.component.scss'],
 })
-export class DialogsDetailComponent implements OnInit {
+export class DialogsDetailComponent implements OnInit, OnDestroy {
+    updateScrollbar = new Subject<void>()
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
     subs!: Subscription
     take = 30
     skip = 0
+
+    scrollbarConfig: IScrollbarCfg = {
+        initialPosition: {
+            veritcal: 'bottom',
+        },
+        isScroll: {
+            horizontal: false,
+        },
+    }
 
     constructor(
         private readonly httpService: MainSectionHttpService,
@@ -35,6 +46,10 @@ export class DialogsDetailComponent implements OnInit {
     ) {}
 
     ngOnInit() {
+        this.subs = this.store.select(getActiveReceiverID()).subscribe(() => {
+            this.updateScrollbar.next()
+        })
+
         this.isSelectedReceiver$ = combineLatest([
             this.store.select(getDialogs()),
             this.store.select(getActiveReceiverID()),
@@ -95,6 +110,10 @@ export class DialogsDetailComponent implements OnInit {
                 return of([])
             })
         )
+    }
+
+    ngOnDestroy() {
+        if (this.subs) this.subs.unsubscribe()
     }
 
     parseDays(message: IMessage, arr: IMessage[], i: number) {

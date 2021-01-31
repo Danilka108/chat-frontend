@@ -9,13 +9,13 @@ import { DialogsComponent } from './pages/dialogs/dialogs.component'
 import { MaterialModule } from 'src/app/material/material.module'
 import { DialogsGroupComponent } from './components/dialogs-group/dialogs-group.component'
 import { SectionComponent } from './components/section/section.component'
-import { SimplebarAngularModule } from 'simplebar-angular'
 import { DialogsDetailComponent } from './components/dialogs-detail/dialogs-detail.component'
 import { NoConnectionComponent } from './components/no-connection/no-connection.component'
 import { DialogsMessageComponent } from './components/dialogs-message/dialogs-message.component'
 import { GlobalComponentsModule } from 'src/app/global-components/global-components.module'
 import { DialogsInputComponent } from './components/dialogs-input/dialogs-input.component'
 import { DialogsSeparatorComponent } from './components/dialogs-separator/dialogs-separator.component'
+import { ScrollbarModule } from 'src/app/scrollbar/scrollbar.module'
 
 @NgModule({
     declarations: [
@@ -34,8 +34,8 @@ import { DialogsSeparatorComponent } from './components/dialogs-separator/dialog
         CommonModule,
         RouterModule.forChild(routes),
         AuthModule,
-        SimplebarAngularModule,
         GlobalComponentsModule,
+        ScrollbarModule,
     ],
     providers: [MainSectionHttpService],
 })

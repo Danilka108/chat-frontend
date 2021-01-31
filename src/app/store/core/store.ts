@@ -1,6 +1,5 @@
 import { BehaviorSubject, Observable } from 'rxjs'
 import { distinctUntilChanged, map } from 'rxjs/operators'
-import { ISelectFn } from '../interfaces/select-fn.interface'
 import { IAction } from './interfaces/action.interface'
 import { ReducersMap } from './interfaces/reducers-map.type'
 import { ISelectorFn } from './interfaces/selector.interface'
@@ -37,8 +36,8 @@ export class Store<StateType> {
     }
 
     selectSnapshot(): StateType
-    selectSnapshot<KeyType>(selectorFn: ISelectFn<StateType, KeyType>): KeyType
-    selectSnapshot<KeyType>(selectorFn?: ISelectFn<StateType, KeyType>) {
+    selectSnapshot<KeyType>(selectorFn: ISelectorFn<StateType, KeyType>): KeyType
+    selectSnapshot<KeyType>(selectorFn?: ISelectorFn<StateType, KeyType>) {
         if (selectorFn) return selectorFn({ ...this.state.getValue() })
         return { ...this.state.getValue() }
     }

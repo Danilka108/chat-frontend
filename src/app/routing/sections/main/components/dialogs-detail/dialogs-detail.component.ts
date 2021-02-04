@@ -1,8 +1,8 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
-import { combineLatest, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
+import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core'
+import { NgScrollbar } from 'ngx-scrollbar'
+import { BehaviorSubject, combineLatest, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
 import { catchError, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { IScrollbarCfg } from 'src/app/scrollbar/interfaces/config.interface'
 import { addDialogMessages } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
@@ -22,22 +22,19 @@ interface IMessageWithIsLast extends IMessage {
     templateUrl: './dialogs-detail.component.html',
     styleUrls: ['./dialogs-detail.component.scss'],
 })
-export class DialogsDetailComponent implements OnInit, OnDestroy {
-    updateScrollbar = new Subject<void>()
+export class DialogsDetailComponent implements OnInit, OnDestroy, AfterViewInit, AfterViewChecked {
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
-    subs!: Subscription
+
     take = 30
     skip = 0
+    wrapperHeight = new BehaviorSubject(0)
+    wrapperHeight$ = this.wrapperHeight.asObservable()
 
-    scrollbarConfig: IScrollbarCfg = {
-        initialPosition: {
-            veritcal: 'bottom',
-        },
-        isScroll: {
-            horizontal: false,
-        },
-    }
+    subs!: Subscription
+
+    @ViewChild('scrollbar') scrollbar!: NgScrollbar
+    @ViewChild('wrapper') wrapper!: ElementRef
 
     constructor(
         private readonly httpService: MainSectionHttpService,
@@ -46,10 +43,6 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.subs = this.store.select(getActiveReceiverID()).subscribe(() => {
-            this.updateScrollbar.next()
-        })
-
         this.isSelectedReceiver$ = combineLatest([
             this.store.select(getDialogs()),
             this.store.select(getActiveReceiverID()),
@@ -110,6 +103,23 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                 return of([])
             })
         )
+    }
+
+    ngAfterViewInit() {
+        this.wrapperHeight$.subscribe((height) => {
+            this.scrollbar.scrollTo({
+                top: height,
+                duration: 0,
+            })
+        })
+    }
+
+    ngAfterViewChecked() {
+        const wrapperHeight = (<HTMLElement>this.wrapper.nativeElement).offsetHeight
+
+        if (wrapperHeight !== this.wrapperHeight.getValue()) {
+            this.wrapperHeight.next(wrapperHeight)
+        }
     }
 
     ngOnDestroy() {

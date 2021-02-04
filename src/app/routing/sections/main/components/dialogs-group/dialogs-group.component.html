@@ -1,6 +1,6 @@
-<app-scrollbar [config]="scrollbarConfig">
+<ng-scrollbar>
     <div class="wrapper">
-            <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
+        <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
             [message]="dialog.latestMessage"
             [date]="parseDate(dialog.createdAt)"
             [active]="(activeReceiverID$ | async) ===  dialog.receiverID"
@@ -9,4 +9,4 @@
             [isSmallSize]="isSmallSize"
         ></app-main-dialogs-item>
     </div>
-</app-scrollbar>
+</ng-scrollbar>

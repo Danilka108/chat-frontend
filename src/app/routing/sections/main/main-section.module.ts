@@ -15,7 +15,7 @@ import { DialogsMessageComponent } from './components/dialogs-message/dialogs-me
 import { GlobalComponentsModule } from 'src/app/global-components/global-components.module'
 import { DialogsInputComponent } from './components/dialogs-input/dialogs-input.component'
 import { DialogsSeparatorComponent } from './components/dialogs-separator/dialogs-separator.component'
-import { ScrollbarModule } from 'src/app/scrollbar/scrollbar.module'
+import { NgScrollbarModule } from 'ngx-scrollbar'
 
 @NgModule({
     declarations: [
@@ -35,7 +35,7 @@ import { ScrollbarModule } from 'src/app/scrollbar/scrollbar.module'
         RouterModule.forChild(routes),
         AuthModule,
         GlobalComponentsModule,
-        ScrollbarModule,
+        NgScrollbarModule,
     ],
     providers: [MainSectionHttpService],
 })

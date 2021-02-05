@@ -8,7 +8,7 @@ import { getConnectionError } from 'src/app/store/selectors/auth.selectors'
 import { getRequestLoading } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
-import { MainSectionHttpService } from '../../main-section-http.service'
+import { MainSectionHttpService } from '../../services/main-section-http.service'
 
 @Component({
     selector: 'app-dialogs',

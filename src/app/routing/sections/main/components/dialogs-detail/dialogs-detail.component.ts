@@ -2,20 +2,19 @@ import { AfterViewChecked, AfterViewInit, Component, ElementRef, OnDestroy, OnIn
 import { NgScrollbar } from 'ngx-scrollbar'
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
 import { catchError, map, switchMap, tap } from 'rxjs/operators'
-import { DateService } from 'src/app/common/date.service'
-import { addDialogMessages } from 'src/app/store/actions/main.actions'
+import { addDialogMessages, updateDialogScroll } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
-import { getActiveReceiverID, getDialogMessages, getDialogs } from 'src/app/store/selectors/main.selectors'
+import {
+    getActiveReceiverID,
+    getDialogMessages,
+    getDialogs,
+    getDialogScroll,
+} from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
-import { IMessage } from '../../interface/message.interface'
-import { MainSectionHttpService } from '../../main-section-http.service'
-
-interface IMessageWithIsLast extends IMessage {
-    isLastInGroup: boolean
-    isDiffDays: boolean
-    diffDate: string
-}
+import { IMessage, IMessageWithIsLast } from '../../interface/message.interface'
+import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { MessageService } from '../../services/message.service'
 
 @Component({
     selector: 'app-main-dialogs-detail',
@@ -28,17 +27,21 @@ export class DialogsDetailComponent implements OnInit, OnDestroy, AfterViewInit,
 
     take = 30
     skip = 0
+
     wrapperHeight = new BehaviorSubject(0)
     wrapperHeight$ = this.wrapperHeight.asObservable()
 
-    subs!: Subscription
+    scroll = new BehaviorSubject(0)
+    scroll$ = this.scroll.asObservable()
+
+    sub = new Subscription()
 
     @ViewChild('scrollbar') scrollbar!: NgScrollbar
     @ViewChild('wrapper') wrapper!: ElementRef
 
     constructor(
         private readonly httpService: MainSectionHttpService,
-        private readonly dateService: DateService,
+        private readonly messageService: MessageService,
         private readonly store: Store<IAppState>
     ) {}
 
@@ -58,7 +61,7 @@ export class DialogsDetailComponent implements OnInit, OnDestroy, AfterViewInit,
             })
         )
 
-        const msgs$ = this.store.select(getActiveReceiverID()).pipe(
+        this.messages$ = this.store.select(getActiveReceiverID()).pipe(
             map((activeReceiverID) => {
                 if (!activeReceiverID) throw null
                 return {
@@ -79,39 +82,66 @@ export class DialogsDetailComponent implements OnInit, OnDestroy, AfterViewInit,
                     messages$ = of(dialogMessages.messages)
                 }
 
-                return forkJoin({
-                    activeReceiverID: of(activeReceiverID),
-                    dialogMessages: messages$,
-                })
+                return messages$
             }),
-            switchMap(({ activeReceiverID }) => {
-                return this.store.select(getDialogMessages(activeReceiverID))
-            }),
-            map((dialogMessages) => {
-                if (dialogMessages) {
-                    return this.parseMessages(dialogMessages.messages)
-                } else {
-                    return []
-                }
+            map((messages) => {
+                return this.messageService.parseMessages(messages)
             }),
             catchError(() => [])
-        )
-
-        this.messages$ = this.isSelectedReceiver$.pipe(
-            switchMap((isSelected) => {
-                if (isSelected) return msgs$
-                return of([])
-            })
         )
     }
 
     ngAfterViewInit() {
-        this.wrapperHeight$.subscribe((height) => {
-            this.scrollbar.scrollTo({
-                top: height,
-                duration: 0,
+        this.sub.add(
+            this.store
+                .select(getActiveReceiverID())
+                .pipe(
+                    map((activeReceiverID) => {
+                        if (activeReceiverID) {
+                            const scroll = this.store.selectSnapshot(getDialogScroll(activeReceiverID))
+
+                            if (scroll !== null) return scroll
+                            return null
+                        }
+                        return null
+                    }),
+                    switchMap((scroll) => {
+                        if (scroll === null) {
+                            return this.wrapperHeight$
+                        }
+                        return of(scroll)
+                    })
+                )
+                .subscribe((scroll) => {
+                    this.scroll.next(scroll)
+                })
+        )
+
+        this.sub.add(
+            this.scrollbar.scrolled.subscribe((event) => {
+                const scroll = (<HTMLElement>(<Event>event).target).scrollTop
+                const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
+
+                if (activeReceiverID) {
+                    this.store.dispatch(updateDialogScroll(activeReceiverID, scroll))
+                }
             })
-        })
+        )
+
+        this.sub.add(
+            this.scroll$.subscribe((scroll) => {
+                setTimeout(() => {
+                    this.scrollbar.scrollTo({
+                        top: scroll,
+                        duration: 0,
+                    })
+                })
+            })
+        )
+    }
+
+    ngOnDestroy() {
+        this.sub.unsubscribe()
     }
 
     ngAfterViewChecked() {
@@ -120,66 +150,6 @@ export class DialogsDetailComponent implements OnInit, OnDestroy, AfterViewInit,
         if (wrapperHeight !== this.wrapperHeight.getValue()) {
             this.wrapperHeight.next(wrapperHeight)
         }
-    }
-
-    ngOnDestroy() {
-        if (this.subs) this.subs.unsubscribe()
-    }
-
-    parseDays(message: IMessage, arr: IMessage[], i: number) {
-        let isUnequalDays: boolean | null = null
-        let diffDate = ''
-
-        if (arr[i - 1]) {
-            isUnequalDays = this.dateService.isUnequalDays(message.createdAt, arr[i - 1].createdAt)
-
-            if (isUnequalDays) {
-                diffDate = message.createdAt
-            }
-        } else {
-            isUnequalDays = true
-            diffDate = message.createdAt
-        }
-
-        const result: [boolean, string] = [isUnequalDays, diffDate]
-        return result
-    }
-
-    parseMessages(messages: IMessage[]): IMessageWithIsLast[] {
-        return messages
-            .sort((a, b) => this.dateService.compareDatesASC(a.createdAt, b.createdAt))
-            .map((message, i, arr) => {
-                if (message.senderID !== arr[i + 1]?.senderID) {
-                    const [isUnequalDays, diffDate] = this.parseDays(message, arr, i)
-
-                    const msg: IMessageWithIsLast = {
-                        ...message,
-                        isLastInGroup: true,
-                        isDiffDays: isUnequalDays,
-                        diffDate: diffDate,
-                    }
-                    return msg
-                } else {
-                    const [isUnequalDays, diffDate] = this.parseDays(message, arr, i)
-
-                    const msg: IMessageWithIsLast = {
-                        ...message,
-                        isLastInGroup: false,
-                        isDiffDays: isUnequalDays,
-                        diffDate: diffDate,
-                    }
-                    return msg
-                }
-            })
-            .map((message) => {
-                const msg = message
-
-                if (msg.isDiffDays) {
-                    msg.isLastInGroup = true
-                }
-
-                return msg
-            })
     }
 
     getUserID() {

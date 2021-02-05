@@ -7,3 +7,9 @@ export interface IMessage {
     isUpdated: boolean
     messageID: number
 }
+
+export interface IMessageWithIsLast extends IMessage {
+    isLastInGroup: boolean
+    isDiffDays: boolean
+    diffDate: string
+}

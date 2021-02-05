@@ -6,8 +6,8 @@ import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { IAppState } from 'src/app/store/states/app.state'
 import { environment } from 'src/environments/environment'
-import { IDialog } from './interface/dialog.interface'
-import { IMessage } from './interface/message.interface'
+import { IDialog } from '../interface/dialog.interface'
+import { IMessage } from '../interface/message.interface'
 
 interface IGetDialogsResponse {
     httpStatus: number

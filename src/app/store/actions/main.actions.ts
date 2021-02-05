@@ -1,7 +1,6 @@
 import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface'
 import { IMessage } from 'src/app/routing/sections/main/interface/message.interface'
 import { IAction } from '../core/interfaces/action.interface'
-import { IDialogMessages } from '../interfaces/dialogs-messages.interface'
 
 export const UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION = 'UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION'
 export const updateActiveReceiverID = (
@@ -41,6 +40,26 @@ export const addDialogMessages = (
     }
 }
 
+export const UPDATE_MAIN_DIALOG_SCROLL_ACTION = 'UPDATE_MAIN_DIALOG_SCROLL_ACTION'
+export const updateDialogScroll = (
+    receiverID: number,
+    scroll: number
+): IAction<
+    typeof UPDATE_MAIN_DIALOG_SCROLL_ACTION,
+    {
+        receiverID: number
+        scroll: number
+    }
+> => {
+    return {
+        type: UPDATE_MAIN_DIALOG_SCROLL_ACTION,
+        payload: {
+            receiverID,
+            scroll,
+        },
+    }
+}
+
 export const UPDATE_MAIN_REQUEST_LOADING_ACTION = 'UPDATE_MAIN_REQUEST_LOADING_ACTION'
 export const updateRequestLoading = (
     requestLoading: boolean
@@ -52,5 +71,9 @@ export const updateRequestLoading = (
 }
 
 export type MainActions = ReturnType<
-    typeof updateActiveReceiverID | typeof addDialogs | typeof addDialogMessages | typeof updateRequestLoading
+    | typeof updateActiveReceiverID
+    | typeof addDialogs
+    | typeof addDialogMessages
+    | typeof updateRequestLoading
+    | typeof updateDialogScroll
 >

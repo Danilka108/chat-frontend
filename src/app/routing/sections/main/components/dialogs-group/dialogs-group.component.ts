@@ -18,7 +18,7 @@ import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
 export class DialogsGroupComponent implements OnInit, OnDestroy {
     dialogs$!: Observable<IDialog[]>
     activeReceiverID$!: Observable<number | null>
-    subs!: Subscription
+    sub!: Subscription
 
     @HostBinding('class.small') isSmallSize = false
     smallSizeMax = 800
@@ -39,7 +39,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
             })
         )
 
-        this.subs = this.route.params.subscribe((params) => {
+        this.sub = this.route.params.subscribe((params) => {
             const id = Number(params['id'])
             if (!isNaN(id)) this.store.dispatch(updateActiveReceiverID(id))
             else this.store.dispatch(updateActiveReceiverID(null))
@@ -49,7 +49,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        if (this.subs) this.subs.unsubscribe()
+        if (this.sub) this.sub.unsubscribe()
     }
 
     @HostListener('window:resize')

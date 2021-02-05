@@ -3,6 +3,7 @@ import {
     UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION,
     ADD_MAIN_DIALOGS_ACTION,
     ADD_MAIN_DIALOG_MESSAGES_ACTION,
+    UPDATE_MAIN_DIALOG_SCROLL_ACTION,
 } from '../actions/main.actions'
 import { IReducerFn } from '../core/interfaces/reducer-fn.interface'
 import { IMainState } from '../states/main.state'
@@ -66,6 +67,27 @@ export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) 
             return {
                 ...state,
                 dialogsMessages,
+            }
+        }
+        case UPDATE_MAIN_DIALOG_SCROLL_ACTION: {
+            const dialogsScroll = [...state.dialogsScroll]
+
+            const dialogIndex = dialogsScroll.findIndex((dialogScroll) => {
+                return dialogScroll.receiverID === action.payload.receiverID
+            })
+
+            if (dialogIndex > -1) {
+                dialogsScroll[dialogIndex].scroll = action.payload.scroll
+            } else {
+                dialogsScroll.push({
+                    receiverID: action.payload.receiverID,
+                    scroll: action.payload.scroll,
+                })
+            }
+
+            return {
+                ...state,
+                dialogsScroll,
             }
         }
         default:

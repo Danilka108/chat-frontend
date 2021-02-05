@@ -1,4 +1,4 @@
-<ng-scrollbar>
+<ng-scrollbar class="scrollbar">
     <div class="wrapper">
         <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
             [message]="dialog.latestMessage"

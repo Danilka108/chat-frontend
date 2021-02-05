@@ -1,7 +1,45 @@
 @import '../../../../../styles/vars.scss';
 
-:host {
-    width: 100%;
-    height: 3rem;
+.wrapper {
+    display: flex;
+    align-items: center;
     background-color: map-get($custom-colors, main);
+    border-left: 1px solid map-get($custom-colors, light-gray);
+}
+
+.form {
+    width: 100%;
+    height: 100px;
+    max-height: calc(4px * 2 + 1rem * 8);
+    padding: 1rem 0;
+    box-sizing: content-box;
+    flex: 1
+}
+
+.scrollbar-wrapper {
+    margin: 1rem 0;
+}
+
+.textarea-wrapper {
+    padding: 0 11px;
+    padding-top: 4px;
+}
+
+.textarea {
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    resize: none;
+    word-break: break-word;
+
+    &,
+    &:focus {
+        border: none;
+        outline: none;
+    }
+}
+
+.btn-send {
+    margin-right: 0.5rem;
 }

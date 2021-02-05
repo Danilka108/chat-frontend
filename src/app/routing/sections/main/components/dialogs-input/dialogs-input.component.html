@@ -1,1 +1,17 @@
-<p>dialogs-input works!</p>
+<div class="wrapper">
+    <form [formGroup]="formGroup" class="form" [style.height]="height + 'px'">
+        <ng-scrollbar class="scrollbar">
+            <div class="textarea-wrapper"
+                 message-input
+                 (heightChange)="onMessageInputHeightChange($event)">
+                <textarea class="textarea mat-body"
+                          name="message"
+                          cdkTextareaAutosize
+                          autosize="CdkTextareaAutosize"
+                          cdkAutosizeMinRows="1"
+                          placeholder="Send message..."></textarea>
+            </div>
+        </ng-scrollbar>    
+    </form>
+    <button class="btn-send" mat-icon-button color="primary" aria-label="Send message"><mat-icon>send</mat-icon></button>    
+</div>

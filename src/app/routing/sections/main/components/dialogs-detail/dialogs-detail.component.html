@@ -2,7 +2,7 @@
      *ngIf="!(isSelectedReceiver$ | async)">
     <h2>Please select chat to start messaging</h2>
 </div>
-<ng-scrollbar #scrollbar>
+<ng-scrollbar #scrollbar class="scrollbar">
     <div #wrapper class="wrapper">
         <ng-template ngFor let-message [ngForOf]="messages$ | async">
             <app-main-dialogs-separator *ngIf="message.isDiffDays"

@@ -17,6 +17,8 @@ import { DialogsInputComponent } from './components/dialogs-input/dialogs-input.
 import { DialogsSeparatorComponent } from './components/dialogs-separator/dialogs-separator.component'
 import { NgScrollbarModule } from 'ngx-scrollbar'
 import { MessageService } from './services/message.service'
+import { MessageInputDirective } from './directives/message-input.directive'
+import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 
 @NgModule({
     declarations: [
@@ -29,6 +31,7 @@ import { MessageService } from './services/message.service'
         DialogsMessageComponent,
         DialogsInputComponent,
         DialogsSeparatorComponent,
+        MessageInputDirective,
     ],
     imports: [
         MaterialModule,
@@ -37,6 +40,8 @@ import { MessageService } from './services/message.service'
         AuthModule,
         GlobalComponentsModule,
         NgScrollbarModule,
+        ReactiveFormsModule,
+        FormsModule,
     ],
     providers: [MainSectionHttpService, MessageService],
 })

@@ -10,12 +10,13 @@
     }
 }
 
-
-ng-scrollbar::ng-deep .ng-scroll-content {
-    width: 100%;
-}
-
 .wrapper {
     width: 100%;
     padding: 0 0.7rem;
+}
+
+.scrollbar {
+    &::ng-deep .ng-scroll-content {
+        width: 100%;
+    }
 }

@@ -11,4 +11,14 @@ html, body {
 
 body {
     margin: 0;
+
+    .scrollbar {
+        --scrollbar-thumb-color: #{map-get($custom-colors, dark-main-middle-gray)};
+        --scrollbar-thumb-hover-color: #{map-get($custom-colors, dark-gray)};
+        --scrollbar-thumb-transition: background 250ms width 250ms height 250ms;
+    
+        --scrollbar-size: 4px;
+        --scrollbar-hover-size: 8px;
+        --scrollbar-padding: 2.5px;
+    }
 }

@@ -1,4 +1,8 @@
-import { Component, OnInit } from '@angular/core'
+import { CdkTextareaAutosize } from '@angular/cdk/text-field'
+import { Component, NgZone, OnInit, ViewChild } from '@angular/core'
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
+import { take } from 'rxjs/operators'
+import { MessageInputDirective } from '../../directives/message-input.directive'
 
 @Component({
     selector: 'app-main-dialogs-input',
@@ -6,7 +10,30 @@ import { Component, OnInit } from '@angular/core'
     styleUrls: ['./dialogs-input.component.scss'],
 })
 export class DialogsInputComponent implements OnInit {
-    constructor() {}
+    @ViewChild('autosize') autosize!: CdkTextareaAutosize
+    @ViewChild(MessageInputDirective) input!: MessageInputDirective
 
-    ngOnInit(): void {}
+    formGroup!: FormGroup
+
+    height = 0
+
+    constructor(private readonly ngZone: NgZone, private readonly fb: FormBuilder) {}
+
+    triggerZone() {
+        this.ngZone.onStable.pipe(take(1)).subscribe(() => {
+            this.autosize.resizeToFitContent(true)
+        })
+    }
+
+    ngOnInit() {
+        this.formGroup = this.fb.group({
+            message: new FormControl(),
+        })
+    }
+
+    onMessageInputHeightChange(event: number) {
+        setTimeout(() => {
+            this.height = event
+        })
+    }
 }

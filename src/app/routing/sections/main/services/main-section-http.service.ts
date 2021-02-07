@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { map } from 'rxjs/operators'
+import { map, tap } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/services/auth.service'
 import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -8,17 +8,20 @@ import { IAppState } from 'src/app/store/states/app.state'
 import { environment } from 'src/environments/environment'
 import { IDialog } from '../interface/dialog.interface'
 import { IMessage } from '../interface/message.interface'
+import { IResponse } from '../interface/response.interface'
 
-interface IGetDialogsResponse {
-    httpStatus: number
-    message: string
+interface IGetDialogsResponse extends IResponse {
     data: IDialog[]
 }
 
-interface IGetMessagesResponse {
-    httpStatus: number
-    message: string
+interface IGetMessagesResponse extends IResponse {
     data: IMessage[]
+}
+
+interface ISendMessageResponse extends IResponse {
+    data: {
+        messageID: number,
+    }
 }
 
 @Injectable()
@@ -85,5 +88,31 @@ export class MainSectionHttpService {
                     return result
                 })
             )
+    }
+
+    sendMessage(receiverID: number, message: string) {
+        this.store.dispatch(updateRequestLoading(true))
+
+        return this.authService.authRequest((accessToken) => {
+            return this.httpClient.post(`${environment.apiUrl}/message/${receiverID}`, {
+                message,
+            }, {
+                headers: {
+                    authorization: `Bearer ${accessToken}`,
+                },
+            }).pipe(
+                map((result) => {
+                    const value = result as ISendMessageResponse
+
+                    return value.data.messageID
+                })
+            )
+        }).pipe(
+            map((messageID) => {
+                this.store.dispatch(updateRequestLoading(false))
+
+                return messageID
+            })
+        )
     }
 }

@@ -3,7 +3,6 @@
 :host {
     display: flex;
     width: 100%;
-
     justify-content: flex-start;
 
     &:not(.own-msg) {
@@ -21,8 +20,8 @@
                 border-bottom-left-radius: 0;
             }
 
-            .avatar {
-                display: block;
+            .avatar-wrapper {
+                display: flex;
                 left: -2.5rem;
             }
         }
@@ -42,8 +41,8 @@
                 border-bottom-right-radius: 0;
             }
 
-            .avatar {
-                display: block;
+            .avatar-wrapper {
+                display: flex;
             }
         }
 
@@ -61,7 +60,6 @@
     margin-bottom: 0.1rem;
     margin-top: 0.1rem;
     position: relative;
-    max-width: 70%;
     display: flex;
     align-items: flex-end;
     background-color: map-get($custom-colors, main);
@@ -74,6 +72,8 @@
     word-wrap: break-word;
     margin: 0;
     margin-right: 0.5rem;
+    max-width: 20rem;
+    white-space: pre-wrap;
 }
 
 .time {
@@ -104,15 +104,22 @@
     }
 }
 
-.avatar {
+
+.avatar-wrapper {
     display: none;
+    width: 2.2rem;
+    height: 2.2rem;
+    z-index: 1000;
+    position: absolute;
+    bottom: 0;
+    right: -2.5rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.avatar {
     width: 2rem;
     height: 2rem;
     background-color: #000;
-    z-index: 1000;
-    position: absolute;
-    top: 50%;
-    transform: translateY(-50%);
-    right: -2.5rem;
     border-radius: 50%;
 }

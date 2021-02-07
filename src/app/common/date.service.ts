@@ -62,4 +62,8 @@ export class DateService {
 
         return dA !== dB
     }
+
+    now() {
+        return moment.utc().format()
+    }
 }

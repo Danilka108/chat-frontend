@@ -9,9 +9,11 @@ import { DateService } from 'src/app/common/date.service'
 export class DialogsMessageComponent {
     @Input() @HostBinding('class.own-msg') isOwnMsg!: boolean
     @Input() @HostBinding('class.last-in-group') isLastInGroup!: boolean
-
     @Input() message!: string
     @Input() date!: string
+    @Input() wrapperWidth!: number
+
+    wrapperHeightFactor = 0.6
 
     constructor(private readonly dateService: DateService) {}
 

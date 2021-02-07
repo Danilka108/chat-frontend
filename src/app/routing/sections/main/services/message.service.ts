@@ -51,10 +51,10 @@ export class MessageService {
                     return msg
                 }
             })
-            .map((message) => {
+            .map((message, i, arr) => {
                 const msg = message
 
-                if (msg.isDiffDays) {
+                if (arr[i + 1]?.isDiffDays) {
                     msg.isLastInGroup = true
                 }
 

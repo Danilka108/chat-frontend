@@ -1,17 +1,29 @@
-<div class="wrapper">
-    <form [formGroup]="formGroup" class="form" [style.height]="height + 'px'">
+<form [formGroup]="formGroup" class="form">
+    <div class="wrapper" [style.height]="height + 'px'">
         <ng-scrollbar class="scrollbar">
             <div class="textarea-wrapper"
                  message-input
                  (heightChange)="onMessageInputHeightChange($event)">
                 <textarea class="textarea mat-body"
-                          name="message"
+                          #textarea
+                          (keydown)="onTextareaKeydown($event)"
+                          formControlName="message"
+                          type="text"
                           cdkTextareaAutosize
                           autosize="CdkTextareaAutosize"
                           cdkAutosizeMinRows="1"
                           placeholder="Send message..."></textarea>
             </div>
-        </ng-scrollbar>    
-    </form>
-    <button class="btn-send" mat-icon-button color="primary" aria-label="Send message"><mat-icon>send</mat-icon></button>    
-</div>
+        </ng-scrollbar>
+    </div>
+    <button class="btn-send"
+            color="primary"
+            [style.height]="btnSize + 'px'"
+            [style.width]="btnSize + 'px'"
+            matRipple
+            aria-label="Send message"
+            [disabled]="loading"
+            (click)="onSubmit()">
+        <mat-icon>send</mat-icon>
+    </button>
+</form>

@@ -6,7 +6,7 @@ import {
     ISelect,
     ISelectAndParse,
     STORE_I_SELECT_AND_PARSE_DISCRIMINATOR,
-    STORE_I_SELECT_DISCRIMINATOR
+    STORE_I_SELECT_DISCRIMINATOR,
 } from './interfaces/select.interface'
 
 export class Store<StateType> {
@@ -35,7 +35,9 @@ export class Store<StateType> {
         return object.discriminator === STORE_I_SELECT_DISCRIMINATOR
     }
 
-    instanceOfISelectAndParse<KeyType, ReturnType>(object: any): object is ISelectAndParse<StateType, KeyType, ReturnType> {
+    instanceOfISelectAndParse<KeyType, ReturnType>(
+        object: any
+    ): object is ISelectAndParse<StateType, KeyType, ReturnType> {
         return object.discriminator === STORE_I_SELECT_AND_PARSE_DISCRIMINATOR
     }
 
@@ -44,16 +46,9 @@ export class Store<StateType> {
     select<KeyType, ReturnType>(select: ISelectAndParse<StateType, KeyType, ReturnType>): Observable<ReturnType>
     select<KeyType, ReturnType>(select?: unknown) {
         if (this.instanceOfISelect<KeyType>(select)) {
-            return this.state$.pipe(
-                map(select.selectorFn),
-                distinctUntilChanged(),
-            )
+            return this.state$.pipe(map(select.selectorFn), distinctUntilChanged())
         } else if (this.instanceOfISelectAndParse<KeyType, ReturnType>(select)) {
-            return this.state$.pipe(
-                map(select.selectorFn),
-                distinctUntilChanged(),
-                map(select.parserFn)
-            )
+            return this.state$.pipe(map(select.selectorFn), distinctUntilChanged(), map(select.parserFn))
         } else {
             return this.state$
         }

@@ -3,7 +3,7 @@ import {
     ISelect,
     ISelectAndParse,
     STORE_I_SELECT_AND_PARSE_DISCRIMINATOR,
-    STORE_I_SELECT_DISCRIMINATOR
+    STORE_I_SELECT_DISCRIMINATOR,
 } from '../core/interfaces/select.interface'
 import { IDialogMessages } from '../interfaces/dialog-messages.interface'
 import { IDialogScroll } from '../interfaces/dialog-scroll.interface'
@@ -31,11 +31,13 @@ export const getDialog = (receiverID: number): ISelectAndParse<IAppState, IDialo
             const dialog = dialogs.find((dlg) => dlg.receiverID === receiverID)
 
             return dialog ? dialog : null
-        }
+        },
     }
 }
 
-export const getDialogMessages = (receiverID: number): ISelectAndParse<IAppState, IDialogMessages[], IDialogMessages | null> => {
+export const getDialogMessages = (
+    receiverID: number
+): ISelectAndParse<IAppState, IDialogMessages[], IDialogMessages | null> => {
     return {
         discriminator: STORE_I_SELECT_AND_PARSE_DISCRIMINATOR,
         selectorFn: (state) => state.main.dialogsMessages,
@@ -44,7 +46,7 @@ export const getDialogMessages = (receiverID: number): ISelectAndParse<IAppState
 
             if (dialogMessages) return dialogMessages
             return null
-        }
+        },
     }
 }
 
@@ -64,6 +66,6 @@ export const getDialogScroll = (receiverID: number): ISelectAndParse<IAppState, 
 
             if (dialogScroll) return dialogScroll.scroll
             return null
-        }
+        },
     }
 }

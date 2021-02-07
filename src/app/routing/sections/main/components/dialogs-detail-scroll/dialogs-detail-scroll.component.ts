@@ -1,17 +1,25 @@
-import { AfterViewChecked, AfterViewInit, Component, ElementRef, Input, OnDestroy, OnInit, ViewChild } from '@angular/core';
-import { NgScrollbar } from 'ngx-scrollbar';
-import { BehaviorSubject, Observable, of, Subject, Subscription } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
-import { updateDialogScroll } from 'src/app/store/actions/main.actions';
-import { Store } from 'src/app/store/core/store';
-import { getActiveReceiverID, getDialogScroll } from 'src/app/store/selectors/main.selectors';
-import { IAppState } from 'src/app/store/states/app.state';
+import {
+    AfterViewChecked,
+    AfterViewInit,
+    Component,
+    ElementRef,
+    Input,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+} from '@angular/core'
+import { NgScrollbar } from 'ngx-scrollbar'
+import { BehaviorSubject, Observable, of, Subject, Subscription } from 'rxjs'
+import { map, switchMap } from 'rxjs/operators'
+import { updateDialogScroll } from 'src/app/store/actions/main.actions'
+import { Store } from 'src/app/store/core/store'
+import { getActiveReceiverID, getDialogScroll } from 'src/app/store/selectors/main.selectors'
+import { IAppState } from 'src/app/store/states/app.state'
 
 @Component({
     selector: 'app-main-dialogs-detail-scroll',
     templateUrl: './dialogs-detail-scroll.component.html',
-    styleUrls: ['./dialogs-detail-scroll.component.scss']
-
+    styleUrls: ['./dialogs-detail-scroll.component.scss'],
 })
 export class DialogsDetailScrollComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
     @ViewChild('scrollbar') scrollbar!: NgScrollbar
@@ -27,14 +35,14 @@ export class DialogsDetailScrollComponent implements OnInit, AfterViewInit, Afte
 
     sub = new Subscription()
 
-    constructor(
-        private readonly store: Store<IAppState>
-    ) {}
+    constructor(private readonly store: Store<IAppState>) {}
 
     ngOnInit() {
-        this.sub.add(this.sendMessageEvent.subscribe(() => {
-            this.scroll.next(this.wrapperHeight.getValue())
-        }))
+        this.sub.add(
+            this.sendMessageEvent.subscribe(() => {
+                this.scroll.next(this.wrapperHeight.getValue())
+            })
+        )
     }
 
     ngAfterViewInit() {

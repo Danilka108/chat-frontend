@@ -4,11 +4,7 @@ import { map, switchMap } from 'rxjs/operators'
 import { addDialogMessages } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
-import {
-    getActiveReceiverID,
-    getDialogMessages,
-    getDialogs,
-} from 'src/app/store/selectors/main.selectors'
+import { getActiveReceiverID, getDialogMessages, getDialogs } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
 import { IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
@@ -51,7 +47,7 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                 return index > -1
             })
         )
-        
+
         this.messages$ = this.store.select(getActiveReceiverID()).pipe(
             switchMap((activeReceiverID) => {
                 if (activeReceiverID === null) return of(null)
@@ -62,31 +58,36 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                 if (dialogMessages === null) return []
 
                 return this.messageService.parseMessages(dialogMessages.messages)
-            }),
+            })
         )
 
-        this.sub.add(this.store.select(getActiveReceiverID()).pipe(
-            switchMap((activeReceiverID) => {
-                if (activeReceiverID) {
-                    const dialogMessages = this.store.selectSnapshot(getDialogMessages(activeReceiverID))
+        this.sub.add(
+            this.store
+                .select(getActiveReceiverID())
+                .pipe(
+                    switchMap((activeReceiverID) => {
+                        if (activeReceiverID) {
+                            const dialogMessages = this.store.selectSnapshot(getDialogMessages(activeReceiverID))
 
-                    if (dialogMessages) {
+                            if (dialogMessages) {
+                                return of(null)
+                            }
+
+                            return forkJoin({
+                                activeReceiverID: of(activeReceiverID),
+                                messages: this.httpService.getMessages(activeReceiverID, this.take, this.skip),
+                            })
+                        }
+
                         return of(null)
-                    }
-
-                    return forkJoin({
-                        activeReceiverID: of(activeReceiverID),
-                        messages: this.httpService.getMessages(activeReceiverID, this.take, this.skip)
                     })
-                }
-
-                return of(null)
-            })
-        ).subscribe((result) => {
-            if (result) {
-                this.store.dispatch(addDialogMessages(result.activeReceiverID, result.messages))
-            }
-        }))
+                )
+                .subscribe((result) => {
+                    if (result) {
+                        this.store.dispatch(addDialogMessages(result.activeReceiverID, result.messages))
+                    }
+                })
+        )
     }
 
     onSendMessage() {

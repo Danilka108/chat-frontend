@@ -1,4 +1,4 @@
 export interface IResponse {
-    httpStatus: number,
+    httpStatus: number
     message: string
 }

@@ -63,7 +63,7 @@ export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) 
                     })
                 }
             }
-            
+
             return {
                 ...state,
                 dialogsMessages,

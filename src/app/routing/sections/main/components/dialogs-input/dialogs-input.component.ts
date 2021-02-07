@@ -38,13 +38,15 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         private readonly fb: FormBuilder,
         private readonly httpService: MainSectionHttpService,
         private readonly store: Store<IAppState>,
-        private readonly dateService: DateService,
+        private readonly dateService: DateService
     ) {}
 
     triggerZone() {
-        this.sub.add(this.ngZone.onStable.pipe(take(1)).subscribe(() => {
-            this.autosize.resizeToFitContent(true)
-        }))
+        this.sub.add(
+            this.ngZone.onStable.pipe(take(1)).subscribe(() => {
+                this.autosize.resizeToFitContent(true)
+            })
+        )
     }
 
     ngOnInit() {
@@ -66,7 +68,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
 
     onSubmit() {
         const message = this.formGroup.get('message')?.value as string | null
-    
+
         if (!this.loading && message !== null) {
             this.loading = true
 
@@ -75,35 +77,44 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
             if (activeReceiverID) {
                 const req = this.httpService.sendMessage(activeReceiverID, message)
 
-                this.sub.add(req.subscribe((messageID) => {
-                    const userID = this.store.selectSnapshot(getUserID())
-                    const dialog = this.store.selectSnapshot(getDialog(activeReceiverID))
-                    const nowDate = this.dateService.now()
+                this.sub.add(
+                    req.subscribe((messageID) => {
+                        const userID = this.store.selectSnapshot(getUserID())
+                        const dialog = this.store.selectSnapshot(getDialog(activeReceiverID))
+                        const nowDate = this.dateService.now()
 
-                    if (userID && messageID && dialog) {
-                        this.store.dispatch(addDialogMessages(activeReceiverID, [{
-                            senderID: userID,
-                            receiverID: activeReceiverID,
-                            message,
-                            messageID,
-                            createdAt: nowDate,
-                            updatedAt: nowDate,
-                            isUpdated: false,
-                        }]))
+                        if (userID && messageID && dialog) {
+                            this.store.dispatch(
+                                addDialogMessages(activeReceiverID, [
+                                    {
+                                        senderID: userID,
+                                        receiverID: activeReceiverID,
+                                        message,
+                                        messageID,
+                                        createdAt: nowDate,
+                                        updatedAt: nowDate,
+                                        isUpdated: false,
+                                    },
+                                ])
+                            )
 
+                            this.store.dispatch(
+                                addDialogs([
+                                    {
+                                        receiverID: dialog.receiverID,
+                                        receiverName: dialog.receiverName,
+                                        latestMessage: message,
+                                        createdAt: nowDate,
+                                    },
+                                ])
+                            )
+                        }
 
-                        this.store.dispatch(addDialogs([{
-                            receiverID: dialog.receiverID,
-                            receiverName: dialog.receiverName,
-                            latestMessage: message,
-                            createdAt: nowDate
-                        }]))
-                    }
+                        this.sendMessage.emit()
 
-                    this.sendMessage.emit()
-
-                    this.completeSubmit()
-                }))
+                        this.completeSubmit()
+                    })
+                )
             } else {
                 this.completeSubmit()
             }
@@ -113,7 +124,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
     completeSubmit() {
         this.loading = false
         this.formGroup.setValue({
-            message: null
+            message: null,
         })
     }
 
@@ -122,7 +133,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
             const messageValue = this.formGroup.get('message')?.value as string | null
 
             this.formGroup.setValue({
-                message: messageValue + '\n'
+                message: messageValue + '\n',
             })
         } else if (event.key == 'Enter') {
             event.preventDefault()

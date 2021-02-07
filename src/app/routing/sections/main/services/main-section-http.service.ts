@@ -20,7 +20,7 @@ interface IGetMessagesResponse extends IResponse {
 
 interface ISendMessageResponse extends IResponse {
     data: {
-        messageID: number,
+        messageID: number
     }
 }
 
@@ -93,26 +93,34 @@ export class MainSectionHttpService {
     sendMessage(receiverID: number, message: string) {
         this.store.dispatch(updateRequestLoading(true))
 
-        return this.authService.authRequest((accessToken) => {
-            return this.httpClient.post(`${environment.apiUrl}/message/${receiverID}`, {
-                message,
-            }, {
-                headers: {
-                    authorization: `Bearer ${accessToken}`,
-                },
-            }).pipe(
-                map((result) => {
-                    const value = result as ISendMessageResponse
+        return this.authService
+            .authRequest((accessToken) => {
+                return this.httpClient
+                    .post(
+                        `${environment.apiUrl}/message/${receiverID}`,
+                        {
+                            message,
+                        },
+                        {
+                            headers: {
+                                authorization: `Bearer ${accessToken}`,
+                            },
+                        }
+                    )
+                    .pipe(
+                        map((result) => {
+                            const value = result as ISendMessageResponse
 
-                    return value.data.messageID
+                            return value.data.messageID
+                        })
+                    )
+            })
+            .pipe(
+                map((messageID) => {
+                    this.store.dispatch(updateRequestLoading(false))
+
+                    return messageID
                 })
             )
-        }).pipe(
-            map((messageID) => {
-                this.store.dispatch(updateRequestLoading(false))
-
-                return messageID
-            })
-        )
     }
 }

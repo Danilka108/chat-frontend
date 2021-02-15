@@ -70,10 +70,31 @@ export const updateRequestLoading = (
     }
 }
 
+export const UPDATE_DIALOG_SKIP_ACTION = 'UPDATE_DIALOG_SKIP_ACTION'
+export const updateDialogSkip = (
+    receiverID: number,
+    skip: number
+): IAction<
+    typeof UPDATE_DIALOG_SKIP_ACTION,
+    {
+        receiverID: number
+        skip: number
+    }
+> => {
+    return {
+        type: UPDATE_DIALOG_SKIP_ACTION,
+        payload: {
+            receiverID,
+            skip,
+        },
+    }
+}
+
 export type MainActions = ReturnType<
     | typeof updateActiveReceiverID
     | typeof addDialogs
     | typeof addDialogMessages
     | typeof updateRequestLoading
     | typeof updateDialogScroll
+    | typeof updateDialogSkip
 >

@@ -1,9 +1,11 @@
+import { makeStateKey } from '@angular/platform-browser'
 import {
     MainActions,
     UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION,
     ADD_MAIN_DIALOGS_ACTION,
     ADD_MAIN_DIALOG_MESSAGES_ACTION,
     UPDATE_MAIN_DIALOG_SCROLL_ACTION,
+    UPDATE_DIALOG_SKIP_ACTION,
 } from '../actions/main.actions'
 import { IReducerFn } from '../core/interfaces/reducer-fn.interface'
 import { IMainState } from '../states/main.state'
@@ -79,15 +81,30 @@ export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) 
             if (dialogIndex > -1) {
                 dialogsScroll[dialogIndex].scroll = action.payload.scroll
             } else {
-                dialogsScroll.push({
-                    receiverID: action.payload.receiverID,
-                    scroll: action.payload.scroll,
-                })
+                dialogsScroll.push(action.payload)
             }
 
             return {
                 ...state,
                 dialogsScroll,
+            }
+        }
+        case UPDATE_DIALOG_SKIP_ACTION: {
+            const dialogsSkip = [...state.dialogsSkip]
+
+            const dialogIndex = dialogsSkip.findIndex(
+                (dialogSkip) => dialogSkip.receiverID === action.payload.receiverID
+            )
+
+            if (dialogIndex > -1) {
+                dialogsSkip[dialogIndex].skip = action.payload.skip
+            } else {
+                dialogsSkip.push(action.payload)
+            }
+
+            return {
+                ...state,
+                dialogsSkip,
             }
         }
         default:

@@ -1,30 +1,39 @@
-import { Component, ElementRef, OnDestroy, OnInit, ViewChild } from '@angular/core'
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
 import { combineLatest, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
-import { addDialogMessages } from 'src/app/store/actions/main.actions'
+import { addDialogMessages, updateDialogSkip } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
-import { getActiveReceiverID, getDialogMessages, getDialogs } from 'src/app/store/selectors/main.selectors'
+import {
+    getActiveReceiverID,
+    getDialogMessages,
+    getDialogs,
+    getDialogSkip,
+} from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
 import { IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
 
+// const TAKE_MESSAGES_FACTOR = 1 / 50
+
 @Component({
     selector: 'app-main-dialogs-detail',
     templateUrl: './dialogs-detail.component.html',
     styleUrls: ['./dialogs-detail.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsDetailComponent implements OnInit, OnDestroy {
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
 
-    take = 30
+    take = 0
     skip = 0
 
     sub = new Subscription()
 
     sendMessageEvent = new Subject<void>()
+    getMessagesOnTopEvent = new Subject<void>()
 
     constructor(
         private readonly httpService: MainSectionHttpService,
@@ -33,6 +42,8 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
+        this.take = 20
+
         this.isSelectedReceiver$ = combineLatest([
             this.store.select(getDialogs()),
             this.store.select(getActiveReceiverID()),
@@ -75,7 +86,7 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
 
                             return forkJoin({
                                 activeReceiverID: of(activeReceiverID),
-                                messages: this.httpService.getMessages(activeReceiverID, this.take, this.skip),
+                                messages: this.httpService.getMessages(activeReceiverID, this.take, 0),
                             })
                         }
 
@@ -84,10 +95,29 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                 )
                 .subscribe((result) => {
                     if (result) {
+                        this.store.dispatch(updateDialogSkip(result.activeReceiverID, this.take))
                         this.store.dispatch(addDialogMessages(result.activeReceiverID, result.messages))
                     }
                 })
         )
+    }
+
+    onTop() {
+        const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
+
+        if (activeReceiverID !== null) {
+            const dialogSkip = this.store.selectSnapshot(getDialogSkip(activeReceiverID))
+
+            if (dialogSkip !== null) {
+                this.sub.add(
+                    this.httpService.getMessages(activeReceiverID, this.take, dialogSkip).subscribe((messages) => {
+                        this.store.dispatch(addDialogMessages(activeReceiverID, messages))
+                        this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
+                        this.getMessagesOnTopEvent.next()
+                    })
+                )
+            }
+        }
     }
 
     onSendMessage() {

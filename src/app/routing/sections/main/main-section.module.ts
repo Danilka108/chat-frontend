@@ -20,6 +20,7 @@ import { MessageService } from './services/message.service'
 import { MessageInputDirective } from './directives/message-input.directive'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { DialogsDetailScrollComponent } from './components/dialogs-detail-scroll/dialogs-detail-scroll.component'
+import { OverlayscrollbarsModule } from 'overlayscrollbars-ngx'
 
 @NgModule({
     declarations: [

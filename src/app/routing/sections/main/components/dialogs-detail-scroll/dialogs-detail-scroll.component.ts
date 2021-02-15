@@ -3,17 +3,16 @@ import {
     AfterViewInit,
     Component,
     ElementRef,
+    EventEmitter,
     Input,
     OnDestroy,
     OnInit,
+    Output,
     ViewChild,
 } from '@angular/core'
-import { NgScrollbar } from 'ngx-scrollbar'
-import { BehaviorSubject, Observable, of, Subject, Subscription } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
-import { updateDialogScroll } from 'src/app/store/actions/main.actions'
+import { BehaviorSubject, Observable, Subscription } from 'rxjs'
+import { pairwise, switchMap } from 'rxjs/operators'
 import { Store } from 'src/app/store/core/store'
-import { getActiveReceiverID, getDialogScroll } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
 
 @Component({
@@ -22,87 +21,54 @@ import { IAppState } from 'src/app/store/states/app.state'
     styleUrls: ['./dialogs-detail-scroll.component.scss'],
 })
 export class DialogsDetailScrollComponent implements OnInit, AfterViewInit, AfterViewChecked, OnDestroy {
-    @ViewChild('scrollbar') scrollbar!: NgScrollbar
     @ViewChild('wrapper') wrapper!: ElementRef
+    @ViewChild('view') view!: ElementRef
 
-    @Input() sendMessageEvent!: Observable<void>
+    @Input() getMessagesOnTopEvent!: Observable<void>
+    @Output() top = new EventEmitter<void>()
 
-    wrapperHeight = new BehaviorSubject(0)
-    wrapperHeight$ = this.wrapperHeight.asObservable()
+    viewHeight = new BehaviorSubject(0)
+    viewHeight$ = this.viewHeight.asObservable()
 
-    scroll = new BehaviorSubject(0)
-    scroll$ = this.scroll.asObservable()
-
-    sub = new Subscription()
+    subscription = new Subscription()
 
     constructor(private readonly store: Store<IAppState>) {}
 
-    ngOnInit() {
-        this.sub.add(
-            this.sendMessageEvent.subscribe(() => {
-                this.scroll.next(this.wrapperHeight.getValue())
-            })
-        )
+    set sub(sub: Subscription) {
+        this.subscription.add(sub)
     }
 
+    ngOnInit() {}
+
     ngAfterViewInit() {
-        this.sub.add(
-            this.store
-                .select(getActiveReceiverID())
-                .pipe(
-                    map((activeReceiverID) => {
-                        if (activeReceiverID) {
-                            const scroll = this.store.selectSnapshot(getDialogScroll(activeReceiverID))
+        const wrapperNativeElement = this.wrapper.nativeElement as HTMLElement
 
-                            if (scroll !== null) return scroll
-                            return null
-                        }
-                        return null
-                    }),
-                    switchMap((scroll) => {
-                        if (scroll === null) {
-                            return this.wrapperHeight$
-                        }
-                        return of(scroll)
-                    })
-                )
-                .subscribe((scroll) => {
-                    this.scroll.next(scroll)
-                })
-        )
+        wrapperNativeElement.onscroll = () => {
+            if (wrapperNativeElement.scrollTop === 0) {
+                this.top.emit()
+            }
+        }
 
-        this.sub.add(
-            this.scrollbar.scrolled.subscribe((event) => {
-                const scroll = (<HTMLElement>(<Event>event).target).scrollTop
-                const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
-
-                if (activeReceiverID) {
-                    this.store.dispatch(updateDialogScroll(activeReceiverID, scroll))
-                }
+        this.getMessagesOnTopEvent
+            .pipe(
+                switchMap(() => this.viewHeight),
+                pairwise()
+            )
+            .subscribe(([prevViewHeight, nextViewHeight]) => {
+                wrapperNativeElement.scrollTop = nextViewHeight - prevViewHeight
             })
-        )
-
-        this.sub.add(
-            this.scroll$.subscribe((scroll) => {
-                setTimeout(() => {
-                    this.scrollbar.scrollTo({
-                        top: scroll,
-                        duration: 0,
-                    })
-                })
-            })
-        )
     }
 
     ngAfterViewChecked() {
-        const wrapperHeight = (<HTMLElement>this.wrapper.nativeElement).offsetHeight
+        // const wrapperNativeElement = this.wrapper.nativeElement as HTMLElement
+        const viewNativeElement = this.view.nativeElement as HTMLElement
 
-        if (wrapperHeight !== this.wrapperHeight.getValue()) {
-            this.wrapperHeight.next(wrapperHeight)
-        }
+        // wrapperNativeElement.scrollTop = wrapperNativeElement.scrollWidth
+
+        this.viewHeight.next(viewNativeElement.offsetHeight)
     }
 
     ngOnDestroy() {
-        this.sub.unsubscribe()
+        this.subscription.unsubscribe()
     }
 }

@@ -7,6 +7,7 @@ import {
 } from '../core/interfaces/select.interface'
 import { IDialogMessages } from '../interfaces/dialog-messages.interface'
 import { IDialogScroll } from '../interfaces/dialog-scroll.interface'
+import { IDialogSkip } from '../interfaces/dialog-skip.interface'
 import { IAppState } from '../states/app.state'
 
 export const getActiveReceiverID = (): ISelect<IAppState, number | null> => {
@@ -65,6 +66,19 @@ export const getDialogScroll = (receiverID: number): ISelectAndParse<IAppState, 
             const dialogScroll = dialogsScroll.find((dlgScrl) => dlgScrl.receiverID === receiverID)
 
             if (dialogScroll) return dialogScroll.scroll
+            return null
+        },
+    }
+}
+
+export const getDialogSkip = (receiverID: number): ISelectAndParse<IAppState, IDialogSkip[], number | null> => {
+    return {
+        discriminator: STORE_I_SELECT_AND_PARSE_DISCRIMINATOR,
+        selectorFn: (state) => state.main.dialogsSkip,
+        parserFn: (dialogsSkip) => {
+            const dialogSkip = dialogsSkip.find((dlgSkp) => dlgSkp.receiverID === receiverID)
+
+            if (dialogSkip) return dialogSkip.skip
             return null
         },
     }

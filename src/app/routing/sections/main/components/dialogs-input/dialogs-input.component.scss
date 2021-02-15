@@ -44,6 +44,7 @@
 }
 
 .btn-send {
+    cursor: pointer;
     margin-right: 0.5rem;
     background-color: map-get($custom-colors, main);
     margin-left: 0.5rem;

@@ -2,15 +2,16 @@
      *ngIf="!(isSelectedReceiver$ | async)">
     <h2>Please select chat to start messaging</h2>
 </div>
-<app-main-dialogs-detail-scroll [sendMessageEvent]="sendMessageEvent.asObservable()">
-    <div class="wrapper" #wrapper>
+
+<app-main-dialogs-detail-scroll (top)="onTop()" [getMessagesOnTopEvent]="getMessagesOnTopEvent.asObservable()">
+    <div class="wrapper">
         <ng-template ngFor let-message [ngForOf]="messages$ | async">
             <app-main-dialogs-separator
                 *ngIf="message.isDiffDays"
                 [date]="message.diffDate">
             </app-main-dialogs-separator>
             <app-main-dialogs-message
-                [wrapperWidth]="wrapper.offsetWidth"
+                [wrapperWidth]="500"
                 [message]="message.message"
                 [date]="message.createdAt"
                 [isLastInGroup]="message.isLastInGroup"
@@ -19,4 +20,4 @@
         </ng-template>
     </div>
 </app-main-dialogs-detail-scroll>
-<app-main-dialogs-input (sendMessage)="onSendMessage()"></app-main-dialogs-input>
+<app-main-dialogs-input *ngIf="isSelectedReceiver$ | async" (sendMessage)="onSendMessage()"></app-main-dialogs-input>

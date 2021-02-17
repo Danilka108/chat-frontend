@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
-import { combineLatest, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core'
+import { combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
 import { addDialogMessages, updateDialogSkip } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -15,7 +15,7 @@ import { IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
 
-// const TAKE_MESSAGES_FACTOR = 1 / 50
+const TAKE_MESSAGES_FACTOR = 1 / 25
 
 @Component({
     selector: 'app-main-dialogs-detail',
@@ -28,12 +28,8 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     isSelectedReceiver$ = of(true)
 
     take = 0
-    skip = 0
 
     sub = new Subscription()
-
-    sendMessageEvent = new Subject<void>()
-    getMessagesOnTopEvent = new Subject<void>()
 
     constructor(
         private readonly httpService: MainSectionHttpService,
@@ -42,7 +38,7 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     ) {}
 
     ngOnInit() {
-        this.take = 20
+        this.onWindowResize()
 
         this.isSelectedReceiver$ = combineLatest([
             this.store.select(getDialogs()),
@@ -73,34 +69,39 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
         )
 
         this.sub.add(
-            this.store
-                .select(getActiveReceiverID())
-                .pipe(
-                    switchMap((activeReceiverID) => {
-                        if (activeReceiverID) {
-                            const dialogMessages = this.store.selectSnapshot(getDialogMessages(activeReceiverID))
+            this.store.select(getDialogs()).pipe(
+                switchMap(() => this.store.select(getActiveReceiverID())),
+                switchMap((activeReceiverID) => {
+                    if (activeReceiverID) {
+                        const dialogMessages = this.store.selectSnapshot(getDialogMessages(activeReceiverID))
 
-                            if (dialogMessages) {
-                                return of(null)
-                            }
-
-                            return forkJoin({
-                                activeReceiverID: of(activeReceiverID),
-                                messages: this.httpService.getMessages(activeReceiverID, this.take, 0),
-                            })
+                        if (dialogMessages) {
+                            return of(null)
                         }
 
-                        return of(null)
-                    })
-                )
-                .subscribe((result) => {
-                    if (result) {
-                        this.store.dispatch(updateDialogSkip(result.activeReceiverID, this.take))
-                        this.store.dispatch(addDialogMessages(result.activeReceiverID, result.messages))
+                        return forkJoin({
+                            activeReceiverID: of(activeReceiverID),
+                            messages: this.httpService.getMessages(activeReceiverID, this.take, 0),
+                        })
                     }
+
+                    return of(null)
                 })
+            ).subscribe((result) => {
+                if (result) {
+                    this.store.dispatch(updateDialogSkip(result.activeReceiverID, this.take))
+                    this.store.dispatch(addDialogMessages(result.activeReceiverID, result.messages))
+                }
+            })
         )
     }
+
+    @HostListener('window:resize')
+    onWindowResize() {
+        this.take = Math.abs(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
+    }
+
+    onSendMessage() {}
 
     onTop() {
         const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
@@ -113,15 +114,10 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                     this.httpService.getMessages(activeReceiverID, this.take, dialogSkip).subscribe((messages) => {
                         this.store.dispatch(addDialogMessages(activeReceiverID, messages))
                         this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
-                        this.getMessagesOnTopEvent.next()
                     })
                 )
             }
         }
-    }
-
-    onSendMessage() {
-        this.sendMessageEvent.next()
     }
 
     getUserID() {

@@ -1,7 +1,7 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field'
 import { Component, ElementRef, EventEmitter, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
-import { Subscription } from 'rxjs'
+import { BehaviorSubject, Subject, Subscription } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, addDialogs, updateDialogScroll } from 'src/app/store/actions/main.actions'
@@ -29,9 +29,11 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
     btnRippleColor = 'rgba(220, 220, 220, 0.17)'
     formGroup!: FormGroup
     btnSize = 0
-    height = 0
     loading = false
     sub = new Subscription()
+
+    height = new BehaviorSubject<number>(0)
+    height$ = this.height.asObservable()
 
     constructor(
         private readonly ngZone: NgZone,
@@ -60,9 +62,10 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
     }
 
     onMessageInputHeightChange(event: number) {
+        this.height.next(event)
+
         setTimeout(() => {
             if (this.btnSize === 0) this.btnSize = event
-            this.height = event
         })
     }
 

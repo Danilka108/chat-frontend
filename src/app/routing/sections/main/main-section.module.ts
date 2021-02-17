@@ -8,7 +8,6 @@ import { DialogsItemComponent } from './components/dialogs-item/dialogs-item.com
 import { DialogsComponent } from './pages/dialogs/dialogs.component'
 import { MaterialModule } from 'src/app/material/material.module'
 import { DialogsGroupComponent } from './components/dialogs-group/dialogs-group.component'
-import { SectionComponent } from './components/section/section.component'
 import { DialogsDetailComponent } from './components/dialogs-detail/dialogs-detail.component'
 import { NoConnectionComponent } from './components/no-connection/no-connection.component'
 import { DialogsMessageComponent } from './components/dialogs-message/dialogs-message.component'
@@ -19,8 +18,6 @@ import { NgScrollbarModule } from 'ngx-scrollbar'
 import { MessageService } from './services/message.service'
 import { MessageInputDirective } from './directives/message-input.directive'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
-import { DialogsDetailScrollComponent } from './components/dialogs-detail-scroll/dialogs-detail-scroll.component'
-import { OverlayscrollbarsModule } from 'overlayscrollbars-ngx'
 
 @NgModule({
     declarations: [
@@ -28,13 +25,11 @@ import { OverlayscrollbarsModule } from 'overlayscrollbars-ngx'
         DialogsGroupComponent,
         DialogsDetailComponent,
         DialogsComponent,
-        SectionComponent,
         NoConnectionComponent,
         DialogsMessageComponent,
         DialogsInputComponent,
         DialogsSeparatorComponent,
         MessageInputDirective,
-        DialogsDetailScrollComponent,
     ],
     imports: [
         MaterialModule,

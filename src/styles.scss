@@ -11,6 +11,8 @@ html, body {
 }
 
 body {
+    overflow-y: scroll;
+
     margin: 0;
 
     .scrollbar {

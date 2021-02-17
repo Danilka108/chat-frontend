@@ -1,5 +1,5 @@
 <form [formGroup]="formGroup" class="form">
-    <div class="wrapper" [style.height]="height + 'px'">
+    <div class="wrapper" [style.height]="(height$ | async) + 'px'">
         <ng-scrollbar class="scrollbar">
             <div class="textarea-wrapper"
                  message-input

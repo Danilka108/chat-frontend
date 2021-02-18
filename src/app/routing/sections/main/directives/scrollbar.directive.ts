@@ -1,9 +1,9 @@
-import { AfterViewInit, Directive, ElementRef, HostListener, OnDestroy } from "@angular/core";
-import { fromEvent, Subscription } from "rxjs";
-import { tap } from "rxjs/operators";
+import { AfterViewInit, Directive, ElementRef, HostListener, OnDestroy } from '@angular/core'
+import { fromEvent, Subscription } from 'rxjs'
+import { tap } from 'rxjs/operators'
 
 @Directive({
-    selector: '[app-main-scrollbar]'
+    selector: '[app-main-scrollbar]',
 })
 export class ScrollbarDirective implements AfterViewInit, OnDestroy {
     element!: HTMLElement

@@ -29,7 +29,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         private readonly route: ActivatedRoute,
         private readonly router: Router,
         private readonly dateService: DateService,
-        private readonly httpService: MainSectionHttpService,
+        private readonly httpService: MainSectionHttpService
     ) {}
 
     ngOnInit() {

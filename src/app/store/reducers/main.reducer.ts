@@ -5,7 +5,8 @@ import {
     ADD_MAIN_DIALOGS_ACTION,
     ADD_MAIN_DIALOG_MESSAGES_ACTION,
     UPDATE_MAIN_DIALOG_SCROLL_ACTION,
-    UPDATE_DIALOG_SKIP_ACTION,
+    UPDATE_MAIN_DIALOG_SKIP_ACTION,
+    UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION,
 } from '../actions/main.actions'
 import { IReducerFn } from '../core/interfaces/reducer-fn.interface'
 import { IMainState } from '../states/main.state'
@@ -89,7 +90,7 @@ export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) 
                 dialogsScroll,
             }
         }
-        case UPDATE_DIALOG_SKIP_ACTION: {
+        case UPDATE_MAIN_DIALOG_SKIP_ACTION: {
             const dialogsSkip = [...state.dialogsSkip]
 
             const dialogIndex = dialogsSkip.findIndex(
@@ -105,6 +106,22 @@ export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) 
             return {
                 ...state,
                 dialogsSkip,
+            }
+        }
+        case UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION: {
+            const dialogsIsUpload = [...state.dialogsIsUpload]
+
+            const dialogIndex = dialogsIsUpload.findIndex(
+                (dialogIsUpload) => dialogIsUpload.receiverID === action.payload.receiverID
+            )
+
+            if (dialogIndex > -1) {
+                dialogsIsUpload[dialogIndex].isUpload = action.payload.isUpload
+            } else dialogsIsUpload.push(action.payload)
+
+            return {
+                ...state,
+                dialogsIsUpload,
             }
         }
         default:

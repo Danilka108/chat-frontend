@@ -1,5 +1,6 @@
 import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface'
 import { IMessage } from 'src/app/routing/sections/main/interface/message.interface'
+import { createAction } from '../core/create-action'
 import { IAction } from '../core/interfaces/action.interface'
 
 export const UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION = 'UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION'
@@ -70,22 +71,36 @@ export const updateRequestLoading = (
     }
 }
 
-export const UPDATE_DIALOG_SKIP_ACTION = 'UPDATE_DIALOG_SKIP_ACTION'
+export const UPDATE_MAIN_DIALOG_SKIP_ACTION = 'UPDATE_DIALOG_SKIP_ACTION'
 export const updateDialogSkip = (
     receiverID: number,
     skip: number
 ): IAction<
-    typeof UPDATE_DIALOG_SKIP_ACTION,
+    typeof UPDATE_MAIN_DIALOG_SKIP_ACTION,
     {
         receiverID: number
         skip: number
     }
 > => {
     return {
-        type: UPDATE_DIALOG_SKIP_ACTION,
+        type: UPDATE_MAIN_DIALOG_SKIP_ACTION,
         payload: {
             receiverID,
             skip,
+        },
+    }
+}
+
+export const UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION = 'UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION'
+export const updateDialogIsUpload = (
+    receiverID: number,
+    isUpload: boolean
+): IAction<typeof UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION, { receiverID: number; isUpload: boolean }> => {
+    return {
+        type: UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION,
+        payload: {
+            receiverID,
+            isUpload,
         },
     }
 }
@@ -97,4 +112,5 @@ export type MainActions = ReturnType<
     | typeof updateRequestLoading
     | typeof updateDialogScroll
     | typeof updateDialogSkip
+    | typeof updateDialogIsUpload
 >

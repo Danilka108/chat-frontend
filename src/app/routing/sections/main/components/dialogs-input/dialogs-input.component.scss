@@ -58,7 +58,6 @@
 .btn-send {
     cursor: pointer;
     margin-right: 0.5rem;
-    background-color: map-get($custom-colors, main);
     margin-left: 0.5rem;
     border: 0;
     display: flex;
@@ -72,15 +71,19 @@
         outline: none;
     }
 
+    background-color: map-get($custom-colors, main-gray);
+
     mat-icon {
-        color: map-get($basic-colors, primary);
+        color: map-get($custom-colors, dark-main-middle-gray);
     }
 
-    &:disabled {
-        background-color: map-get($custom-colors, main-gray);
+    &:not(:disabled) {
+        transition: background 200ms;
+        background-color: map-get($custom-colors, main);
 
         mat-icon {
             color: map-get($custom-colors, dark-main-middle-gray);
+            color: map-get($basic-colors, primary);
         }
     }
 }

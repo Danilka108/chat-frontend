@@ -5,6 +5,7 @@ import {
     STORE_I_SELECT_AND_PARSE_DISCRIMINATOR,
     STORE_I_SELECT_DISCRIMINATOR,
 } from '../core/interfaces/select.interface'
+import { IDialogIsUpload } from '../interfaces/dialog-is-upload.interface'
 import { IDialogMessages } from '../interfaces/dialog-messages.interface'
 import { IDialogScroll } from '../interfaces/dialog-scroll.interface'
 import { IDialogSkip } from '../interfaces/dialog-skip.interface'
@@ -79,6 +80,21 @@ export const getDialogSkip = (receiverID: number): ISelectAndParse<IAppState, ID
             const dialogSkip = dialogsSkip.find((dlgSkp) => dlgSkp.receiverID === receiverID)
 
             if (dialogSkip) return dialogSkip.skip
+            return null
+        },
+    }
+}
+
+export const getDialogIsUpload = (
+    receiverID: number
+): ISelectAndParse<IAppState, IDialogIsUpload[], IDialogIsUpload | null> => {
+    return {
+        discriminator: STORE_I_SELECT_AND_PARSE_DISCRIMINATOR,
+        selectorFn: (state) => state.main.dialogsIsUpload,
+        parserFn: (dialogsIsUpload) => {
+            const dialogIsUpload = dialogsIsUpload.find((dlgIsUpload) => dlgIsUpload.receiverID === receiverID)
+
+            if (dialogIsUpload) return dialogIsUpload
             return null
         },
     }

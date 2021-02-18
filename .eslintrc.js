@@ -9,7 +9,7 @@
 //     "eslint-plugin-standard": "^5.0.0",
 
 module.exports = {
-  root: true,
+  root: true,  
   overrides: [
     {
       files: ["*.ts"],
@@ -19,7 +19,7 @@ module.exports = {
         ],
         createDefaultProgram: true
       },
-      extends: ["plugin:@angular-eslint/recommended"],
+      extends: ["plugin:@angular-eslint/recommended", "unused-imports"]
     },
     {
       files: ["*.component.html"],

@@ -144,4 +144,13 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
             this.onSubmit()
         }
     }
+
+    isMessageEmpty() {
+        const msg = (this.formGroup.get('message')?.value as string) || null
+
+        if (msg === null || msg.length === 0) {
+            return true
+        }
+        return false
+    }
 }

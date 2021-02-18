@@ -22,7 +22,7 @@
             [style.width]="btnSize + 'px'"
             matRipple
             aria-label="Send message"
-            [disabled]="loading"
+            [disabled]="loading || isMessageEmpty()"
             (click)="onSubmit()">
         <mat-icon>send</mat-icon>
     </button>

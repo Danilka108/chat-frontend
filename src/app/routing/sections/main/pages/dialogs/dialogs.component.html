@@ -1,5 +1,7 @@
 <app-loading *ngIf="requestLoading$ | async"></app-loading>
-<section>
-    <app-main-dialogs-group></app-main-dialogs-group>
-    <app-main-dialogs-detail></app-main-dialogs-detail>
-</section>
+<app-main-dialogs-scroll (topReached)="onTopReached()">
+    <section>
+        <app-main-dialogs-group></app-main-dialogs-group>
+        <app-main-dialogs-detail [topReachedEvent]="topReachedEvent$"></app-main-dialogs-detail>
+    </section>
+</app-main-dialogs-scroll>

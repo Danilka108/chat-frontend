@@ -8,7 +8,8 @@ import { DateService } from 'src/app/common/date.service'
 import { Store } from 'src/app/store/core/store'
 import { IAppState } from 'src/app/store/states/app.state'
 import { getActiveReceiverID, getDialogs } from 'src/app/store/selectors/main.selectors'
-import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
+import { addDialogs, updateActiveReceiverID } from 'src/app/store/actions/main.actions'
+import { MainSectionHttpService } from '../../services/main-section-http.service'
 
 @Component({
     selector: 'app-main-dialogs-group',
@@ -27,7 +28,8 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         private readonly store: Store<IAppState>,
         private readonly route: ActivatedRoute,
         private readonly router: Router,
-        private readonly dateService: DateService
+        private readonly dateService: DateService,
+        private readonly httpService: MainSectionHttpService,
     ) {}
 
     ngOnInit() {
@@ -38,6 +40,10 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
                 return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
             })
         )
+
+        this.sub = this.httpService.getDialogs().subscribe((dialogs) => {
+            this.store.dispatch(addDialogs(dialogs))
+        })
 
         this.sub = this.route.params.subscribe((params) => {
             const id = Number(params['id'])

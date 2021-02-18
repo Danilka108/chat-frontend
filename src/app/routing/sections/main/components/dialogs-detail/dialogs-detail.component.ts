@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core'
-import { combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
+import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, OnDestroy, OnInit, Output } from '@angular/core'
+import { combineLatest, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
 import { addDialogMessages, updateDialogSkip } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -24,6 +24,8 @@ const TAKE_MESSAGES_FACTOR = 1 / 25
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsDetailComponent implements OnInit, OnDestroy {
+    @Input() topReachedEvent!: Observable<void>
+
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
 
@@ -94,6 +96,8 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                 }
             })
         )
+
+        this.sub = this.topReachedEvent.subscribe(() => this.onTopReached())
     }
 
     @HostListener('window:resize')
@@ -103,7 +107,7 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
 
     onSendMessage() {}
 
-    onTop() {
+    onTopReached() {
         const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
 
         if (activeReceiverID !== null) {

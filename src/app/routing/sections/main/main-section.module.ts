@@ -18,6 +18,8 @@ import { NgScrollbarModule } from 'ngx-scrollbar'
 import { MessageService } from './services/message.service'
 import { MessageInputDirective } from './directives/message-input.directive'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
+import { DialogsScrollComponent } from './components/dialogs-scroll/dialogs-scroll.component'
+import { ScrollbarDirective } from './directives/scrollbar.directive'
 
 @NgModule({
     declarations: [
@@ -30,6 +32,8 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
         DialogsInputComponent,
         DialogsSeparatorComponent,
         MessageInputDirective,
+        DialogsScrollComponent,
+        ScrollbarDirective,
     ],
     imports: [
         MaterialModule,

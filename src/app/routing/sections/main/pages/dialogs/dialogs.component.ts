@@ -1,6 +1,6 @@
 import { Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
-import { Observable, Subscription } from 'rxjs'
+import { Observable, Subject, Subscription } from 'rxjs'
 import { delay, startWith } from 'rxjs/operators'
 import { addDialogs } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -16,21 +16,27 @@ import { MainSectionHttpService } from '../../services/main-section-http.service
     styleUrls: ['./dialogs.component.scss'],
 })
 export class DialogsComponent implements OnInit, OnDestroy {
-    subsReq!: Subscription
-    subsNoConnection!: Subscription
     noConnectionDialog: MatDialogRef<NoConnectionComponent> | null = null
     requestLoading$!: Observable<boolean>
 
+    subscription = new Subscription()
+
+    topReachedEvent = new Subject<void>()
+    topReachedEvent$ = this.topReachedEvent.asObservable()
+
     constructor(
-        private readonly httpService: MainSectionHttpService,
         private readonly store: Store<IAppState>,
         private readonly dialog: MatDialog
     ) {}
 
+    set sub(sub: Subscription) {
+        this.subscription.add(sub)
+    }
+
     ngOnInit() {
         this.requestLoading$ = this.store.select(getRequestLoading()).pipe(startWith(true), delay(0))
 
-        this.subsNoConnection = this.store.select(getConnectionError()).subscribe((isError) => {
+        this.sub = this.store.select(getConnectionError()).subscribe((isError) => {
             if (!this.noConnectionDialog && isError) {
                 this.noConnectionDialog = this.dialog.open(NoConnectionComponent, {
                     closeOnNavigation: true,
@@ -40,14 +46,13 @@ export class DialogsComponent implements OnInit, OnDestroy {
                 this.noConnectionDialog.close()
             }
         })
+    }
 
-        this.subsReq = this.httpService.getDialogs().subscribe((dialogs) => {
-            this.store.dispatch(addDialogs(dialogs))
-        })
+    onTopReached() {
+        this.topReachedEvent.next()
     }
 
     ngOnDestroy() {
-        if (this.subsReq) this.subsReq.unsubscribe()
-        if (this.subsNoConnection) this.subsNoConnection.unsubscribe()
+        this.subscription.unsubscribe()
     }
 }

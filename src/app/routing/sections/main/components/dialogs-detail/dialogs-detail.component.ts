@@ -24,7 +24,7 @@ import { IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
 
-const TAKE_MESSAGES_FACTOR = 1 / 25
+const TAKE_MESSAGES_FACTOR = 1 / 15
 
 @Component({
     selector: 'app-main-dialogs-detail',

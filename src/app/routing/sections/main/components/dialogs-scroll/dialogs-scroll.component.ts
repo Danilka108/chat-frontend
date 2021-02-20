@@ -22,6 +22,7 @@ import {
     getDialogScroll,
 } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
+import { ScrollBottomService } from '../../services/scroll-bottom.service'
 
 const SCROLLBAR_UPLOAD_EVENT_FACTOR = 0.25
 
@@ -34,7 +35,6 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
     @ViewChild('scrollbar') scrollbar!: ElementRef
     @ViewChild('content') content!: ElementRef
 
-    @Input() scrollToBottomEvent!: Observable<void>
     @Output() topReached = new EventEmitter<void>()
 
     contentHeight = {
@@ -51,7 +51,7 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
 
     subscription = new Subscription()
 
-    constructor(private readonly store: Store<IAppState>) {}
+    constructor(private readonly store: Store<IAppState>, private readonly scrollBottomService: ScrollBottomService) {}
 
     set sub(sub: Subscription) {
         this.subscription.add(sub)
@@ -60,10 +60,20 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
     ngAfterViewInit() {
         const scrollbar = this.scrollbar.nativeElement as HTMLElement
 
-        this.sub = this.scrollToBottomEvent
+        this.sub = this.scrollBottomService
+            .getScrollBottom()
             .pipe(
-                map(() => {
-                    setTimeout(() => (scrollbar.scrollTop = this.contentHeight.current))
+                map(({ isSmooth }) => {
+                    setTimeout(() => {
+                        if (isSmooth) {
+                            scrollbar.scrollTo({
+                                top: this.contentHeight.current,
+                                behavior: 'smooth',
+                            })
+                        } else {
+                            scrollbar.scrollTop = this.contentHeight.current
+                        }
+                    })
                 })
             )
             .subscribe()
@@ -154,6 +164,15 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                         ) {
                             this.updatingContent = true
                             this.topReached.emit()
+                        }
+
+                        if (
+                            scrollbar.scrollTop + scrollbar.offsetHeight <=
+                            this.contentHeight.current - scrollbar.offsetHeight
+                        ) {
+                            this.scrollBottomService.emitIsViewed(true)
+                        } else {
+                            this.scrollBottomService.emitIsViewed(false)
                         }
                     }
                 })

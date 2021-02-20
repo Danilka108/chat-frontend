@@ -22,9 +22,6 @@ export class DialogsComponent implements OnInit, OnDestroy {
     topReachedEvent = new Subject<void>()
     topReachedEvent$ = this.topReachedEvent.asObservable()
 
-    sendMessageEvent = new Subject<void>()
-    sendMessageEvent$ = this.sendMessageEvent.asObservable()
-
     constructor(private readonly store: Store<IAppState>, private readonly dialog: MatDialog) {}
 
     set sub(sub: Subscription) {
@@ -48,10 +45,6 @@ export class DialogsComponent implements OnInit, OnDestroy {
 
     onTopReached() {
         this.topReachedEvent.next()
-    }
-
-    onSendMessage() {
-        this.sendMessageEvent.next()
     }
 
     ngOnDestroy() {

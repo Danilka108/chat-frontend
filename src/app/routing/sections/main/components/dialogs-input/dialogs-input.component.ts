@@ -10,6 +10,7 @@ import { getUserID } from 'src/app/store/selectors/auth.selectors'
 import { getActiveReceiverID, getDialog } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { ScrollBottomService } from '../../services/scroll-bottom.service'
 
 @Component({
     selector: 'app-main-dialogs-input',
@@ -18,9 +19,6 @@ import { MainSectionHttpService } from '../../services/main-section-http.service
 })
 export class DialogsInputComponent implements OnInit, OnDestroy {
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
-    // @ViewChild('form') form!: ElementRef<HTMLElement
-
-    @Output() sendMessage = new EventEmitter<void>()
 
     btnRippleColor = 'rgba(220, 220, 220, 0.17)'
     formGroup!: FormGroup
@@ -36,7 +34,8 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         private readonly fb: FormBuilder,
         private readonly httpService: MainSectionHttpService,
         private readonly store: Store<IAppState>,
-        private readonly dateService: DateService
+        private readonly dateService: DateService,
+        private readonly scrollBottomService: ScrollBottomService
     ) {}
 
     triggerZone() {
@@ -109,7 +108,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
                             )
                         }
 
-                        this.sendMessage.emit()
+                        this.scrollBottomService.emitScrollBottom(false)
 
                         this.completeSubmit()
                     })

@@ -34,7 +34,6 @@ const TAKE_MESSAGES_FACTOR = 1 / 15
 })
 export class DialogsDetailComponent implements OnInit, OnDestroy {
     @Input() topReachedEvent!: Observable<void>
-    @Output() sendMessage = new EventEmitter<void>()
 
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
@@ -120,10 +119,6 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     @HostListener('window:resize')
     onWindowResize() {
         this.take = Math.abs(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
-    }
-
-    onSendMessage() {
-        this.sendMessage.emit()
     }
 
     onTopReached() {

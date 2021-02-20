@@ -22,6 +22,7 @@ import { DialogsScrollComponent } from './components/dialogs-scroll/dialogs-scro
 import { DialogsScrollBottomComponent } from './components/dialogs-scroll-bottom/dialogs-scroll-bottom.component'
 import { InfiniteScrollModule } from 'ngx-infinite-scroll'
 import { ScrollbarDirective } from './directives/scrollbar.directive'
+import { ScrollBottomService } from './services/scroll-bottom.service'
 
 @NgModule({
     declarations: [
@@ -49,6 +50,6 @@ import { ScrollbarDirective } from './directives/scrollbar.directive'
         FormsModule,
         InfiniteScrollModule,
     ],
-    providers: [MainSectionHttpService, MessageService],
+    providers: [MainSectionHttpService, MessageService, ScrollBottomService],
 })
 export class MainSectionModule {}

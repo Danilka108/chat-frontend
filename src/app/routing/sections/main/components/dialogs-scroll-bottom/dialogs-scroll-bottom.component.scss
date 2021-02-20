@@ -5,7 +5,7 @@
     top: 0;
     right: 0;
     transform: translateY(-100%);
-    margin-right: 2.5%;
+    padding: 1rem;
     z-index: 6000;
 }
 
@@ -14,5 +14,13 @@ button {
     height: 3rem;
     mat-icon {
         transform: scale(2.2);
+    }
+
+    opacity: 0;
+    transform: translateY(15%);
+    transition: 150ms;
+    &.isView {
+        opacity: 1;
+        transform: translateY(0);
     }
 }

@@ -1,5 +1,8 @@
 <button class="btn-send"
         color="accent"
+        (click)="onClick()"
+        [class.isView]="isViewed$ | async"
+        [disabled]="isDisabled"
         mat-fab>
     <mat-icon>keyboard_arrow_down</mat-icon>
 </button>

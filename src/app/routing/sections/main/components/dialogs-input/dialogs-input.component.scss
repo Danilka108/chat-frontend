@@ -8,15 +8,17 @@
     margin: 0 auto;
     z-index: 2000;
     padding-top: 0.2rem;
-    overflow: hidden;
     background-color: map-get($custom-colors, main);
+}
+
+.hidden-wrapper {
+    overflow: hidden;
 }
 
 .form {
     width: 100%;
     display: flex;
     align-items: flex-end;
-    position: relative;
     z-index: 1000;
 }
 

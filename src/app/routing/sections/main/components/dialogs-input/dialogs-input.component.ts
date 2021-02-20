@@ -1,17 +1,14 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field'
 import { Component, ElementRef, EventEmitter, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
-import { BehaviorSubject, Subject, Subscription } from 'rxjs'
+import { BehaviorSubject, Subscription } from 'rxjs'
 import { take } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { addDialogMessages, addDialogs, updateDialogScroll } from 'src/app/store/actions/main.actions'
-import { ISelect, STORE_I_SELECT_DISCRIMINATOR } from 'src/app/store/core/interfaces/select.interface'
+import { addDialogMessages, addDialogs } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
-import { getActiveReceiverID, getDialog, getDialogs } from 'src/app/store/selectors/main.selectors'
+import { getActiveReceiverID, getDialog } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
-import { IMainState } from 'src/app/store/states/main.state'
-import { MessageInputDirective } from '../../directives/message-input.directive'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 
 @Component({
@@ -21,8 +18,7 @@ import { MainSectionHttpService } from '../../services/main-section-http.service
 })
 export class DialogsInputComponent implements OnInit, OnDestroy {
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
-    @ViewChild(MessageInputDirective) input!: MessageInputDirective
-    @ViewChild('textarea') textarea!: ElementRef
+    // @ViewChild('form') form!: ElementRef<HTMLElement
 
     @Output() sendMessage = new EventEmitter<void>()
 

@@ -1,0 +1,18 @@
+@import '../../../../../styles/vars.scss';
+
+:host {
+    position: absolute;
+    top: 0;
+    right: 0;
+    transform: translateY(-100%);
+    margin-right: 2.5%;
+    z-index: 6000;
+}
+
+button {
+    width: 3rem;
+    height: 3rem;
+    mat-icon {
+        transform: scale(2.2);
+    }
+}

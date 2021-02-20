@@ -21,7 +21,13 @@ import { HttpClientModule } from '@angular/common/http'
         MainSectionGuard,
         RedirectGuard,
     ],
-    imports: [HttpClientModule, CommonModule, RouterModule.forRoot(routes)],
+    imports: [
+        HttpClientModule,
+        CommonModule,
+        RouterModule.forRoot(routes, {
+            scrollPositionRestoration: 'disabled',
+        }),
+    ],
     exports: [RouterModule],
 })
 export class RoutingModule {}

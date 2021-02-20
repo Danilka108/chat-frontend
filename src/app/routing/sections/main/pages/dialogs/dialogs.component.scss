@@ -7,4 +7,5 @@ section {
     box-shadow: 0px 0px 0px 1px map-get($custom-colors, main-gray);
     margin: 0 auto;
     display: flex;
+    position: relative;
 }

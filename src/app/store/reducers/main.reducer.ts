@@ -1,4 +1,3 @@
-import { makeStateKey } from '@angular/platform-browser'
 import {
     MainActions,
     UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION,
@@ -7,12 +6,19 @@ import {
     UPDATE_MAIN_DIALOG_SCROLL_ACTION,
     UPDATE_MAIN_DIALOG_SKIP_ACTION,
     UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION,
+    UPDATE_MAIN_REQUEST_LOADING_ACTION,
 } from '../actions/main.actions'
 import { IReducerFn } from '../core/interfaces/reducer-fn.interface'
 import { IMainState } from '../states/main.state'
 
 export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) => {
     switch (action.type) {
+        case UPDATE_MAIN_REQUEST_LOADING_ACTION: {
+            return {
+                ...state,
+                requestLoading: action.payload,
+            }
+        }
         case UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION: {
             return {
                 ...state,

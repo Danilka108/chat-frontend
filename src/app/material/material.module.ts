@@ -10,22 +10,10 @@ import { MatProgressBarModule } from '@angular/material/progress-bar'
 import { MatButtonToggleModule } from '@angular/material/button-toggle'
 import { MatRippleModule } from '@angular/material/core'
 import { MatDialogModule } from '@angular/material/dialog'
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner'
 
 @NgModule({
     declarations: [],
-    imports: [
-        CommonModule,
-        MatDialogModule,
-        MatFormFieldModule,
-        MatInputModule,
-        MatIconModule,
-        MatButtonModule,
-        MatCheckboxModule,
-        MatToolbarModule,
-        MatProgressBarModule,
-        MatButtonToggleModule,
-        MatRippleModule,
-    ],
     exports: [
         MatDialogModule,
         MatFormFieldModule,
@@ -37,6 +25,7 @@ import { MatDialogModule } from '@angular/material/dialog'
         MatProgressBarModule,
         MatButtonToggleModule,
         MatRippleModule,
+        MatProgressSpinnerModule,
     ],
 })
 export class MaterialModule {}

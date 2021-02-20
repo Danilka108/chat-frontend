@@ -6,16 +6,14 @@
     bottom: 0;
     width: 100%;
     margin: 0 auto;
-    box-shadow: 0px 0px 6px 10px map-get($custom-colors, light-gray);
-    background-color: map-get($custom-colors, light-gray);
     z-index: 2000;
-    padding-bottom: 2rem;
     padding-top: 0.2rem;
+    overflow: hidden;
+    background-color: map-get($custom-colors, main);
 }
 
 .form {
     width: 100%;
-    margin: 0 auto;
     display: flex;
     align-items: flex-end;
     position: relative;
@@ -25,12 +23,48 @@
 .wrapper {
     width: 100%;
     max-height: calc(4px * 2 + 1rem * 8);
-    flex: 1
+    flex: 1;
+}
+
+.form-field {
+    width: 100%;
+    margin-bottom: -1.343rem;
+
+    &::ng-deep {
+        .mat-form-field-flex,
+        .mat-form-field-infix {
+            padding: 0;
+            border: 0;
+        }
+
+        .mat-form-field-flex {
+            background-color: transparent;
+        }
+
+        .mat-form-field-wrapper {
+            padding-bottom: 1.343rem;
+        }
+
+        .mat-form-field-infix {
+            padding-bottom: 0.5rem;
+            border-top: 0.5rem solid transparent;
+            display: flex;
+            align-items: flex-end;
+        }
+
+        .mat-form-field-underline {
+            snap {
+                height: 6px;
+            }
+
+            &:before {
+                height: 3px;
+            }
+        }
+    }
 }
 
 .scrollbar {
-    background-color: map-get($custom-colors, main);
-    border-radius: 0.5rem;
     display: block;
 }
 
@@ -40,11 +74,11 @@
 }
 
 .textarea {
+    overflow: hidden;
     width: 100%;
     margin: 0;
     padding: 0.6rem 0;
     box-sizing: content-box;
-    overflow: hidden;
     resize: none;
     word-break: break-word;
 
@@ -56,7 +90,6 @@
 }
 
 .btn-send {
-    cursor: pointer;
     margin-right: 0.5rem;
     margin-left: 0.5rem;
     border: 0;
@@ -71,18 +104,16 @@
         outline: none;
     }
 
-    background-color: map-get($custom-colors, main-gray);
+    background-color: map-get($custom-colors, main);
 
     mat-icon {
+        transition: color 200ms;
         color: map-get($custom-colors, dark-main-middle-gray);
     }
 
     &:not(:disabled) {
-        transition: background 200ms;
-        background-color: map-get($custom-colors, main);
-
+        cursor: pointer;
         mat-icon {
-            color: map-get($custom-colors, dark-main-middle-gray);
             color: map-get($basic-colors, primary);
         }
     }

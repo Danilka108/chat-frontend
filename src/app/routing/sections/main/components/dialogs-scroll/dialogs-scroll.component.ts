@@ -4,12 +4,14 @@ import {
     Component,
     ElementRef,
     EventEmitter,
+    HostListener,
     Input,
+    NgZone,
     OnDestroy,
     Output,
     ViewChild,
 } from '@angular/core'
-import { BehaviorSubject, fromEvent, Observable, of, Subscription } from 'rxjs'
+import { fromEvent, Observable, of, Subject, Subscription } from 'rxjs'
 import { catchError, debounceTime, map, switchMap, tap } from 'rxjs/operators'
 import { updateDialogScroll } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -21,12 +23,14 @@ import {
 } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
 
+const SCROLLBAR_UPLOAD_EVENT_FACTOR = 0.25
+
 @Component({
     selector: 'app-main-dialogs-scroll',
     templateUrl: './dialogs-scroll.component.html',
     styleUrls: ['./dialogs-scroll.component.scss'],
 })
-export class DialogsScrollComponent implements AfterViewChecked, AfterViewInit, OnDestroy {
+export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
     @ViewChild('scrollbar') scrollbar!: ElementRef
     @ViewChild('content') content!: ElementRef
 
@@ -38,7 +42,7 @@ export class DialogsScrollComponent implements AfterViewChecked, AfterViewInit, 
         previous: 0,
     }
 
-    height = new BehaviorSubject<void>(undefined)
+    height = new Subject<void>()
     height$ = this.height.asObservable()
 
     ignoreScroll = true
@@ -79,6 +83,12 @@ export class DialogsScrollComponent implements AfterViewChecked, AfterViewInit, 
                 tap(() => {
                     if (this.updatingContent) {
                         setTimeout(() => {
+                            const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
+
+                            if (activeReceiverID !== null) {
+                                this.store.dispatch(updateDialogScroll(activeReceiverID, scrollbar.scrollTop))
+                            }
+
                             this.updatingContent = false
                         })
                     }
@@ -127,19 +137,19 @@ export class DialogsScrollComponent implements AfterViewChecked, AfterViewInit, 
             .pipe(
                 debounceTime(20),
                 tap(() => {
-                    const ignore = !!this.ignoreScroll
+                    const ignore = this.ignoreScroll
                     this.ignoreScroll = false
 
                     const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
 
                     if (activeReceiverID !== null) {
-                        this.store.dispatch(updateDialogScroll(activeReceiverID, scrollbar.scrollTop))
+                        if (!ignore) this.store.dispatch(updateDialogScroll(activeReceiverID, scrollbar.scrollTop))
 
                         const isUpload = this.store.selectSnapshot(getDialogIsUpload(activeReceiverID))
 
                         if (
                             (isUpload?.isUpload === true || isUpload === null) &&
-                            scrollbar.scrollTop < scrollbar.offsetHeight * 0.8 &&
+                            scrollbar.scrollTop === 0 &&
                             !ignore
                         ) {
                             this.updatingContent = true

@@ -8,7 +8,7 @@ import {
     OnInit,
     Output,
 } from '@angular/core'
-import { combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
+import { BehaviorSubject, combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
 import { addDialogMessages, updateDialogIsUpload, updateDialogSkip } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -38,6 +38,9 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
 
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
+
+    isShowSpinner = new BehaviorSubject(false)
+    isShowSpinner$ = this.isShowSpinner.asObservable()
 
     take = 0
 
@@ -137,7 +140,6 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                         } else {
                             this.store.dispatch(addDialogMessages(activeReceiverID, messages))
                             this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
-                            console.log('aaa')
                         }
                     })
                 )

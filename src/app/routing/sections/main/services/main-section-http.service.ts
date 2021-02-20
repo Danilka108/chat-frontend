@@ -1,6 +1,6 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
-import { map, tap } from 'rxjs/operators'
+import { delay, map } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/services/auth.service'
 import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -84,6 +84,7 @@ export class MainSectionHttpService {
             .pipe(
                 map((result) => {
                     this.store.dispatch(updateRequestLoading(false))
+
                     if (!result) return []
                     return result
                 })

@@ -13,7 +13,7 @@ export class DialogsMessageComponent {
     @Input() date!: string
     @Input() wrapperWidth!: number
 
-    wrapperHeightFactor = 0.6
+    wrapperWidthFactor = 0.5
 
     constructor(private readonly dateService: DateService) {}
 

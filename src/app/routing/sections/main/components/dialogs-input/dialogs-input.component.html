@@ -1,29 +1,31 @@
 <form [formGroup]="formGroup" class="form">
-    <div class="wrapper" [style.height]="(height$ | async) + 'px'">
-        <ng-scrollbar class="scrollbar">
-            <div class="textarea-wrapper"
-                 message-input
-                 (heightChange)="onMessageInputHeightChange($event)">
-                <textarea class="textarea mat-body"
-                          #textarea
-                          (keydown)="onTextareaKeydown($event)"
-                          formControlName="message"
-                          type="text"
-                          cdkTextareaAutosize
-                          autosize="CdkTextareaAutosize"
-                          cdkAutosizeMinRows="1"
-                          placeholder="Send message..."></textarea>
-            </div>
-        </ng-scrollbar>
-    </div>
-    <button class="btn-send"
-            color="primary"
+    <mat-form-field class="form-field" appearance="fill">
+        <div class="wrapper" [style.height]="(height$ | async) + 'px'">
+            <ng-scrollbar class="scrollbar">
+                <div class="textarea-wrapper"
+                     message-input
+                     (heightChange)="onMessageInputHeightChange($event)">
+                    <textarea class="textarea mat-body"
+                              matInput
+                              type="text"
+                              cdkTextareaAutosize
+                              autosize="CdkTextareaAutosize"
+                              cdkAutosizeMinRows="1"
+                              formControlName="message"
+                              (keydown)="onTextareaKeydown($event)"
+                              placeholder="Send message..."></textarea>
+                </div>
+            </ng-scrollbar>
+        </div>
+        <button class="btn-send"
+            color="basic"
             [style.height]="btnSize + 'px'"
             [style.width]="btnSize + 'px'"
-            matRipple
             aria-label="Send message"
+            matRipple
             [disabled]="loading || isMessageEmpty()"
             (click)="onSubmit()">
         <mat-icon>send</mat-icon>
     </button>
+    </mat-form-field>
 </form>

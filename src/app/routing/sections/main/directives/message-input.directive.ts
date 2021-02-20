@@ -1,5 +1,4 @@
 import { AfterViewChecked, Directive, ElementRef, EventEmitter, Output } from '@angular/core'
-import { BehaviorSubject } from 'rxjs'
 
 @Directive({
     selector: '[message-input]',

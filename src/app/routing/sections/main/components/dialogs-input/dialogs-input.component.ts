@@ -26,8 +26,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
     loading = false
     sub = new Subscription()
 
-    height = new BehaviorSubject<number>(0)
-    height$ = this.height.asObservable()
+    height = 0
 
     constructor(
         private readonly ngZone: NgZone,
@@ -57,7 +56,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
     }
 
     onMessageInputHeightChange(event: number) {
-        this.height.next(event)
+        this.height = event
 
         setTimeout(() => {
             if (this.btnSize === 0) this.btnSize = event
@@ -91,6 +90,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
                                         messageID,
                                         createdAt: nowDate,
                                         updatedAt: nowDate,
+                                        isReaded: false,
                                         isUpdated: false,
                                     },
                                 ])
@@ -103,6 +103,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
                                         receiverName: dialog.receiverName,
                                         latestMessage: message,
                                         createdAt: nowDate,
+                                        notReadedMessagesCount: dialog.notReadedMessagesCount,
                                     },
                                 ])
                             )

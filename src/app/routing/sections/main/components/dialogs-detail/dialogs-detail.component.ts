@@ -10,7 +10,12 @@ import {
 } from '@angular/core'
 import { BehaviorSubject, combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
 import { map, switchMap } from 'rxjs/operators'
-import { addDialogMessages, updateDialogIsUpload, updateDialogSkip } from 'src/app/store/actions/main.actions'
+import {
+    addDialogMessages,
+    updateDialogIsUpload,
+    updateDialogSkip,
+    updateDialogsNotReadedMessagesCount,
+} from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
 import {
@@ -37,9 +42,6 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
 
     messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
-
-    isShowSpinner = new BehaviorSubject(false)
-    isShowSpinner$ = this.isShowSpinner.asObservable()
 
     take = 0
 
@@ -109,6 +111,7 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                         this.store.dispatch(updateDialogSkip(result.activeReceiverID, this.take))
                         this.store.dispatch(addDialogMessages(result.activeReceiverID, result.messages))
                         this.store.dispatch(updateDialogIsUpload(result.activeReceiverID, true))
+                        this.store.dispatch(updateDialogsNotReadedMessagesCount(result.activeReceiverID, 0))
                     }
                 })
         )

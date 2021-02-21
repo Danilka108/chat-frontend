@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { Router } from '@angular/router'
 import { Observable, of } from 'rxjs'
-import { catchError, concatMap, map } from 'rxjs/operators'
+import { catchError, concatMap, map, switchMap } from 'rxjs/operators'
 import { updateAccessToken, updateConnectionError, updateUserID } from 'src/app/store/actions/auth.actions'
 import { Store } from 'src/app/store/core/store'
 import { getAccessToken } from 'src/app/store/selectors/auth.selectors'
@@ -58,7 +58,7 @@ export class AuthService {
             catchError((error) => {
                 if (error?.status === 401) {
                     return this.update().pipe(
-                        concatMap((result) => {
+                        switchMap((result) => {
                             const accessToken2 = this.store.selectSnapshot(getAccessToken())
 
                             if (result && accessToken2) {
@@ -70,6 +70,7 @@ export class AuthService {
                                             this.store.dispatch(updateConnectionError(true))
                                         }
 
+                                        this.router.navigateByUrl('')
                                         return of(null)
                                     })
                                 )
@@ -81,6 +82,7 @@ export class AuthService {
                     )
                 } else {
                     this.store.dispatch(updateConnectionError(true))
+                    this.router.navigateByUrl('')
                     return of(null)
                 }
             })

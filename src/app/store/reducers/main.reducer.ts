@@ -7,6 +7,7 @@ import {
     UPDATE_MAIN_DIALOG_SKIP_ACTION,
     UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION,
     UPDATE_MAIN_REQUEST_LOADING_ACTION,
+    UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION,
 } from '../actions/main.actions'
 import { IReducerFn } from '../core/interfaces/reducer-fn.interface'
 import { IMainState } from '../states/main.state'
@@ -37,6 +38,20 @@ export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) 
                     dialogs.push(dialog)
                 }
             })
+
+            return {
+                ...state,
+                dialogs,
+            }
+        }
+        case UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION: {
+            const dialogs = [...state.dialogs]
+
+            const dialogIndex = dialogs.findIndex((dlg) => dlg.receiverID === action.payload.receiverID)
+
+            if (dialogIndex > -1) {
+                dialogs[dialogIndex].notReadedMessagesCount = action.payload.count
+            }
 
             return {
                 ...state,

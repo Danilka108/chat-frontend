@@ -1,5 +1,5 @@
 <button matRipple [ngClass]="active ? 'active' : ''" (click)="onClick()" [matRippleColor]="active ? rippleColorActive : rippleColor">
-    <div class="photo"></div>
+    <div class="photo"><div *ngIf="isSmallSize && notReadedMessagesCount !== 0" class="badge">{{notReadedMessagesCount}}</div></div>
     <div *ngIf="!isSmallSize" class="info"> 
         <div class="top">
             <div class="receiver">
@@ -11,6 +11,7 @@
             <div class="last-message mat-subheading-1">
                 {{message}}
             </div>
+            <div *ngIf="notReadedMessagesCount !== 0" class="badge">{{notReadedMessagesCount}}</div>
         </div>
     </div>
 </button>

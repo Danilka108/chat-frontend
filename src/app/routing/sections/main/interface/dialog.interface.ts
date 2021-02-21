@@ -3,4 +3,5 @@ export interface IDialog {
     receiverName: string
     latestMessage: string
     createdAt: string
+    notReadedMessagesCount: number
 }

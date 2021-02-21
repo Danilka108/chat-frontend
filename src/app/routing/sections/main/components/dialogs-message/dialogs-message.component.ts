@@ -12,6 +12,7 @@ export class DialogsMessageComponent {
     @Input() message!: string
     @Input() date!: string
     @Input() wrapperWidth!: number
+    @Input() isReaded!: boolean
 
     wrapperWidthFactor = 0.5
 

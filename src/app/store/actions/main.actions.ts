@@ -21,6 +21,20 @@ export const addDialogs = (dialogs: IDialog[]): IAction<typeof ADD_MAIN_DIALOGS_
     }
 }
 
+export const UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION = 'UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION'
+export const updateDialogsNotReadedMessagesCount = (
+    receiverID: number,
+    count: number
+): IAction<typeof UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION, { receiverID: number; count: number }> => {
+    return {
+        type: UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION,
+        payload: {
+            receiverID,
+            count,
+        },
+    }
+}
+
 export const ADD_MAIN_DIALOG_MESSAGES_ACTION = 'ADD_MAIN_DIALOG_MESSAGES_ACTION'
 export const addDialogMessages = (
     receiverID: number,
@@ -113,4 +127,5 @@ export type MainActions = ReturnType<
     | typeof updateDialogScroll
     | typeof updateDialogSkip
     | typeof updateDialogIsUpload
+    | typeof updateDialogsNotReadedMessagesCount
 >

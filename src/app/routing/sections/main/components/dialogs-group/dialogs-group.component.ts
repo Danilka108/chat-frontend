@@ -26,7 +26,6 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly store: Store<IAppState>,
-        private readonly route: ActivatedRoute,
         private readonly router: Router,
         private readonly dateService: DateService,
         private readonly httpService: MainSectionHttpService
@@ -43,12 +42,6 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
 
         this.sub = this.httpService.getDialogs().subscribe((dialogs) => {
             this.store.dispatch(addDialogs(dialogs))
-        })
-
-        this.sub = this.route.params.subscribe((params) => {
-            const id = Number(params['id'])
-            if (!isNaN(id)) this.store.dispatch(updateActiveReceiverID(id))
-            else this.store.dispatch(updateActiveReceiverID(null))
         })
 
         this.onResize()

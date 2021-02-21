@@ -4,14 +4,12 @@ import {
     Component,
     ElementRef,
     EventEmitter,
-    HostListener,
-    Input,
     NgZone,
     OnDestroy,
     Output,
     ViewChild,
 } from '@angular/core'
-import { fromEvent, Observable, of, Subject, Subscription } from 'rxjs'
+import { fromEvent, of, Subject, Subscription } from 'rxjs'
 import { catchError, debounceTime, map, switchMap, tap } from 'rxjs/operators'
 import { updateDialogScroll } from 'src/app/store/actions/main.actions'
 import { Store } from 'src/app/store/core/store'
@@ -24,7 +22,7 @@ import {
 import { IAppState } from 'src/app/store/states/app.state'
 import { ScrollBottomService } from '../../services/scroll-bottom.service'
 
-const SCROLLBAR_UPLOAD_EVENT_FACTOR = 0.25
+const SCROLLBAR_UPLOAD_EVENT_FACTOR = 0.4
 
 @Component({
     selector: 'app-main-dialogs-scroll',
@@ -32,8 +30,8 @@ const SCROLLBAR_UPLOAD_EVENT_FACTOR = 0.25
     styleUrls: ['./dialogs-scroll.component.scss'],
 })
 export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
-    @ViewChild('scrollbar') scrollbar!: ElementRef
-    @ViewChild('content') content!: ElementRef
+    @ViewChild('scrollbar') scrollbar!: ElementRef<HTMLElement>
+    @ViewChild('content') content!: ElementRef<HTMLElement>
 
     @Output() topReached = new EventEmitter<void>()
 
@@ -51,7 +49,11 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
 
     subscription = new Subscription()
 
-    constructor(private readonly store: Store<IAppState>, private readonly scrollBottomService: ScrollBottomService) {}
+    constructor(
+        private readonly store: Store<IAppState>,
+        private readonly scrollBottomService: ScrollBottomService,
+        private readonly ngZone: NgZone
+    ) {}
 
     set sub(sub: Subscription) {
         this.subscription.add(sub)
@@ -78,6 +80,18 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
             )
             .subscribe()
 
+        this.store.select(getActiveReceiverID()).pipe(
+            map((activeReceiverID) => {
+                if (activeReceiverID !== null) {
+                    const scroll = this.store.selectSnapshot(getDialogScroll(activeReceiverID))
+
+                    if (scroll !== null) {
+                        scrollbar.scrollTop = scroll
+                    }
+                }
+            })
+        )
+
         this.sub = this.store
             .select(getActiveReceiverID())
             .pipe(
@@ -92,54 +106,10 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                 }),
                 tap(() => {
                     if (this.updatingContent) {
-                        setTimeout(() => {
-                            const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
-
-                            if (activeReceiverID !== null) {
-                                this.store.dispatch(updateDialogScroll(activeReceiverID, scrollbar.scrollTop))
-                            }
-
-                            this.updatingContent = false
-                        })
+                        setTimeout(() => (this.updatingContent = false))
                     }
                 }),
                 catchError(() => of())
-            )
-            .subscribe()
-
-        this.sub = this.store
-            .select(getActiveReceiverID())
-            .pipe(
-                switchMap(() => this.height$),
-                map(() => {
-                    const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
-
-                    if (activeReceiverID !== null) {
-                        return this.store.selectSnapshot(getDialogScroll(activeReceiverID))
-                    }
-
-                    return null
-                }),
-                map((scroll) => {
-                    if (scroll !== null) return scroll
-                    return this.contentHeight.current
-                }),
-                map((scroll) => {
-                    if (this.updatingContent) {
-                        const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
-
-                        if (activeReceiverID !== null) {
-                            const prevScroll = this.store.selectSnapshot(getDialogScroll(activeReceiverID))
-
-                            if (prevScroll !== null) {
-                                scrollbar.scrollTop =
-                                    prevScroll + this.contentHeight.current - this.contentHeight.previous
-                            }
-                        }
-                    } else {
-                        scrollbar.scrollTop = scroll
-                    }
-                })
             )
             .subscribe()
 
@@ -159,7 +129,7 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
 
                         if (
                             (isUpload?.isUpload === true || isUpload === null) &&
-                            scrollbar.scrollTop === 0 &&
+                            scrollbar.scrollTop <= this.contentHeight.current * SCROLLBAR_UPLOAD_EVENT_FACTOR &&
                             !ignore
                         ) {
                             this.updatingContent = true
@@ -181,18 +151,34 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
     }
 
     ngAfterViewChecked() {
-        const content = this.content.nativeElement as HTMLElement
+        const scrollbar = this.scrollbar.nativeElement
+        const content = this.content.nativeElement
 
         if (content.offsetHeight !== this.contentHeight.current) {
             this.ignoreScroll = true
 
-            if (content.offsetHeight > this.contentHeight.current) {
+            if (content.offsetHeight >= this.contentHeight.current) {
                 this.contentHeight.previous = this.contentHeight.current
+                this.contentHeight.current = content.offsetHeight
+
+                if (this.updatingContent) {
+                    scrollbar.scrollTop += this.contentHeight.current - this.contentHeight.previous
+                } else {
+                    const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
+
+                    if (activeReceiverID !== null) {
+                        const scroll = this.store.selectSnapshot(getDialogScroll(activeReceiverID))
+
+                        if (scroll !== null) {
+                            scrollbar.scrollTop = scroll
+                        } else {
+                            scrollbar.scrollTop = this.contentHeight.current
+                        }
+                    }
+                }
+            } else {
+                this.contentHeight.current = content.offsetHeight
             }
-
-            this.contentHeight.current = content.offsetHeight
-
-            this.height.next()
         }
     }
 

@@ -3,7 +3,6 @@
     <h2>Please select chat to start messaging</h2>
 </div>
 <div class="wrapper" *ngIf="isSelectedReceiver$ | async">
-    <mat-spinner *ngIf="isShowSpinner$ | async" color="accent" [diameter]="50" class="spinner"></mat-spinner>
     <div #wrapper class="scrollable-wrapper">
         <ng-template ngFor let-message [ngForOf]="messages$ | async">
             <app-main-dialogs-separator
@@ -16,6 +15,7 @@
                 [date]="message.createdAt"
                 [isLastInGroup]="message.isLastInGroup"
                 [isOwnMsg]="message.senderID === getUserID() ? true : false"
+                [isReaded]="message.isReaded"
             ></app-main-dialogs-message>
         </ng-template>
     </div>

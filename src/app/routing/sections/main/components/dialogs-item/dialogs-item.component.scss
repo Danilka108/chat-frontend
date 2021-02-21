@@ -55,6 +55,13 @@ button {
     height: 3rem;
     flex-shrink: 0;
     background-color: black;
+    position: relative;
+
+    .badge {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+    }
 }
 
 .info {
@@ -98,5 +105,21 @@ button {
 
 .last-message {
     color: map-get($custom-colors, dark-gray);
+    display: flex;
+    align-items: center;
     margin: 0 !important;
+}
+
+.badge {
+    background-color: map-get($basic-colors, accent);
+    padding: 0 0.3rem;
+    border-radius: 0.6rem;
+    font-weight: 600;
+    font-size: 0.8rem;
+    height: 1.2rem;
+    min-width: 1.2rem;
+    line-height: 1.2rem;
+    margin-left: 0.5rem;
+    color: map-get($custom-colors, main);
+    z-index: 200;
 }

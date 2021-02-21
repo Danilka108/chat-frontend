@@ -6,6 +6,7 @@ export interface IMessage {
     updatedAt: string
     isUpdated: boolean
     messageID: number
+    isReaded: boolean
 }
 
 export interface IMessageWithIsLast extends IMessage {

@@ -13,6 +13,7 @@ export class DialogsItemComponent {
     @Input() date!: string
     @Input() message!: string
     @Input() isSmallSize!: boolean
+    @Input() notReadedMessagesCount!: number
 
     rippleColorActive = 'rgba(220, 220, 220, 0.17)'
     rippleColor = ''

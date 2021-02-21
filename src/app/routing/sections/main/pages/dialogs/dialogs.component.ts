@@ -56,7 +56,6 @@ export class DialogsComponent implements OnInit, OnDestroy {
                 skipWhile((dialogs) => dialogs.length === 0),
                 switchMap(() => this.route.params),
                 tap((params) => {
-                    console.log(this.store.selectSnapshot(getDialogs()))
                     const id = Number(params['id'])
 
                     const dialogsIDs = this.store.selectSnapshot(getDialogs()).map((dialog) => dialog.receiverID)

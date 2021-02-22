@@ -9,6 +9,7 @@ import { Store } from 'src/app/store/core/store'
 import { getUserID } from 'src/app/store/selectors/auth.selectors'
 import { getActiveReceiverID, getDialog } from 'src/app/store/selectors/main.selectors'
 import { IAppState } from 'src/app/store/states/app.state'
+import { IDialog } from '../../interface/dialog.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { ScrollBottomService } from '../../services/scroll-bottom.service'
 

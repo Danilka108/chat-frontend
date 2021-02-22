@@ -2,12 +2,24 @@ import { BehaviorSubject, Observable } from 'rxjs'
 import { distinctUntilChanged, map } from 'rxjs/operators'
 import { IAction } from './interfaces/action.interface'
 import { ReducersMap } from './interfaces/reducers-map.type'
-import {
-    ISelect,
-    ISelectAndParse,
-    STORE_I_SELECT_AND_PARSE_DISCRIMINATOR,
-    STORE_I_SELECT_DISCRIMINATOR,
-} from './interfaces/select.interface'
+import { ISelect, ISelectAndParse } from './interfaces/select.interface'
+
+const instanceOfISelect = <StateType, KeyType>(object: unknown): object is ISelect<StateType, KeyType> => {
+    return (
+        (object as ISelect<StateType, KeyType>).selectorFn !== undefined &&
+        (object as ISelect<StateType, KeyType>).parserFn === undefined
+    )
+}
+
+const instanceOfISelectAndParse = <StateType, KeyType, ReturnType>(
+    object: unknown
+): object is ISelectAndParse<StateType, KeyType, ReturnType> => {
+    const obj = object as ISelectAndParse<StateType, KeyType, ReturnType>
+    if (obj.selectorFn !== undefined && obj.parserFn !== undefined) {
+        return true
+    }
+    return false
+}
 
 export class Store<StateType> {
     private state!: BehaviorSubject<StateType>
@@ -31,38 +43,26 @@ export class Store<StateType> {
         this.state.next(state)
     }
 
-    instanceOfISelect<KeyType>(object: any): object is ISelect<StateType, KeyType> {
-        return object.discriminator === STORE_I_SELECT_DISCRIMINATOR
-    }
-
-    instanceOfISelectAndParse<KeyType, ReturnType>(
-        object: any
-    ): object is ISelectAndParse<StateType, KeyType, ReturnType> {
-        return object.discriminator === STORE_I_SELECT_AND_PARSE_DISCRIMINATOR
-    }
-
-    select(): Observable<StateType>
     select<KeyType>(select: ISelect<StateType, KeyType>): Observable<KeyType>
-    select<KeyType, ReturnType>(select: ISelectAndParse<StateType, KeyType, ReturnType>): Observable<ReturnType>
-    select<KeyType, ReturnType>(select?: unknown) {
-        if (this.instanceOfISelect<KeyType>(select)) {
+    select<KeyType, ReturnType>(select: ISelect<StateType, KeyType, ReturnType>): Observable<ReturnType>
+    select<KeyType, ReturnType>(select: unknown) {
+        if (instanceOfISelect<StateType, KeyType>(select)) {
             return this.state$.pipe(map(select.selectorFn), distinctUntilChanged())
-        } else if (this.instanceOfISelectAndParse<KeyType, ReturnType>(select)) {
+        } else if (instanceOfISelectAndParse<StateType, KeyType, ReturnType>(select)) {
             return this.state$.pipe(map(select.selectorFn), distinctUntilChanged(), map(select.parserFn))
         } else {
             return this.state$
         }
     }
 
-    selectSnapshot(): StateType
     selectSnapshot<KeyType>(select: ISelect<StateType, KeyType>): KeyType
-    selectSnapshot<KeyType, ReturnType>(select: ISelectAndParse<StateType, KeyType, ReturnType>): ReturnType
-    selectSnapshot<KeyType, ReturnType>(select?: unknown) {
+    selectSnapshot<KeyType, ReturnType>(select: ISelect<StateType, KeyType, ReturnType>): ReturnType
+    selectSnapshot<KeyType, ReturnType>(select: unknown) {
         const state = { ...this.state.getValue() }
 
-        if (this.instanceOfISelect<KeyType>(select)) {
+        if (instanceOfISelect<StateType, KeyType>(select)) {
             return select.selectorFn(state)
-        } else if (this.instanceOfISelectAndParse<KeyType, ReturnType>(select)) {
+        } else if (instanceOfISelectAndParse<StateType, KeyType, ReturnType>(select)) {
             return select.parserFn(select.selectorFn(state))
         } else {
             return state

@@ -1,12 +1,10 @@
 import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface'
 import { IMessage } from 'src/app/routing/sections/main/interface/message.interface'
-import { createAction } from '../core/create-action'
 import { IAction } from '../core/interfaces/action.interface'
 
 export const UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION = 'UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION'
-export const updateActiveReceiverID = (
-    activeReceiverID: number | null
-): IAction<typeof UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION, number | null> => {
+type UpdateActiveReceiverIDAction = IAction<typeof UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION, number | null>
+export const updateActiveReceiverID = (activeReceiverID: number | null): UpdateActiveReceiverIDAction => {
     return {
         type: UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION,
         payload: activeReceiverID,
@@ -14,18 +12,44 @@ export const updateActiveReceiverID = (
 }
 
 export const ADD_MAIN_DIALOGS_ACTION = 'ADD_MAIN_DIALOGS_ACTION'
-export const addDialogs = (dialogs: IDialog[]): IAction<typeof ADD_MAIN_DIALOGS_ACTION, IDialog[]> => {
+type AddDialogsAction = IAction<typeof ADD_MAIN_DIALOGS_ACTION, IDialog[]>
+export const addDialogs = (dialogs: IDialog[]): AddDialogsAction => {
     return {
         type: ADD_MAIN_DIALOGS_ACTION,
         payload: dialogs,
     }
 }
 
+export const UPDATE_MAIN_DIALOG_NEW_MESSAGES_COUNT_ACTION = 'UPDATE_DIALOG_NEW_MESSAGES_COUNT_ACTION'
+type UpdateDialogNewMessagesCountAction = IAction<
+    typeof UPDATE_MAIN_DIALOG_NEW_MESSAGES_COUNT_ACTION,
+    {
+        receiverID: number
+        count: number
+    }
+>
+export const updateDialogNewMessagesCount = (receiverID: number, count: number): UpdateDialogNewMessagesCountAction => {
+    return {
+        type: UPDATE_MAIN_DIALOG_NEW_MESSAGES_COUNT_ACTION,
+        payload: {
+            receiverID,
+            count,
+        },
+    }
+}
+
 export const UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION = 'UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION'
+type UpdateDialogNotReadedMessagesCountAction = IAction<
+    typeof UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION,
+    {
+        receiverID: number
+        count: number
+    }
+>
 export const updateDialogsNotReadedMessagesCount = (
     receiverID: number,
     count: number
-): IAction<typeof UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION, { receiverID: number; count: number }> => {
+): UpdateDialogNotReadedMessagesCountAction => {
     return {
         type: UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION,
         payload: {
@@ -36,16 +60,14 @@ export const updateDialogsNotReadedMessagesCount = (
 }
 
 export const ADD_MAIN_DIALOG_MESSAGES_ACTION = 'ADD_MAIN_DIALOG_MESSAGES_ACTION'
-export const addDialogMessages = (
-    receiverID: number,
-    messages: IMessage[]
-): IAction<
+type AddDialogMessagesAction = IAction<
     typeof ADD_MAIN_DIALOG_MESSAGES_ACTION,
     {
         receiverID: number
         messages: IMessage[]
     }
-> => {
+>
+export const addDialogMessages = (receiverID: number, messages: IMessage[]): AddDialogMessagesAction => {
     return {
         type: ADD_MAIN_DIALOG_MESSAGES_ACTION,
         payload: {
@@ -56,16 +78,14 @@ export const addDialogMessages = (
 }
 
 export const UPDATE_MAIN_DIALOG_SCROLL_ACTION = 'UPDATE_MAIN_DIALOG_SCROLL_ACTION'
-export const updateDialogScroll = (
-    receiverID: number,
-    scroll: number
-): IAction<
+type UpdateDialogScrollAction = IAction<
     typeof UPDATE_MAIN_DIALOG_SCROLL_ACTION,
     {
         receiverID: number
         scroll: number
     }
-> => {
+>
+export const updateDialogScroll = (receiverID: number, scroll: number): UpdateDialogScrollAction => {
     return {
         type: UPDATE_MAIN_DIALOG_SCROLL_ACTION,
         payload: {
@@ -76,9 +96,8 @@ export const updateDialogScroll = (
 }
 
 export const UPDATE_MAIN_REQUEST_LOADING_ACTION = 'UPDATE_MAIN_REQUEST_LOADING_ACTION'
-export const updateRequestLoading = (
-    requestLoading: boolean
-): IAction<typeof UPDATE_MAIN_REQUEST_LOADING_ACTION, boolean> => {
+type UpdateRequestLoadingAction = IAction<typeof UPDATE_MAIN_REQUEST_LOADING_ACTION, boolean>
+export const updateRequestLoading = (requestLoading: boolean): UpdateRequestLoadingAction => {
     return {
         type: UPDATE_MAIN_REQUEST_LOADING_ACTION,
         payload: requestLoading,
@@ -86,16 +105,14 @@ export const updateRequestLoading = (
 }
 
 export const UPDATE_MAIN_DIALOG_SKIP_ACTION = 'UPDATE_DIALOG_SKIP_ACTION'
-export const updateDialogSkip = (
-    receiverID: number,
-    skip: number
-): IAction<
+type UpdateDialogSkipAction = IAction<
     typeof UPDATE_MAIN_DIALOG_SKIP_ACTION,
     {
         receiverID: number
         skip: number
     }
-> => {
+>
+export const updateDialogSkip = (receiverID: number, skip: number): UpdateDialogSkipAction => {
     return {
         type: UPDATE_MAIN_DIALOG_SKIP_ACTION,
         payload: {
@@ -106,10 +123,14 @@ export const updateDialogSkip = (
 }
 
 export const UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION = 'UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION'
-export const updateDialogIsUpload = (
-    receiverID: number,
-    isUpload: boolean
-): IAction<typeof UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION, { receiverID: number; isUpload: boolean }> => {
+type UpdateDialogIsUploadAction = IAction<
+    typeof UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION,
+    {
+        receiverID: number
+        isUpload: boolean
+    }
+>
+export const updateDialogIsUpload = (receiverID: number, isUpload: boolean) => {
     return {
         type: UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION,
         payload: {
@@ -119,13 +140,12 @@ export const updateDialogIsUpload = (
     }
 }
 
-export type MainActions = ReturnType<
-    | typeof updateActiveReceiverID
-    | typeof addDialogs
-    | typeof addDialogMessages
-    | typeof updateRequestLoading
-    | typeof updateDialogScroll
-    | typeof updateDialogSkip
-    | typeof updateDialogIsUpload
-    | typeof updateDialogsNotReadedMessagesCount
->
+export type MainActions =
+    | UpdateActiveReceiverIDAction
+    | AddDialogsAction
+    | AddDialogMessagesAction
+    | UpdateRequestLoadingAction
+    | UpdateDialogScrollAction
+    | UpdateDialogSkipAction
+    | UpdateDialogIsUploadAction
+    | ReturnType<typeof updateDialogsNotReadedMessagesCount>

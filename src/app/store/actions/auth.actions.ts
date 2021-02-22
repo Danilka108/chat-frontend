@@ -1,7 +1,9 @@
 import { IAction } from '../core/interfaces/action.interface'
 
 export const UPDATE_AUTH_USER_ID_ACTION = 'AUTH_USER_ID_UPDATE_ACTION'
-export const updateUserID = (userID: number): IAction<typeof UPDATE_AUTH_USER_ID_ACTION, number> => {
+type UpdateUserIDAction = IAction<typeof UPDATE_AUTH_USER_ID_ACTION, number>
+
+export const updateUserID = (userID: number): UpdateUserIDAction => {
     return {
         type: UPDATE_AUTH_USER_ID_ACTION,
         payload: userID,
@@ -9,7 +11,9 @@ export const updateUserID = (userID: number): IAction<typeof UPDATE_AUTH_USER_ID
 }
 
 export const UPDATE_AUTH_ACCESS_TOKEN_ACTION = 'UPDATE_AUTH_ACCESS_TOKEN_ACTION'
-export const updateAccessToken = (accessToken: string): IAction<typeof UPDATE_AUTH_ACCESS_TOKEN_ACTION, string> => {
+type UpdateAccessTokenAction = IAction<typeof UPDATE_AUTH_ACCESS_TOKEN_ACTION, string>
+
+export const updateAccessToken = (accessToken: string): UpdateAccessTokenAction => {
     return {
         type: UPDATE_AUTH_ACCESS_TOKEN_ACTION,
         payload: accessToken,
@@ -17,13 +21,13 @@ export const updateAccessToken = (accessToken: string): IAction<typeof UPDATE_AU
 }
 
 export const UPDATE_AUTH_CONNECTION_ERROR_ACTION = 'UPDATE_AUTH_CONNECTION_ERROR_ACTION'
-export const updateConnectionError = (
-    connectionError: boolean
-): IAction<typeof UPDATE_AUTH_CONNECTION_ERROR_ACTION, boolean> => {
+type UpdateConnectionErrorAction = IAction<typeof UPDATE_AUTH_CONNECTION_ERROR_ACTION, boolean>
+
+export const updateConnectionError = (connectionError: boolean): UpdateConnectionErrorAction => {
     return {
         type: UPDATE_AUTH_CONNECTION_ERROR_ACTION,
         payload: connectionError,
     }
 }
 
-export type AuthActions = ReturnType<typeof updateUserID | typeof updateAccessToken | typeof updateConnectionError>
+export type AuthActions = UpdateUserIDAction | UpdateAccessTokenAction | UpdateConnectionErrorAction

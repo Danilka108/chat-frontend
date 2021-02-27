@@ -1,10 +1,11 @@
-import { Component, HostBinding, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core'
 import { DateService } from 'src/app/common/date.service'
 
 @Component({
     selector: 'app-main-dialogs-message',
     templateUrl: './dialogs-message.component.html',
     styleUrls: ['./dialogs-message.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogsMessageComponent {
     @Input() @HostBinding('class.own-msg') isOwnMsg!: boolean

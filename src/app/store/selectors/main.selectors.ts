@@ -1,88 +1,93 @@
+import { createFeatureSelector, createSelector } from '@ngrx/store'
 import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface'
-import { ISelect, ISelectAndParse } from '../core/interfaces/select.interface'
-import { IDialogIsUpload } from '../interfaces/dialog-is-upload.interface'
-import { IDialogMessages } from '../interfaces/dialog-messages.interface'
-import { IDialogScroll } from '../interfaces/dialog-scroll.interface'
-import { IDialogSkip } from '../interfaces/dialog-skip.interface'
-import { IAppState } from '../states/app.state'
+import { AppState } from '../state/app.state'
+import { mainKey, MainState } from '../state/main.state'
 
-export const getActiveReceiverID = (): ISelect<IAppState, number | null> => {
-    return {
-        selectorFn: (state) => state.main.activeReceiverID,
+export const selectMain = createFeatureSelector<AppState, MainState>(mainKey)
+
+export const selectActiveReceiverID = createSelector(selectMain, (mainState) => mainState.activeReceiverID)
+
+export const selectDialogs = createSelector(selectMain, (mainState: MainState): IDialog[] => mainState.dialogs)
+
+export const selectDialogsReceiverIDs = createSelector(selectMain, (mainState) => {
+    return mainState.dialogs.map((dialog) => {
+        return dialog.receiverID
+    })
+})
+
+export const selectDialog = createSelector(
+    selectMain,
+    (mainState: MainState, { receiverID }: { receiverID: number }): IDialog | null => {
+        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+
+        if (dialogIndex > -1) {
+            const { receiverID, receiverName, lastMessage, createdAt, newMessagesCount } = mainState.dialogs[
+                dialogIndex
+            ]
+
+            return {
+                receiverID,
+                receiverName,
+                lastMessage,
+                createdAt,
+                newMessagesCount,
+            }
+        }
+
+        return null
     }
-}
+)
 
-export const getDialogs = (): ISelect<IAppState, IDialog[]> => {
-    return {
-        selectorFn: (state) => state.main.dialogs,
-    }
-}
+export const selectDialogMessages = createSelector(
+    selectMain,
+    (mainState: MainState, { receiverID }: { receiverID: number }) => {
+        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-export const getDialog = (receiverID: number): ISelect<IAppState, IDialog[], IDialog | null> => {
-    return {
-        selectorFn: (state) => state.main.dialogs,
-        parserFn: (dialogs) => {
-            const dialog = dialogs.find((dlg) => dlg.receiverID === receiverID)
-
-            return dialog ? dialog : null
-        },
-    }
-}
-
-export const getDialogMessages = (
-    receiverID: number
-): ISelect<IAppState, IDialogMessages[], IDialogMessages | null> => {
-    return {
-        selectorFn: (state) => state.main.dialogsMessages,
-        parserFn: (dialogsMessages) => {
-            const dialogMessages = dialogsMessages.find((dlgMsg) => dlgMsg.receiverID === receiverID)
-
-            if (dialogMessages) return dialogMessages
+        if (dialogIndex > -1) {
+            return mainState.dialogs[dialogIndex].messages
+        } else {
             return null
-        },
+        }
     }
-}
+)
 
-export const getRequestLoading = (): ISelect<IAppState, boolean> => {
-    return {
-        selectorFn: (state) => state.main.requestLoading,
-    }
-}
+export const selectDialogScroll = createSelector(
+    selectMain,
+    (mainState: MainState, { receiverID }: { receiverID: number }) => {
+        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-export const getDialogScroll = (receiverID: number): ISelect<IAppState, IDialogScroll[], number | null> => {
-    return {
-        selectorFn: (state) => state.main.dialogsScroll,
-        parserFn: (dialogsScroll) => {
-            const dialogScroll = dialogsScroll.find((dlgScrl) => dlgScrl.receiverID === receiverID)
-
-            if (dialogScroll) return dialogScroll.scroll
+        if (dialogIndex > -1) {
+            return mainState.dialogs[dialogIndex].scroll
+        } else {
             return null
-        },
+        }
     }
-}
+)
 
-export const getDialogSkip = (receiverID: number): ISelect<IAppState, IDialogSkip[], number | null> => {
-    return {
-        selectorFn: (state) => state.main.dialogsSkip,
-        parserFn: (dialogsSkip) => {
-            const dialogSkip = dialogsSkip.find((dlgSkp) => dlgSkp.receiverID === receiverID)
+export const selectDialogSkip = createSelector(
+    selectMain,
+    (mainState: MainState, { receiverID }: { receiverID: number }) => {
+        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-            if (dialogSkip) return dialogSkip.skip
+        if (dialogIndex > -1) {
+            return mainState.dialogs[dialogIndex].skip
+        } else {
             return null
-        },
+        }
     }
-}
+)
 
-export const getDialogIsUpload = (
-    receiverID: number
-): ISelect<IAppState, IDialogIsUpload[], IDialogIsUpload | null> => {
-    return {
-        selectorFn: (state) => state.main.dialogsIsUpload,
-        parserFn: (dialogsIsUpload) => {
-            const dialogIsUpload = dialogsIsUpload.find((dlgIsUpload) => dlgIsUpload.receiverID === receiverID)
+export const selectDialogIsUploaded = createSelector(
+    selectMain,
+    (mainState: MainState, { receiverID }: { receiverID: number }) => {
+        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-            if (dialogIsUpload) return dialogIsUpload
+        if (dialogIndex > -1) {
+            return mainState.dialogs[dialogIndex].isUploaded
+        } else {
             return null
-        },
+        }
     }
-}
+)
+
+export const selectRequestLoading = createSelector(selectMain, (mainState) => mainState.requestLoading)

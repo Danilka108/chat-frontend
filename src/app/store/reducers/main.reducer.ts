@@ -1,151 +1,175 @@
+import { createReducer, on } from '@ngrx/store'
+import { IMessage } from 'src/app/routing/sections/main/interface/message.interface'
 import {
-    MainActions,
-    UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION,
-    ADD_MAIN_DIALOGS_ACTION,
-    ADD_MAIN_DIALOG_MESSAGES_ACTION,
-    UPDATE_MAIN_DIALOG_SCROLL_ACTION,
-    UPDATE_MAIN_DIALOG_SKIP_ACTION,
-    UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION,
-    UPDATE_MAIN_REQUEST_LOADING_ACTION,
-    UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION,
+    addDialogMessages,
+    addDialogs,
+    updateActiveReceiverID,
+    updateDialogIsUploaded,
+    updateDialogLastMessage,
+    updateDialogNewMessagesCount,
+    updateDialogScroll,
+    updateDialogSkip,
+    updateRequestLoading,
 } from '../actions/main.actions'
-import { IReducerFn } from '../core/interfaces/reducer-fn.interface'
-import { IMainState } from '../states/main.state'
+import { mainInitialState } from '../state/main.state'
 
-export const mainReducer: IReducerFn<IMainState, MainActions> = (state, action) => {
-    switch (action.type) {
-        case UPDATE_MAIN_REQUEST_LOADING_ACTION: {
-            return {
-                ...state,
-                requestLoading: action.payload,
-            }
-        }
-        case UPDATE_MAIN_ACTIVE_RECEIVER_ID_ACTION: {
-            return {
-                ...state,
-                activeReceiverID: action.payload,
-            }
-        }
-        case ADD_MAIN_DIALOGS_ACTION: {
-            const dialogs = [...state.dialogs]
+export const mainReducer = createReducer(
+    mainInitialState,
+    on(updateActiveReceiverID, (state, { activeReceiverID }) => ({
+        ...state,
+        activeReceiverID,
+    })),
+    on(addDialogs, (state, { dialogs }) => {
+        const dlgs = [...state.dialogs]
 
-            action.payload.forEach((dialog) => {
-                const dialogIndex = dialogs.findIndex((dlg) => dlg.receiverID === dialog.receiverID)
+        for (const dialog of dialogs) {
+            const dialogIndex = state.dialogs.findIndex((dlg) => dlg.receiverID === dialog.receiverID)
 
-                if (dialogIndex > -1) {
-                    dialogs[dialogIndex] = dialog
-                } else {
-                    dialogs.push(dialog)
-                }
-            })
-
-            return {
-                ...state,
-                dialogs,
-            }
-        }
-        case UPDATE_DIALOG_NOT_READED_MESSAGES_COUNT_ACTION: {
-            const dialogs = [...state.dialogs]
-
-            const dialogIndex = dialogs.findIndex((dlg) => dlg.receiverID === action.payload.receiverID)
-
-            if (dialogIndex > -1) {
-                dialogs[dialogIndex].notReadedMessagesCount = action.payload.count
-            }
-
-            return {
-                ...state,
-                dialogs,
-            }
-        }
-        case ADD_MAIN_DIALOG_MESSAGES_ACTION: {
-            const dialogsMessages = [...state.dialogsMessages]
-
-            const dialogMessagesIndex = dialogsMessages.findIndex(
-                (dialogMessages) => dialogMessages.receiverID === action.payload.receiverID
-            )
-
-            if (dialogMessagesIndex > -1) {
-                action.payload.messages.forEach((message) => {
-                    const messageIndex = dialogsMessages[dialogMessagesIndex].messages.findIndex(
-                        (msg) => msg.messageID === message.messageID
-                    )
-
-                    if (messageIndex > -1) {
-                        dialogsMessages[dialogMessagesIndex].messages[messageIndex] = message
-                    } else {
-                        dialogsMessages[dialogMessagesIndex].messages.push(message)
-                    }
+            if (dialogIndex === -1) {
+                dlgs.push({
+                    ...dialog,
+                    messages: null,
+                    scroll: null,
+                    skip: null,
+                    isUploaded: false,
                 })
-            } else {
-                const dialogIndex = state.dialogs.findIndex((dialog) => dialog.receiverID === action.payload.receiverID)
+            }
+        }
 
-                if (dialogIndex > -1) {
-                    dialogsMessages.push({
-                        receiverID: action.payload.receiverID,
-                        messages: action.payload.messages,
-                    })
+        return {
+            ...state,
+            dialogs: dlgs,
+        }
+    }),
+    on(updateDialogLastMessage, (state, { receiverID, lastMessage }) => {
+        const dialogs = [...state.dialogs]
+
+        const dialogIndex = dialogs.findIndex((dlg) => dlg.receiverID === receiverID)
+
+        if (dialogIndex > -1) {
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                lastMessage,
+            }
+        }
+
+        return {
+            ...state,
+            dialogs,
+        }
+    }),
+    on(updateDialogNewMessagesCount, (state, { receiverID, newMessagesCount }) => {
+        const dialogs = [...state.dialogs]
+
+        const dialogIndex = dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+
+        if (dialogIndex > -1) {
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                newMessagesCount,
+            }
+        }
+
+        return {
+            ...state,
+            dialogs,
+        }
+    }),
+    on(addDialogMessages, (state, { receiverID, messages }) => {
+        const dialogs = [...state.dialogs]
+
+        const dialogIndex = dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+
+        if (dialogIndex > -1 && dialogs[dialogIndex].messages !== null) {
+            const dialogMessages = dialogs[dialogIndex].messages as IMessage[]
+            const newMessages: IMessage[] = []
+
+            for (const message of messages) {
+                let isAdd = true
+
+                for (const dialogMessage of dialogMessages) {
+                    if (dialogMessage.messageID === message.messageID) {
+                        isAdd = false
+                        break
+                    }
+                }
+
+                if (isAdd) {
+                    newMessages.push(message)
                 }
             }
 
-            return {
-                ...state,
-                dialogsMessages,
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                messages: dialogMessages.concat(newMessages),
+            }
+        } else if (dialogs[dialogIndex].messages === null) {
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                messages,
             }
         }
-        case UPDATE_MAIN_DIALOG_SCROLL_ACTION: {
-            const dialogsScroll = [...state.dialogsScroll]
 
-            const dialogIndex = dialogsScroll.findIndex((dialogScroll) => {
-                return dialogScroll.receiverID === action.payload.receiverID
-            })
+        return {
+            ...state,
+            dialogs,
+        }
+    }),
+    on(updateDialogScroll, (state, { receiverID, scroll }) => {
+        const dialogs = [...state.dialogs]
 
-            if (dialogIndex > -1) {
-                dialogsScroll[dialogIndex].scroll = action.payload.scroll
-            } else {
-                dialogsScroll.push(action.payload)
-            }
+        const dialogIndex = dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-            return {
-                ...state,
-                dialogsScroll,
+        if (dialogIndex > -1) {
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                scroll,
             }
         }
-        case UPDATE_MAIN_DIALOG_SKIP_ACTION: {
-            const dialogsSkip = [...state.dialogsSkip]
 
-            const dialogIndex = dialogsSkip.findIndex(
-                (dialogSkip) => dialogSkip.receiverID === action.payload.receiverID
-            )
+        return {
+            ...state,
+            dialogs,
+        }
+    }),
+    on(updateDialogSkip, (state, { receiverID, skip }) => {
+        const dialogs = [...state.dialogs]
 
-            if (dialogIndex > -1) {
-                dialogsSkip[dialogIndex].skip = action.payload.skip
-            } else {
-                dialogsSkip.push(action.payload)
-            }
+        const dialogIndex = dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-            return {
-                ...state,
-                dialogsSkip,
+        if (dialogIndex > -1) {
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                skip,
             }
         }
-        case UPDATE_MAIN_DIALOG_IS_UPLOAD_ACTION: {
-            const dialogsIsUpload = [...state.dialogsIsUpload]
 
-            const dialogIndex = dialogsIsUpload.findIndex(
-                (dialogIsUpload) => dialogIsUpload.receiverID === action.payload.receiverID
-            )
+        return {
+            ...state,
+            dialogs,
+        }
+    }),
+    on(updateDialogIsUploaded, (state, { receiverID, isUploaded }) => {
+        const dialogs = [...state.dialogs]
 
-            if (dialogIndex > -1) {
-                dialogsIsUpload[dialogIndex].isUpload = action.payload.isUpload
-            } else dialogsIsUpload.push(action.payload)
+        const dialogIndex = dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-            return {
-                ...state,
-                dialogsIsUpload,
+        if (dialogIndex > -1) {
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                isUploaded,
             }
         }
-        default:
-            return state
-    }
-}
+
+        return {
+            ...state,
+            dialogs,
+        }
+    }),
+    on(updateRequestLoading, (state, { requestLoading }) => {
+        return {
+            ...state,
+            requestLoading,
+        }
+    })
+)

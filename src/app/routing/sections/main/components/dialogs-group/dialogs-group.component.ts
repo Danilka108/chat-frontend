@@ -1,20 +1,23 @@
-import { Component, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core'
 import { IDialog } from '../../interface/dialog.interface'
-import { ActivatedRoute, Router } from '@angular/router'
+import { Router } from '@angular/router'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import { Observable, Subscription } from 'rxjs'
-import { map } from 'rxjs/operators'
+import { filter, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { Store } from 'src/app/store/core/store'
-import { IAppState } from 'src/app/store/states/app.state'
-import { getActiveReceiverID, getDialogs } from 'src/app/store/selectors/main.selectors'
-import { addDialogs, updateActiveReceiverID } from 'src/app/store/actions/main.actions'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { select, Store } from '@ngrx/store'
+import { AppState } from 'src/app/store/state/app.state'
+import { selectActiveReceiverID, selectDialogs } from 'src/app/store/selectors/main.selectors'
+import { addDialogs } from 'src/app/store/actions/main.actions'
+
+const SMALL_SIZE_MAX_WIDTH = 800
 
 @Component({
     selector: 'app-main-dialogs-group',
     templateUrl: './dialogs-group.component.html',
     styleUrls: ['./dialogs-group.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogsGroupComponent implements OnInit, OnDestroy {
     dialogs$!: Observable<IDialog[]>
@@ -22,27 +25,39 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     sub!: Subscription
 
     @HostBinding('class.small') isSmallSize = false
-    smallSizeMax = 800
+    smallSizeMax = SMALL_SIZE_MAX_WIDTH
 
     constructor(
-        private readonly store: Store<IAppState>,
+        private readonly store: Store<AppState>,
         private readonly router: Router,
         private readonly dateService: DateService,
         private readonly httpService: MainSectionHttpService
     ) {}
 
     ngOnInit() {
-        this.activeReceiverID$ = this.store.select(getActiveReceiverID())
+        this.activeReceiverID$ = this.store.select(selectActiveReceiverID)
 
-        this.dialogs$ = this.store.select(getDialogs()).pipe(
+        this.dialogs$ = this.store.pipe(
+            select(selectDialogs),
             map((dialogs) => {
                 return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
             })
         )
 
-        this.sub = this.httpService.getDialogs().subscribe((dialogs) => {
-            this.store.dispatch(addDialogs(dialogs))
-        })
+        this.sub = this.store
+            .pipe(
+                select(selectDialogs),
+                filter((dialogs) => {
+                    return dialogs.length === 0
+                }),
+                switchMap(() => {
+                    return this.httpService.getDialogs()
+                }),
+                tap((dialogs) => {
+                    this.store.dispatch(addDialogs({ dialogs }))
+                })
+            )
+            .subscribe()
 
         this.onResize()
     }

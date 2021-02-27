@@ -1,33 +1,10 @@
-import { IAction } from '../core/interfaces/action.interface'
+import { createAction, props } from '@ngrx/store'
 
-export const UPDATE_AUTH_USER_ID_ACTION = 'AUTH_USER_ID_UPDATE_ACTION'
-type UpdateUserIDAction = IAction<typeof UPDATE_AUTH_USER_ID_ACTION, number>
+export const updateUserID = createAction('[Auth] Update User ID', props<{ userID: number }>())
 
-export const updateUserID = (userID: number): UpdateUserIDAction => {
-    return {
-        type: UPDATE_AUTH_USER_ID_ACTION,
-        payload: userID,
-    }
-}
+export const updateAccessToken = createAction('[Auth] Update Access Token', props<{ accessToken: string }>())
 
-export const UPDATE_AUTH_ACCESS_TOKEN_ACTION = 'UPDATE_AUTH_ACCESS_TOKEN_ACTION'
-type UpdateAccessTokenAction = IAction<typeof UPDATE_AUTH_ACCESS_TOKEN_ACTION, string>
-
-export const updateAccessToken = (accessToken: string): UpdateAccessTokenAction => {
-    return {
-        type: UPDATE_AUTH_ACCESS_TOKEN_ACTION,
-        payload: accessToken,
-    }
-}
-
-export const UPDATE_AUTH_CONNECTION_ERROR_ACTION = 'UPDATE_AUTH_CONNECTION_ERROR_ACTION'
-type UpdateConnectionErrorAction = IAction<typeof UPDATE_AUTH_CONNECTION_ERROR_ACTION, boolean>
-
-export const updateConnectionError = (connectionError: boolean): UpdateConnectionErrorAction => {
-    return {
-        type: UPDATE_AUTH_CONNECTION_ERROR_ACTION,
-        payload: connectionError,
-    }
-}
-
-export type AuthActions = UpdateUserIDAction | UpdateAccessTokenAction | UpdateConnectionErrorAction
+export const updateConnectionError = createAction(
+    '[Auth] Update Connection Error',
+    props<{ connectionError: boolean }>()
+)

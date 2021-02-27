@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { DeviceDetectorService } from 'ngx-device-detector'
-import { Observable, of } from 'rxjs'
+import { of } from 'rxjs'
 import { map, catchError, refCount, publish } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 

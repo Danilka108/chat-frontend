@@ -1,19 +1,17 @@
-import { Component, OnDestroy } from '@angular/core'
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { of, Subscription } from 'rxjs'
 import { catchError, map } from 'rxjs/operators'
-import { AuthLocalStorageService } from 'src/app/auth/services/auth-local-storage.service'
 import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants'
-import { updateAccessToken, updateUserID } from 'src/app/store/actions/auth.actions'
-import { Store } from 'src/app/store/core/store'
-import { IAppState } from 'src/app/store/states/app.state'
+import { SessionService } from 'src/app/session/session.service'
 import { AuthSectionHttpService } from '../../services/auth-section-http.service'
 
 @Component({
     selector: 'app-auth-sing-in',
     templateUrl: './sign-in.component.html',
     styleUrls: ['./sign-in.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SignInComponent implements OnDestroy {
     passwordHide = true
@@ -36,9 +34,8 @@ export class SignInComponent implements OnDestroy {
 
     constructor(
         private readonly httpService: AuthSectionHttpService,
-        private readonly localStorageService: AuthLocalStorageService,
-        private readonly store: Store<IAppState>,
-        private readonly router: Router
+        private readonly router: Router,
+        private readonly sessionService: SessionService
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
@@ -69,13 +66,8 @@ export class SignInComponent implements OnDestroy {
             )
 
             this.subs = req$.subscribe(
-                ({ data }) => {
-                    this.localStorageService.setRefreshToken(data.refreshToken)
-                    this.localStorageService.setUserID(data.userID)
-
-                    this.store.dispatch(updateAccessToken(data.accessToken))
-                    this.store.dispatch(updateUserID(data.userID))
-
+                ({ data: { userID, accessToken, refreshToken } }) => {
+                    this.sessionService.set(userID, accessToken, refreshToken)
                     this.router.navigateByUrl('')
                 },
                 () => (this.loading = false)

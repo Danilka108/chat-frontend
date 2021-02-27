@@ -1,7 +1,7 @@
 import { AbstractControl, AsyncValidatorFn, ValidationErrors } from '@angular/forms'
 import { AuthSectionHttpService } from '../services/auth-section-http.service'
-import { catchError, map, take } from 'rxjs/operators'
-import { Observable, of } from 'rxjs'
+import { map } from 'rxjs/operators'
+import { Observable } from 'rxjs'
 
 export const checkEmailAsyncValidator = (authHttpService: AuthSectionHttpService): AsyncValidatorFn => {
     return (control: AbstractControl): Observable<null | ValidationErrors> => {

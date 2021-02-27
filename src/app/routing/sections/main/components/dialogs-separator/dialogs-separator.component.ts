@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 import { DateService } from 'src/app/common/date.service'
 
 @Component({
     selector: 'app-main-dialogs-separator',
     templateUrl: './dialogs-separator.component.html',
     styleUrls: ['./dialogs-separator.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogsSeparatorComponent {
     @Input() date!: string

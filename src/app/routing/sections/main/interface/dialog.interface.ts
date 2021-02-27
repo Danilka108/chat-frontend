@@ -1,7 +1,7 @@
 export interface IDialog {
     receiverID: number
     receiverName: string
-    latestMessage: string
+    lastMessage: string
     createdAt: string
-    notReadedMessagesCount: number
+    newMessagesCount: number
 }

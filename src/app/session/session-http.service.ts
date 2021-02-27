@@ -20,7 +20,7 @@ interface IRefreshTokenResponse {
 }
 
 @Injectable()
-export class AuthHttpService {
+export class SessionHttpService {
     constructor(private readonly httpClient: HttpClient, private readonly deviceService: DeviceDetectorService) {}
 
     refreshToken(body: IRefreshToken) {

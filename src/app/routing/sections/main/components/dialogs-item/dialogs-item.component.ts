@@ -1,9 +1,10 @@
-import { Component, EventEmitter, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, EventEmitter, Input } from '@angular/core'
 
 @Component({
     selector: 'app-main-dialogs-item',
     templateUrl: './dialogs-item.component.html',
     styleUrls: ['./dialogs-item.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogsItemComponent {
     click = new EventEmitter<null>()

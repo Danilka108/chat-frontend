@@ -13,6 +13,7 @@ import { ResetPasswordComponent } from './pages/reset-password/reset-password.co
 import { ResetPasswordCheckEmailComponent } from './pages/reset-password-check-email/reset-password-check-email.component'
 import { HttpClientModule } from '@angular/common/http'
 import { AuthSectionHttpService } from './services/auth-section-http.service'
+import { SessionModule } from 'src/app/session/session.module'
 
 @NgModule({
     declarations: [
@@ -24,13 +25,14 @@ import { AuthSectionHttpService } from './services/auth-section-http.service'
         ResetPasswordCheckEmailComponent,
     ],
     imports: [
-        CommonModule,
+        SessionModule,
         GlobalComponentsModule,
         FormsModule,
         ReactiveFormsModule,
         MaterialModule,
         RouterModule.forChild(routes),
         HttpClientModule,
+        CommonModule,
     ],
     providers: [AuthSectionHttpService],
 })

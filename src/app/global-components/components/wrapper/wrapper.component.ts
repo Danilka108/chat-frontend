@@ -1,10 +1,11 @@
-import { Component, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
 import { FormGroup } from '@angular/forms'
 
 @Component({
     selector: 'app-wrapper',
     templateUrl: './wrapper.component.html',
     styleUrls: ['./wrapper.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class WrapperComponent {
     @Input() formGroup!: FormGroup

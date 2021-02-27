@@ -4,7 +4,7 @@ const localStorageUserID = 'LOCAL_STORAGE_AUTH_USER_ID'
 const localStorageRefreshToken = 'LOCAL_STORAGE_AUTH_REFRESH_TOKEN'
 
 @Injectable()
-export class AuthLocalStorageService {
+export class SessionLocalStorageService {
     private getData(name: string) {
         const data = localStorage.getItem(name)
 

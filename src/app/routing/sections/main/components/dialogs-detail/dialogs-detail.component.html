@@ -14,7 +14,7 @@
                 [message]="message.message"
                 [date]="message.createdAt"
                 [isLastInGroup]="message.isLastInGroup"
-                [isOwnMsg]="message.senderID === getUserID() ? true : false"
+                [isOwnMsg]="message.senderID === (getUserID() | async)"
                 [isReaded]="message.isReaded"
             ></app-main-dialogs-message>
         </ng-template>

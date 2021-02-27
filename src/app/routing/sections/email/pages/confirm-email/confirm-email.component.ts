@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { map, mergeMap } from 'rxjs/operators'
@@ -8,6 +8,7 @@ import { EmailSectionHttpService } from '../../email-section-http.service'
     selector: 'app-confirm-email',
     templateUrl: './confirm-email.component.html',
     styleUrls: ['./confirm-email.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ConfirmEmailComponent implements OnInit, OnDestroy {
     loading = false

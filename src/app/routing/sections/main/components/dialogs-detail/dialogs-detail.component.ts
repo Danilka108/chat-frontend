@@ -1,35 +1,26 @@
-import {
-    ChangeDetectionStrategy,
-    Component,
-    EventEmitter,
-    HostListener,
-    Input,
-    OnDestroy,
-    OnInit,
-    Output,
-} from '@angular/core'
-import { BehaviorSubject, combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
-import { map, switchMap } from 'rxjs/operators'
+import { ChangeDetectionStrategy, Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core'
+import { select, Store } from '@ngrx/store'
+import { forkJoin, Observable, of, Subscription } from 'rxjs'
+import { filter, first, map, switchMap, tap } from 'rxjs/operators'
 import {
     addDialogMessages,
-    updateDialogIsUpload,
+    updateDialogIsUploaded,
+    updateDialogNewMessagesCount,
     updateDialogSkip,
-    updateDialogsNotReadedMessagesCount,
 } from 'src/app/store/actions/main.actions'
-import { Store } from 'src/app/store/core/store'
-import { getUserID } from 'src/app/store/selectors/auth.selectors'
+import { selectUserID } from 'src/app/store/selectors/auth.selectors'
 import {
-    getActiveReceiverID,
-    getDialogMessages,
-    getDialogs,
-    getDialogSkip,
+    selectActiveReceiverID,
+    selectDialog,
+    selectDialogMessages,
+    selectDialogSkip,
 } from 'src/app/store/selectors/main.selectors'
-import { IAppState } from 'src/app/store/states/app.state'
+import { AppState } from 'src/app/store/state/app.state'
 import { IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
 
-const TAKE_MESSAGES_FACTOR = 1 / 5
+const TAKE_MESSAGES_FACTOR = 1 / 10
 
 @Component({
     selector: 'app-main-dialogs-detail',
@@ -45,111 +36,201 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
 
     take = 0
 
-    sub = new Subscription()
+    subscription = new Subscription()
 
     constructor(
+        private readonly store: Store<AppState>,
         private readonly httpService: MainSectionHttpService,
-        private readonly messageService: MessageService,
-        private readonly store: Store<IAppState>
+        private readonly messageService: MessageService
     ) {}
+
+    set sub(sub: Subscription) {
+        this.subscription.add(sub)
+    }
 
     ngOnInit() {
         this.onWindowResize()
 
-        this.isSelectedReceiver$ = combineLatest([
-            this.store.select(getDialogs()),
-            this.store.select(getActiveReceiverID()),
-        ]).pipe(
-            map(([dialogs, activeReceiverID]) => {
-                if (activeReceiverID === null) return false
+        this.sub = this.topReachedEvent.pipe(tap(() => this.onTopReached())).subscribe()
 
-                const index = dialogs.findIndex((dialog) => {
-                    return dialog.receiverID === activeReceiverID
-                })
-
-                return index > -1
+        this.isSelectedReceiver$ = this.store.pipe(
+            select(selectActiveReceiverID),
+            switchMap((activeReceiverID) => {
+                if (activeReceiverID === null) return of(null)
+                return this.store.select(selectDialog, { receiverID: activeReceiverID })
+            }),
+            map((dialog) => {
+                return !!dialog
             })
         )
 
-        this.messages$ = this.store.select(getActiveReceiverID()).pipe(
+        this.messages$ = this.store.pipe(
+            select(selectActiveReceiverID),
             switchMap((activeReceiverID) => {
                 if (activeReceiverID === null) return of(null)
-
-                return this.store.select(getDialogMessages(activeReceiverID))
+                return this.store.select(selectDialogMessages, { receiverID: activeReceiverID })
             }),
             map((dialogMessages) => {
                 if (dialogMessages === null) return []
-
-                return this.messageService.parseMessages(dialogMessages.messages)
+                return this.messageService.parseMessages(dialogMessages.slice())
             })
         )
 
-        this.sub.add(
-            this.store
-                .select(getDialogs())
-                .pipe(
-                    switchMap(() => this.store.select(getActiveReceiverID())),
-                    switchMap((activeReceiverID) => {
-                        if (activeReceiverID) {
-                            const dialogMessages = this.store.selectSnapshot(getDialogMessages(activeReceiverID))
+        this.sub = this.store
+            .pipe(
+                select(selectActiveReceiverID),
+                switchMap((activeReceiverID) => {
+                    if (activeReceiverID === null) {
+                        return of(false)
+                    }
 
-                            if (dialogMessages) {
-                                return of(null)
-                            }
+                    return this.store.pipe(
+                        select(selectDialogMessages, { receiverID: activeReceiverID }),
+                        first(),
+                        map((messages) => {
+                            return messages === null
+                        })
+                    )
+                }),
+                filter((isGetMsgs) => isGetMsgs),
+                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
+                switchMap((activeReceiverID) => {
+                    if (activeReceiverID !== null) {
+                        return forkJoin({
+                            activeReceiverID: of(activeReceiverID),
+                            messages: this.httpService.getMessages(activeReceiverID, this.take, 0),
+                        })
+                    }
 
-                            return forkJoin({
-                                activeReceiverID: of(activeReceiverID),
-                                messages: this.httpService.getMessages(activeReceiverID, this.take, 0),
-                            })
-                        }
-
-                        return of(null)
-                    })
-                )
-                .subscribe((result) => {
+                    return of(null)
+                }),
+                map((result) => {
                     if (result) {
-                        this.store.dispatch(updateDialogSkip(result.activeReceiverID, this.take))
-                        this.store.dispatch(addDialogMessages(result.activeReceiverID, result.messages))
-                        this.store.dispatch(updateDialogIsUpload(result.activeReceiverID, true))
-                        this.store.dispatch(updateDialogsNotReadedMessagesCount(result.activeReceiverID, 0))
+                        const { activeReceiverID, messages } = result
+                        this.store.dispatch(
+                            addDialogMessages({
+                                receiverID: activeReceiverID,
+                                messages,
+                            })
+                        )
+                        this.store.dispatch(
+                            updateDialogSkip({
+                                receiverID: activeReceiverID,
+                                skip: this.take,
+                            })
+                        )
+                        this.store.dispatch(
+                            updateDialogIsUploaded({
+                                receiverID: activeReceiverID,
+                                isUploaded: false,
+                            })
+                        )
+                        this.store.dispatch(
+                            updateDialogNewMessagesCount({
+                                receiverID: activeReceiverID,
+                                newMessagesCount: 0,
+                            })
+                        )
                     }
                 })
-        )
-
-        this.sub = this.topReachedEvent.subscribe(() => this.onTopReached())
+            )
+            .subscribe()
     }
 
     @HostListener('window:resize')
     onWindowResize() {
-        this.take = Math.abs(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
+        this.take = document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR
     }
 
     onTopReached() {
-        const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
+        this.sub = this.store
+            .pipe(
+                select(selectActiveReceiverID),
+                first(),
+                switchMap((activeReceiverID) => {
+                    if (activeReceiverID === null) {
+                        return forkJoin({
+                            activeReceiverID: of(null),
+                            dialogSkip: of(null),
+                        })
+                    }
 
-        if (activeReceiverID !== null) {
-            const dialogSkip = this.store.selectSnapshot(getDialogSkip(activeReceiverID))
-
-            if (dialogSkip !== null) {
-                this.sub.add(
-                    this.httpService.getMessages(activeReceiverID, this.take, dialogSkip).subscribe((messages) => {
-                        if (messages.length === 0) {
-                            this.store.dispatch(updateDialogIsUpload(activeReceiverID, false))
-                        } else {
-                            this.store.dispatch(addDialogMessages(activeReceiverID, messages))
-                            this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
-                        }
+                    return forkJoin({
+                        activeReceiverID: of(activeReceiverID),
+                        dialogSkip: this.store.pipe(
+                            select(selectDialogSkip, { receiverID: activeReceiverID }),
+                            first()
+                        ),
                     })
-                )
-            }
-        }
+                }),
+                switchMap(({ activeReceiverID, dialogSkip }) => {
+                    if (activeReceiverID !== null && dialogSkip !== null) {
+                        return forkJoin({
+                            activeReceiverID: of(activeReceiverID),
+                            dialogSkip: of(dialogSkip),
+                            messages: this.httpService.getMessages(activeReceiverID, this.take, dialogSkip),
+                        })
+                    }
+
+                    return of(null)
+                }),
+                tap((result) => {
+                    if (result) {
+                        const { messages, activeReceiverID, dialogSkip } = result
+
+                        if (messages.length === 0) {
+                            this.store.dispatch(
+                                updateDialogIsUploaded({
+                                    receiverID: activeReceiverID,
+                                    isUploaded: true,
+                                })
+                            )
+                            // this.store.dispatch(updateDialogIsUpload(activeReceiverID, false))
+                        } else {
+                            this.store.dispatch(
+                                addDialogMessages({
+                                    receiverID: activeReceiverID,
+                                    messages,
+                                })
+                            )
+
+                            this.store.dispatch(
+                                updateDialogSkip({
+                                    receiverID: activeReceiverID,
+                                    skip: dialogSkip + this.take,
+                                })
+                            )
+
+                            // this.store.dispatch(addDialogMessages(activeReceiverID, messages))
+                            // this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
+                        }
+                    }
+                })
+            )
+            .subscribe()
+        // const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
+
+        // if (activeReceiverID !== null) {
+        //     const dialogSkip = this.store.selectSnapshot(getDialogSkip(activeReceiverID))
+
+        //     if (dialogSkip !== null) {
+        //         this.sub = this.httpService.getMessages(activeReceiverID, this.take, dialogSkip).subscribe((messages) => {
+        //             if (messages.length === 0) {
+        //                 this.store.dispatch(updateDialogIsUpload(activeReceiverID, false))
+        //             } else {
+        //                 this.store.dispatch(addDialogMessages(activeReceiverID, messages))
+        //                 this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
+        //             }
+        //         })
+        //     }
+        // }
     }
 
     getUserID() {
-        return this.store.selectSnapshot(getUserID())
+        return this.store.select(selectUserID)
     }
 
     ngOnDestroy() {
-        this.sub.unsubscribe()
+        this.subscription.unsubscribe()
     }
 }

@@ -3,10 +3,10 @@ import { NgModule } from '@angular/core'
 import { AppComponent } from './app.component'
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations'
 import { RoutingModule } from './routing/routing.module'
-import { StoreCoreModule } from './store/core/store-core.module'
-import { appInitialState } from './store/states/app.state'
-import { appReducersMap } from './store/reducers/app.reducer'
-import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins'
+import { environment } from 'src/environments/environment'
+import { StoreModule } from '@ngrx/store'
+import { appReducer } from './store/reducers/app.reducer'
+import { StoreDevtoolsModule } from '@ngrx/store-devtools'
 
 @NgModule({
     declarations: [AppComponent],
@@ -14,9 +14,13 @@ import { NG_EVENT_PLUGINS } from '@tinkoff/ng-event-plugins'
         BrowserModule,
         BrowserAnimationsModule,
         RoutingModule,
-        StoreCoreModule.forRoot(appInitialState, appReducersMap),
+        StoreModule.forRoot(appReducer),
+        StoreDevtoolsModule.instrument({
+            maxAge: 25,
+            logOnly: environment.production,
+        }),
     ],
-    providers: [...NG_EVENT_PLUGINS],
+    providers: [],
     bootstrap: [AppComponent],
 })
 export class AppModule {}

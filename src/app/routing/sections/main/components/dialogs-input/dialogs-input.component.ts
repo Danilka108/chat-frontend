@@ -1,15 +1,14 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field'
-import { Component, ElementRef, EventEmitter, NgZone, OnDestroy, OnInit, Output, ViewChild } from '@angular/core'
+import { ChangeDetectionStrategy, Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
-import { BehaviorSubject, Subscription } from 'rxjs'
-import { take } from 'rxjs/operators'
+import { select, Store } from '@ngrx/store'
+import { forkJoin, of, Subscription } from 'rxjs'
+import { first, map, switchMap, take } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { addDialogMessages, addDialogs } from 'src/app/store/actions/main.actions'
-import { Store } from 'src/app/store/core/store'
-import { getUserID } from 'src/app/store/selectors/auth.selectors'
-import { getActiveReceiverID, getDialog } from 'src/app/store/selectors/main.selectors'
-import { IAppState } from 'src/app/store/states/app.state'
-import { IDialog } from '../../interface/dialog.interface'
+import { addDialogMessages, updateDialogLastMessage } from 'src/app/store/actions/main.actions'
+import { selectActiveReceiverIDAndUserID } from 'src/app/store/selectors/app.selectors'
+import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
+import { AppState } from 'src/app/store/state/app.state'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { ScrollBottomService } from '../../services/scroll-bottom.service'
 
@@ -17,6 +16,7 @@ import { ScrollBottomService } from '../../services/scroll-bottom.service'
     selector: 'app-main-dialogs-input',
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogsInputComponent implements OnInit, OnDestroy {
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
@@ -33,9 +33,9 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         private readonly ngZone: NgZone,
         private readonly fb: FormBuilder,
         private readonly httpService: MainSectionHttpService,
-        private readonly store: Store<IAppState>,
         private readonly dateService: DateService,
-        private readonly scrollBottomService: ScrollBottomService
+        private readonly scrollBottomService: ScrollBottomService,
+        private readonly store: Store<AppState>
     ) {}
 
     triggerZone() {
@@ -59,9 +59,9 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
     onMessageInputHeightChange(event: number) {
         this.height = event
 
-        setTimeout(() => {
-            if (this.btnSize === 0) this.btnSize = event
-        })
+        if (this.btnSize === 0 && event !== 0) {
+            setTimeout(() => (this.btnSize = event))
+        }
     }
 
     onSubmit() {
@@ -70,54 +70,59 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         if (!this.loading && message !== null) {
             this.loading = true
 
-            const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
+            this.sub.add(
+                this.store
+                    .pipe(
+                        select(selectActiveReceiverID),
+                        switchMap((activeReceiverID) => {
+                            if (activeReceiverID === null) return of(null)
 
-            if (activeReceiverID) {
-                const req = this.httpService.sendMessage(activeReceiverID, message)
+                            return this.httpService.sendMessage(activeReceiverID, message)
+                        }),
+                        switchMap((messageID) =>
+                            forkJoin({
+                                messageID: of(messageID),
+                                state: this.store.pipe(select(selectActiveReceiverIDAndUserID), first()),
+                            })
+                        ),
+                        map(({ messageID, state: { activeReceiverID, userID } }) => {
+                            if (messageID && activeReceiverID && userID) {
+                                const nowDate = this.dateService.now()
 
-                this.sub.add(
-                    req.subscribe((messageID) => {
-                        const userID = this.store.selectSnapshot(getUserID())
-                        const dialog = this.store.selectSnapshot(getDialog(activeReceiverID))
-                        const nowDate = this.dateService.now()
-
-                        if (userID && messageID && dialog) {
-                            this.store.dispatch(
-                                addDialogMessages(activeReceiverID, [
-                                    {
-                                        senderID: userID,
+                                this.store.dispatch(
+                                    addDialogMessages({
                                         receiverID: activeReceiverID,
-                                        message,
-                                        messageID,
+                                        messages: [
+                                            {
+                                                senderID: userID,
+                                                receiverID: activeReceiverID,
+                                                message,
+                                                messageID,
+                                                createdAt: nowDate,
+                                                updatedAt: nowDate,
+                                                isReaded: false,
+                                                isUpdated: false,
+                                            },
+                                        ],
+                                    })
+                                )
+
+                                this.store.dispatch(
+                                    updateDialogLastMessage({
+                                        receiverID: activeReceiverID,
+                                        lastMessage: message,
                                         createdAt: nowDate,
-                                        updatedAt: nowDate,
-                                        isReaded: false,
-                                        isUpdated: false,
-                                    },
-                                ])
-                            )
+                                    })
+                                )
 
-                            this.store.dispatch(
-                                addDialogs([
-                                    {
-                                        receiverID: dialog.receiverID,
-                                        receiverName: dialog.receiverName,
-                                        latestMessage: message,
-                                        createdAt: nowDate,
-                                        notReadedMessagesCount: dialog.notReadedMessagesCount,
-                                    },
-                                ])
-                            )
-                        }
+                                this.scrollBottomService.emitScrollBottom()
+                            }
 
-                        this.scrollBottomService.emitScrollBottom(false)
-
-                        this.completeSubmit()
-                    })
-                )
-            } else {
-                this.completeSubmit()
-            }
+                            this.completeSubmit()
+                        })
+                    )
+                    .subscribe()
+            )
         }
     }
 

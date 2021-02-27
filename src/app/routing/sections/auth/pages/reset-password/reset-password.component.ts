@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core'
+import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { AuthSectionHttpService } from '../../services/auth-section-http.service'
 import { Router } from '@angular/router'
@@ -9,6 +9,7 @@ import { authSectionResetPasswordCheckEmailPath } from 'src/app/routing/routing.
 @Component({
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class ResetPasswordComponent implements OnDestroy {
     formGroup = new FormGroup({

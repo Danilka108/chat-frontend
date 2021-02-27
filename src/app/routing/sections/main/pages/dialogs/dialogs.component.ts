@@ -1,20 +1,21 @@
-import { Component, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 import { ActivatedRoute, Router } from '@angular/router'
-import { Observable, of, Subject, Subscription } from 'rxjs'
-import { catchError, delay, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
+import { select, Store } from '@ngrx/store'
+import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs'
+import { catchError, delay, first, map, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
-import { Store } from 'src/app/store/core/store'
-import { getConnectionError } from 'src/app/store/selectors/auth.selectors'
-import { getDialogs, getRequestLoading } from 'src/app/store/selectors/main.selectors'
-import { IAppState } from 'src/app/store/states/app.state'
+import { selectConnectionError } from 'src/app/store/selectors/auth.selectors'
+import { selectDialogs, selectDialogsReceiverIDs, selectRequestLoading } from 'src/app/store/selectors/main.selectors'
+import { AppState } from 'src/app/store/state/app.state'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
 
 @Component({
     selector: 'app-dialogs',
     templateUrl: './dialogs.component.html',
     styleUrls: ['./dialogs.component.scss'],
+    changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class DialogsComponent implements OnInit, OnDestroy {
     noConnectionDialog: MatDialogRef<NoConnectionComponent> | null = null
@@ -26,7 +27,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
     topReachedEvent$ = this.topReachedEvent.asObservable()
 
     constructor(
-        private readonly store: Store<IAppState>,
+        private readonly store: Store<AppState>,
         private readonly dialog: MatDialog,
         private readonly route: ActivatedRoute,
         private readonly router: Router
@@ -37,34 +38,39 @@ export class DialogsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.requestLoading$ = this.store.select(getRequestLoading()).pipe(startWith(true), delay(0))
-
-        this.sub = this.store.select(getConnectionError()).subscribe((isError) => {
-            if (!this.noConnectionDialog && isError) {
-                this.noConnectionDialog = this.dialog.open(NoConnectionComponent, {
-                    closeOnNavigation: true,
-                    disableClose: true,
-                })
-            } else if (this.noConnectionDialog && !isError) {
-                this.noConnectionDialog.close()
-            }
-        })
+        this.requestLoading$ = this.store.pipe(select(selectRequestLoading), startWith(true), delay(0))
 
         this.sub = this.store
-            .select(getDialogs())
             .pipe(
+                select(selectConnectionError),
+                map((isError) => {
+                    if (!this.noConnectionDialog && isError) {
+                        this.noConnectionDialog = this.dialog.open(NoConnectionComponent, {
+                            closeOnNavigation: true,
+                            disableClose: true,
+                        })
+                    } else if (this.noConnectionDialog && !isError) {
+                        this.noConnectionDialog.close()
+                    }
+                })
+            )
+            .subscribe()
+
+        this.sub = this.store
+            .pipe(
+                select(selectDialogs),
                 skipWhile((dialogs) => dialogs.length === 0),
-                switchMap(() => this.route.params),
-                tap((params) => {
+                switchMap(() =>
+                    combineLatest([this.route.params, this.store.pipe(select(selectDialogsReceiverIDs), first())])
+                ),
+                tap(([params, dialogsIDs]) => {
                     const id = Number(params['id'])
 
-                    const dialogsIDs = this.store.selectSnapshot(getDialogs()).map((dialog) => dialog.receiverID)
-
                     if (isNaN(id) || !dialogsIDs.includes(id)) {
-                        this.store.dispatch(updateActiveReceiverID(null))
+                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
                         this.router.navigateByUrl(mainSectionDialogsPath.full)
                     } else {
-                        this.store.dispatch(updateActiveReceiverID(id))
+                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: id }))
                     }
                 }),
                 catchError(() => of())

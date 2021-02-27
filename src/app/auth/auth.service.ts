@@ -1,0 +1,46 @@
+import { Injectable } from '@angular/core'
+import { select, Store } from '@ngrx/store'
+import { of } from 'rxjs'
+import { Observable } from 'rxjs'
+import { catchError, first, switchMap, tap } from 'rxjs/operators'
+import { selectAccessToken } from '../store/selectors/auth.selectors'
+import { AppState } from '../store/state/app.state'
+import { SessionService } from '../session/session.service'
+
+const REQUEST_INVALID_TOKEN_ERROR_STATUS = 401
+const UPDATE_TOKEN_MAX_COUNT = 2
+
+@Injectable()
+export class AuthService {
+    constructor(private readonly store: Store<AppState>, private readonly sessionService: SessionService) {}
+
+    private updatingCount = 0
+
+    authRequest<R>(request: (accessToken: string) => Observable<R>): Observable<R | null> {
+        return this.store.pipe(
+            select(selectAccessToken),
+            first(),
+            switchMap((accessToken) => request(accessToken)),
+            catchError((error) => {
+                if (this.updatingCount > UPDATE_TOKEN_MAX_COUNT) {
+                    this.sessionService.remove()
+                    return of(null)
+                }
+
+                if (error.status === REQUEST_INVALID_TOKEN_ERROR_STATUS) {
+                    return this.sessionService.update().pipe(
+                        switchMap(() => {
+                            this.updatingCount += 1
+                            return this.authRequest(request)
+                        })
+                    )
+                }
+
+                return of(null)
+            }),
+            tap(() => {
+                this.updatingCount = 0
+            })
+        )
+    }
+}

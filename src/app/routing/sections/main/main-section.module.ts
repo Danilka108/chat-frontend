@@ -20,7 +20,6 @@ import { MessageInputDirective } from './directives/message-input.directive'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { DialogsScrollComponent } from './components/dialogs-scroll/dialogs-scroll.component'
 import { DialogsScrollBottomComponent } from './components/dialogs-scroll-bottom/dialogs-scroll-bottom.component'
-import { InfiniteScrollModule } from 'ngx-infinite-scroll'
 import { ScrollBottomService } from './services/scroll-bottom.service'
 
 @NgModule({
@@ -46,7 +45,6 @@ import { ScrollBottomService } from './services/scroll-bottom.service'
         NgScrollbarModule,
         ReactiveFormsModule,
         FormsModule,
-        InfiniteScrollModule,
     ],
     providers: [MainSectionHttpService, MessageService, ScrollBottomService],
 })

@@ -1,20 +1,11 @@
-import { ISelect } from '../core/interfaces/select.interface'
-import { IAppState } from '../states/app.state'
+import { createFeatureSelector, createSelector } from '@ngrx/store'
+import { AppState } from '../state/app.state'
+import { authKey, AuthState } from '../state/auth.state'
 
-export const getUserID = (): ISelect<IAppState, number | null> => {
-    return {
-        selectorFn: (state) => state.auth.userID,
-    }
-}
+export const selectAuth = createFeatureSelector<AppState, AuthState>(authKey)
 
-export const getAccessToken = (): ISelect<IAppState, string> => {
-    return {
-        selectorFn: (state) => state.auth.accessToken,
-    }
-}
+export const selectUserID = createSelector(selectAuth, (authState) => authState.userID)
 
-export const getConnectionError = (): ISelect<IAppState, boolean> => {
-    return {
-        selectorFn: (state) => state.auth.connectionError,
-    }
-}
+export const selectAccessToken = createSelector(selectAuth, (authState) => authState.accessToken)
+
+export const selectConnectionError = createSelector(selectAuth, (authState) => authState.connectionError)

@@ -17,29 +17,32 @@ export class AuthService {
     private updatingCount = 0
 
     authRequest<R>(request: (accessToken: string) => Observable<R>): Observable<R | null> {
+        return this.request(request).pipe(
+            tap(() => {
+                if (this.updatingCount !== UPDATE_TOKEN_MAX_COUNT) {
+                    this.updatingCount = 0
+                }
+            })
+        )
+    }
+
+    private request<R>(request: (accessToken: string) => Observable<R>): Observable<R | null> {
         return this.store.pipe(
             select(selectAccessToken),
             first(),
             switchMap((accessToken) => request(accessToken)),
             catchError((error) => {
-                if (this.updatingCount > UPDATE_TOKEN_MAX_COUNT) {
+                if (this.updatingCount >= UPDATE_TOKEN_MAX_COUNT) {
                     this.sessionService.remove()
                     return of(null)
                 }
 
                 if (error.status === REQUEST_INVALID_TOKEN_ERROR_STATUS) {
-                    return this.sessionService.update().pipe(
-                        switchMap(() => {
-                            this.updatingCount += 1
-                            return this.authRequest(request)
-                        })
-                    )
+                    this.updatingCount += 1
+                    return this.sessionService.update().pipe(switchMap(() => this.request(request)))
                 }
 
                 return of(null)
-            }),
-            tap(() => {
-                this.updatingCount = 0
             })
         )
     }

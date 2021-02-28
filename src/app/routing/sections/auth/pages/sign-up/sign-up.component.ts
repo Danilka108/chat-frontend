@@ -12,7 +12,7 @@ import { checkEmailAsyncValidator } from '../../validators/check-email-async.val
 @Component({
     selector: 'app-auth-sign-up',
     templateUrl: './sign-up.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignUpComponent implements OnDestroy {
     formGroup = new FormGroup(

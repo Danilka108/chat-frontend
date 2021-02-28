@@ -17,7 +17,7 @@ const SMALL_SIZE_MAX_WIDTH = 800
     selector: 'app-main-dialogs-group',
     templateUrl: './dialogs-group.component.html',
     styleUrls: ['./dialogs-group.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsGroupComponent implements OnInit, OnDestroy {
     dialogs$!: Observable<IDialog[]>

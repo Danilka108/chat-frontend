@@ -61,7 +61,6 @@ export class MainSectionHttpService {
     }
 
     getMessages(receiverID: number, take: number, skip: number) {
-        console.log('get messages')
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
 
         const params = new HttpParams().set('take', `${take}`).set('skip', `${skip}`)

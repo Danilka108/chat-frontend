@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
     selector: 'app-auth-redirect',
     templateUrl: './redirect.component.html',
     styleUrls: ['./redirect.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RedirectComponent {
     @Input() link!: string

@@ -11,7 +11,7 @@ import { AuthSectionHttpService } from '../../services/auth-section-http.service
     selector: 'app-auth-sing-in',
     templateUrl: './sign-in.component.html',
     styleUrls: ['./sign-in.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SignInComponent implements OnDestroy {
     passwordHide = true

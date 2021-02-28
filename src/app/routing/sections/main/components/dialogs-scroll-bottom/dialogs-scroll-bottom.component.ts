@@ -6,7 +6,7 @@ import { ScrollBottomService } from '../../services/scroll-bottom.service'
     selector: 'app-main-dialogs-scroll-bottom',
     templateUrl: './dialogs-scroll-bottom.component.html',
     styleUrls: ['./dialogs-scroll-bottom.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsScrollBottomComponent implements OnInit, OnDestroy {
     isViewed$!: Observable<boolean>

@@ -21,6 +21,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { DialogsScrollComponent } from './components/dialogs-scroll/dialogs-scroll.component'
 import { DialogsScrollBottomComponent } from './components/dialogs-scroll-bottom/dialogs-scroll-bottom.component'
 import { ScrollBottomService } from './services/scroll-bottom.service'
+import { WsModule } from 'src/app/ws/ws.module'
 
 @NgModule({
     declarations: [
@@ -45,6 +46,7 @@ import { ScrollBottomService } from './services/scroll-bottom.service'
         NgScrollbarModule,
         ReactiveFormsModule,
         FormsModule,
+        WsModule,
     ],
     providers: [MainSectionHttpService, MessageService, ScrollBottomService],
 })

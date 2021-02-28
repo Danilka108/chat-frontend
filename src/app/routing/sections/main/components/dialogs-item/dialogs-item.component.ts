@@ -4,7 +4,7 @@ import { ChangeDetectionStrategy, Component, EventEmitter, Input } from '@angula
     selector: 'app-main-dialogs-item',
     templateUrl: './dialogs-item.component.html',
     styleUrls: ['./dialogs-item.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsItemComponent {
     click = new EventEmitter<null>()

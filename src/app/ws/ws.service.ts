@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core'
 import { DeviceDetectorService } from 'ngx-device-detector'
 import { Observable, of } from 'rxjs'
-import { first, switchMap, tap } from 'rxjs/operators'
+import { first, switchMap } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 import socketio from 'socket.io-client'
 import { ISocket } from './socket.interface'
@@ -14,9 +14,9 @@ import { selectAccessToken } from '../store/selectors/auth.selectors'
 const WS_RECONNECTION_DELAY = 2500
 
 @Injectable()
-export class SocketService {
-    updatingCount = 0
-    connectionError = false
+export class WsService {
+    private updatingCount = 0
+    private connectionError = false
 
     constructor(
         private readonly deviceService: DeviceDetectorService,
@@ -27,21 +27,15 @@ export class SocketService {
     getSocket(): Observable<ISocket | null> {
         return this.updateSocket().pipe(
             switchMap((socket) => {
-                if (this.updatingCount > UPDATE_TOKEN_MAX_COUNT) {
+                if (this.updatingCount >= UPDATE_TOKEN_MAX_COUNT) {
                     this.sessionService.remove()
                     return of(null)
                 }
 
                 if (socket === null) {
                     return this.sessionService.update().pipe(
-                        tap((isUpdated) => {
-                            if (isUpdated) {
-                                this.updatingCount = 0
-                            } else {
-                                this.updatingCount += 1
-                            }
-                        }),
                         switchMap(() => {
+                            this.updatingCount += 1
                             return this.getSocket()
                         })
                     )
@@ -52,14 +46,14 @@ export class SocketService {
         )
     }
 
-    updateSocket() {
-        return this.store.pipe(select(selectAccessToken), first(), switchMap(this.createSocket))
+    private updateSocket() {
+        return this.store.pipe(select(selectAccessToken), first(), switchMap(this.createSocket.bind(this)))
     }
 
-    createSocket(accessToken: string): Observable<ISocket | null> {
-        return new Observable((observer) => {
-            const deviceInfo = this.deviceService.getDeviceInfo()
+    private createSocket(accessToken: string): Observable<ISocket | null> {
+        const deviceInfo = this.deviceService.getDeviceInfo()
 
+        return new Observable((observer) => {
             if (accessToken) {
                 const socket: ISocket = socketio(environment.url, {
                     reconnectionDelay: WS_RECONNECTION_DELAY,
@@ -75,13 +69,15 @@ export class SocketService {
                     this.connectionError = true
                 })
 
-                socket.on('connect', () => {
-                    this.connectionError = false
-                })
-
                 socket.on('error:invalid_token', () => {
+                    this.connectionError = true
                     socket.disconnect()
                     observer.next(null)
+                })
+
+                socket.on('user:connect_success', () => {
+                    this.connectionError = false
+                    this.updatingCount = 0
                 })
 
                 socket.emit('user:connect')

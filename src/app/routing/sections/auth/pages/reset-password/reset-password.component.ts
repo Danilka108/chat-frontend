@@ -9,7 +9,7 @@ import { authSectionResetPasswordCheckEmailPath } from 'src/app/routing/routing.
 @Component({
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordComponent implements OnDestroy {
     formGroup = new FormGroup({

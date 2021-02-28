@@ -16,7 +16,7 @@ import { ScrollBottomService } from '../../services/scroll-bottom.service'
     selector: 'app-main-dialogs-input',
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsInputComponent implements OnInit, OnDestroy {
     @ViewChild('autosize') autosize!: CdkTextareaAutosize

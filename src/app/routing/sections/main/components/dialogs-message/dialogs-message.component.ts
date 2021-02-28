@@ -5,7 +5,7 @@ import { DateService } from 'src/app/common/date.service'
     selector: 'app-main-dialogs-message',
     templateUrl: './dialogs-message.component.html',
     styleUrls: ['./dialogs-message.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsMessageComponent {
     @Input() @HostBinding('class.own-msg') isOwnMsg!: boolean

@@ -15,7 +15,7 @@ import { NoConnectionComponent } from '../../components/no-connection/no-connect
     selector: 'app-dialogs',
     templateUrl: './dialogs.component.html',
     styleUrls: ['./dialogs.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsComponent implements OnInit, OnDestroy {
     noConnectionDialog: MatDialogRef<NoConnectionComponent> | null = null

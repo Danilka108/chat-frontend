@@ -5,7 +5,6 @@ import {
     Component,
     ElementRef,
     EventEmitter,
-
     OnDestroy,
     Output,
     ViewChild,
@@ -29,7 +28,7 @@ const SCROLLBAR_UPLOAD_EVENT_FACTOR = 0.3
     selector: 'app-main-dialogs-scroll',
     templateUrl: './dialogs-scroll.component.html',
     styleUrls: ['./dialogs-scroll.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
     @ViewChild('scrollbar') scrollbar!: ElementRef<HTMLElement>
@@ -67,7 +66,7 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                     setTimeout(() => {
                         if (isSmooth) {
                             scrollbar.scrollTo({
-                                top: this.contentHeight.current,
+                                top: scrollbar.scrollHeight,
                                 behavior: 'smooth',
                             })
                         } else {
@@ -117,13 +116,11 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                 tap(({ activeReceiverID, dialogScroll }) => {
                     if (this.updatingContent) {
                         scrollbar.scrollTop += this.contentHeight.current - this.contentHeight.previous
-                    } else {
-                        if (activeReceiverID !== null) {
-                            if (dialogScroll !== null) {
-                                scrollbar.scrollTop = dialogScroll
-                            } else {
-                                scrollbar.scrollTop = this.contentHeight.current
-                            }
+                    } else if (activeReceiverID !== null) {
+                        if (dialogScroll !== null) {
+                            scrollbar.scrollTop = dialogScroll
+                        } else {
+                            scrollbar.scrollTop = this.contentHeight.current
                         }
                     }
                 })

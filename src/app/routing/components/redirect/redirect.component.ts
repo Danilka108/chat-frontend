@@ -3,6 +3,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core'
 @Component({
     selector: 'app-redirect',
     template: ``,
-    changeDetection: ChangeDetectionStrategy.OnPush
+    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class RedirectComponent {}

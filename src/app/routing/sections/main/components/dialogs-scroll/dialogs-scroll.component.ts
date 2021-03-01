@@ -87,7 +87,7 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                 switchMap(() => this.height$),
                 tap(() => {
                     if (this.updatingContent) {
-                        this.updatingContent = false
+                        setTimeout(() => this.updatingContent = false)
                     }
                 }),
                 catchError(() => of())

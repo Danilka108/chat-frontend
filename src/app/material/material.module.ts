@@ -10,6 +10,7 @@ import { MatButtonToggleModule } from '@angular/material/button-toggle'
 import { MatRippleModule } from '@angular/material/core'
 import { MatDialogModule } from '@angular/material/dialog'
 import { MatBadgeModule } from '@angular/material/badge'
+import { MatSnackBarModule } from '@angular/material/snack-bar'
 
 @NgModule({
     declarations: [],
@@ -25,6 +26,7 @@ import { MatBadgeModule } from '@angular/material/badge'
         MatButtonToggleModule,
         MatRippleModule,
         MatBadgeModule,
+        MatSnackBarModule,
     ],
 })
 export class MaterialModule {}

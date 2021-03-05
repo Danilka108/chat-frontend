@@ -43,12 +43,7 @@ export class MainSectionHttpService {
                             authorization: `Bearer ${accessToken}`,
                         },
                     })
-                    .pipe(
-                        map((val) => {
-                            const v = val as IGetDialogsResponse
-                            return v.data
-                        })
-                    )
+                    .pipe(map((val) => (val as IGetDialogsResponse).data))
             })
             .pipe(
                 map((dialogs) => {
@@ -66,27 +61,21 @@ export class MainSectionHttpService {
         const params = new HttpParams().set('take', `${take}`).set('skip', `${skip}`)
 
         return this.authService
-            .authRequest((accessToken) => {
-                return this.httpClient
+            .authRequest((accessToken) =>
+                this.httpClient
                     .get(`${environment.apiUrl}/message/${receiverID}`, {
                         headers: {
                             authorization: `Bearer ${accessToken}`,
                         },
                         params,
                     })
-                    .pipe(
-                        map((result) => {
-                            const value = result as IGetMessagesResponse
-                            return value.data
-                        })
-                    )
-            })
+                    .pipe(map((result) => (result as IGetMessagesResponse).data))
+            )
             .pipe(
                 map((result) => {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
 
-                    if (!result) return []
-                    return result
+                    return result === null ? [] : result
                 })
             )
     }
@@ -108,13 +97,7 @@ export class MainSectionHttpService {
                             },
                         }
                     )
-                    .pipe(
-                        map((result) => {
-                            const value = result as ISendMessageResponse
-
-                            return value.data.messageID
-                        })
-                    )
+                    .pipe(map((result) => (result as ISendMessageResponse).data.messageID))
             })
             .pipe(
                 map((messageID) => {

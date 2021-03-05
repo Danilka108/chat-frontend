@@ -2,9 +2,11 @@ import { ChangeDetectionStrategy, Component, HostListener, Input, OnDestroy, OnI
 import { select, Store } from '@ngrx/store'
 import { forkJoin, Observable, of, Subscription } from 'rxjs'
 import { filter, first, map, switchMap, tap } from 'rxjs/operators'
+import { DateService } from 'src/app/common/date.service'
 import {
     addDialogMessages,
     updateDialogIsUploaded,
+    updateDialogLastMessage,
     updateDialogNewMessagesCount,
     updateDialogSkip,
 } from 'src/app/store/actions/main.actions'
@@ -13,10 +15,13 @@ import {
     selectActiveReceiverID,
     selectDialog,
     selectDialogMessages,
+    selectDialogNewMessagesCount,
     selectDialogSkip,
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
-import { IMessageWithIsLast } from '../../interface/message.interface'
+import { WsEvents } from 'src/app/ws/ws.events'
+import { WsService } from 'src/app/ws/ws.service'
+import { IMessage, IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
 
@@ -41,7 +46,9 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     constructor(
         private readonly store: Store<AppState>,
         private readonly httpService: MainSectionHttpService,
-        private readonly messageService: MessageService
+        private readonly messageService: MessageService,
+        private readonly wsService: WsService,
+        private readonly dateService: DateService
     ) {}
 
     set sub(sub: Subscription) {
@@ -135,6 +142,64 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                 })
             )
             .subscribe()
+
+        this.sub = this.wsService
+            .fromEvent<IMessage>(WsEvents.user.newMessage)
+            .pipe(
+                switchMap((message) =>
+                    forkJoin({
+                        message: of(message),
+                        userID: this.store.pipe(select(selectUserID), first()),
+                    })
+                ),
+                switchMap(({ message, userID }) => {
+                    const receiverID = userID === message.receiverID ? message.senderID : message.receiverID
+
+                    return forkJoin({
+                        receiverID: of(receiverID),
+                        message: of(message),
+                        dialogSkip: this.store.pipe(select(selectDialogSkip, { receiverID }), first()),
+                        dialogNewMessagesCount: this.store.pipe(
+                            select(selectDialogNewMessagesCount, { receiverID }),
+                            first()
+                        ),
+                    })
+                }),
+                map(({ message, receiverID, dialogSkip, dialogNewMessagesCount }) => {
+                    const dlgSkip = dialogSkip === null ? 0 : dialogSkip
+                    const dlgNewMessagesCount = dialogNewMessagesCount === null ? 0 : dialogNewMessagesCount
+
+                    this.store.dispatch(
+                        addDialogMessages({
+                            receiverID,
+                            messages: [message],
+                        })
+                    )
+
+                    this.store.dispatch(
+                        updateDialogLastMessage({
+                            receiverID,
+                            lastMessage: message.message,
+                            createdAt: this.dateService.now(),
+                        })
+                    )
+
+                    this.store.dispatch(
+                        updateDialogSkip({
+                            receiverID,
+                            skip: dlgSkip,
+                        })
+                    )
+
+                    this.store.dispatch(
+                        updateDialogNewMessagesCount({
+                            receiverID,
+                            newMessagesCount: dlgNewMessagesCount + 1,
+                        })
+                    )
+                })
+            )
+            .subscribe()
     }
 
     @HostListener('window:resize')
@@ -185,7 +250,6 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                                     isUploaded: true,
                                 })
                             )
-                            // this.store.dispatch(updateDialogIsUpload(activeReceiverID, false))
                         } else {
                             this.store.dispatch(
                                 addDialogMessages({
@@ -200,30 +264,11 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                                     skip: dialogSkip + this.take,
                                 })
                             )
-
-                            // this.store.dispatch(addDialogMessages(activeReceiverID, messages))
-                            // this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
                         }
                     }
                 })
             )
             .subscribe()
-        // const activeReceiverID = this.store.selectSnapshot(getActiveReceiverID())
-
-        // if (activeReceiverID !== null) {
-        //     const dialogSkip = this.store.selectSnapshot(getDialogSkip(activeReceiverID))
-
-        //     if (dialogSkip !== null) {
-        //         this.sub = this.httpService.getMessages(activeReceiverID, this.take, dialogSkip).subscribe((messages) => {
-        //             if (messages.length === 0) {
-        //                 this.store.dispatch(updateDialogIsUpload(activeReceiverID, false))
-        //             } else {
-        //                 this.store.dispatch(addDialogMessages(activeReceiverID, messages))
-        //                 this.store.dispatch(updateDialogSkip(activeReceiverID, dialogSkip + this.take))
-        //             }
-        //         })
-        //     }
-        // }
     }
 
     getUserID() {

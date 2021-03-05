@@ -2,10 +2,11 @@ import { Injectable } from '@angular/core'
 import { Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
 import { forkJoin, of } from 'rxjs'
-import { catchError, first, map, switchMap } from 'rxjs/operators'
+import { catchError, first, map, switchMap, tap } from 'rxjs/operators'
 import { updateAccessToken, updateUserID } from '../store/actions/auth.actions'
 import { selectAccessToken, selectUserID } from '../store/selectors/auth.selectors'
 import { AppState } from '../store/state/app.state'
+import { SessionErrorService } from './session-error.service'
 import { SessionHttpService } from './session-http.service'
 import { SessionLocalStorageService } from './session-local-storage.service'
 
@@ -15,7 +16,8 @@ export class SessionService {
         private readonly localStorageService: SessionLocalStorageService,
         private readonly httpService: SessionHttpService,
         private readonly store: Store<AppState>,
-        private readonly router: Router
+        private readonly router: Router,
+        private readonly sessionErrorService: SessionErrorService
     ) {}
 
     update() {
@@ -48,6 +50,7 @@ export class SessionService {
     }
 
     remove() {
+        this.sessionErrorService.emit()
         this.localStorageService.removeRefreshToken()
         this.localStorageService.removeUserID()
         this.router.navigateByUrl('')

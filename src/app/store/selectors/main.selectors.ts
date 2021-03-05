@@ -1,5 +1,4 @@
 import { createFeatureSelector, createSelector } from '@ngrx/store'
-import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface'
 import { AppState } from '../state/app.state'
 import { mainKey, MainState } from '../state/main.state'
 
@@ -7,87 +6,79 @@ export const selectMain = createFeatureSelector<AppState, MainState>(mainKey)
 
 export const selectActiveReceiverID = createSelector(selectMain, (mainState) => mainState.activeReceiverID)
 
-export const selectDialogs = createSelector(selectMain, (mainState: MainState): IDialog[] => mainState.dialogs)
+export const selectRequestLoading = createSelector(selectMain, (mainState) => mainState.requestLoading)
 
-export const selectDialogsReceiverIDs = createSelector(selectMain, (mainState) => {
-    return mainState.dialogs.map((dialog) => {
-        return dialog.receiverID
-    })
+export const selectDialogsReceiverIDs = createSelector(selectMain, (state) => {
+    if (state.dialogs === null) return []
+
+    return state.dialogs.map((dialog) => dialog.receiverID)
 })
 
-export const selectDialog = createSelector(
+export const selectDialogs = createSelector(selectMain, (state) => state.dialogs)
+
+export const selectDialog = createSelector(selectMain, (state: MainState, { receiverID }: { receiverID: number }) => {
+    if (state.dialogs === null) return null
+
+    const index = state.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+
+    if (index === -1) return null
+
+    return state.dialogs[index]
+})
+
+export const selectDialogNewMessagesCount = createSelector(
     selectMain,
-    (mainState: MainState, { receiverID }: { receiverID: number }): IDialog | null => {
-        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+    (state: MainState, { receiverID }: { receiverID: number }) => {
+        if (state.dialogs === null) return null
 
-        if (dialogIndex > -1) {
-            const { receiverID, receiverName, lastMessage, createdAt, newMessagesCount } = mainState.dialogs[
-                dialogIndex
-            ]
+        const index = state.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
-            return {
-                receiverID,
-                receiverName,
-                lastMessage,
-                createdAt,
-                newMessagesCount,
-            }
-        }
+        if (index === -1) return null
 
-        return null
+        return state.dialogs[index].newMessagesCount
     }
 )
 
 export const selectDialogMessages = createSelector(
     selectMain,
-    (mainState: MainState, { receiverID }: { receiverID: number }) => {
-        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+    (state: MainState, { receiverID }: { receiverID: number }) => {
+        const index = state.messages.findIndex((dialog) => dialog.receiverID === receiverID)
 
-        if (dialogIndex > -1) {
-            return mainState.dialogs[dialogIndex].messages
-        } else {
-            return null
-        }
+        if (index === -1) return null
+
+        return state.messages[index].messages
     }
 )
 
 export const selectDialogScroll = createSelector(
     selectMain,
-    (mainState: MainState, { receiverID }: { receiverID: number }) => {
-        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+    (state: MainState, { receiverID }: { receiverID: number }) => {
+        const index = state.scroll.findIndex((dialog) => dialog.receiverID === receiverID)
 
-        if (dialogIndex > -1) {
-            return mainState.dialogs[dialogIndex].scroll
-        } else {
-            return null
-        }
+        if (index === -1) return null
+
+        return state.scroll[index].scroll
     }
 )
 
 export const selectDialogSkip = createSelector(
     selectMain,
-    (mainState: MainState, { receiverID }: { receiverID: number }) => {
-        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+    (state: MainState, { receiverID }: { receiverID: number }) => {
+        const index = state.skip.findIndex((dialog) => dialog.receiverID === receiverID)
 
-        if (dialogIndex > -1) {
-            return mainState.dialogs[dialogIndex].skip
-        } else {
-            return null
-        }
+        if (index === -1) return null
+
+        return state.skip[index].skip
     }
 )
 
 export const selectDialogIsUploaded = createSelector(
     selectMain,
-    (mainState: MainState, { receiverID }: { receiverID: number }) => {
-        const dialogIndex = mainState.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+    (state: MainState, { receiverID }: { receiverID: number }) => {
+        const index = state.isUploaded.findIndex((dialog) => dialog.receiverID === receiverID)
 
-        if (dialogIndex > -1) {
-            return mainState.dialogs[dialogIndex].isUploaded
-        } else {
-            return null
-        }
+        if (index === -1) return null
+
+        return state.isUploaded[index].isUploaded
     }
 )
-
-export const selectRequestLoading = createSelector(selectMain, (mainState) => mainState.requestLoading)

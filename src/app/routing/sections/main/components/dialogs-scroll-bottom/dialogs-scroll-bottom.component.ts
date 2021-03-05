@@ -28,7 +28,7 @@ export class DialogsScrollBottomComponent implements OnInit, OnDestroy {
     }
 
     onClick() {
-        this.scrollBottomService.emitScrollBottom()
+        this.scrollBottomService.emitScrollBottom(false)
         this.isDisabled = true
     }
 

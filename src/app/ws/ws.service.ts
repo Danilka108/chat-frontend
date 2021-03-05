@@ -4,12 +4,12 @@ import { Observable, of } from 'rxjs'
 import { first, switchMap } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 import socketio from 'socket.io-client'
-import { ISocket } from './socket.interface'
 import { SessionService } from '../session/session.service'
 import { UPDATE_TOKEN_MAX_COUNT } from '../session/session.constants'
 import { AppState } from '../store/state/app.state'
 import { select, Store } from '@ngrx/store'
 import { selectAccessToken } from '../store/selectors/auth.selectors'
+import { WsEvents } from './ws.events'
 
 const WS_RECONNECTION_DELAY = 2500
 
@@ -18,14 +18,38 @@ export class WsService {
     private updatingCount = 0
     private connectionError = false
 
+    private socket: Observable<SocketIOClient.Socket | null> | null = null
+
     constructor(
         private readonly deviceService: DeviceDetectorService,
         private readonly store: Store<AppState>,
         private readonly sessionService: SessionService
     ) {}
 
-    getSocket(): Observable<ISocket | null> {
-        return this.updateSocket().pipe(
+    fromEvent<T>(event: string) {
+        if (this.socket === null) {
+            this.socket = this.getSocket()
+        }
+
+        return this.socket.pipe(
+            switchMap(
+                (socket) =>
+                    new Observable<T>((observer) => {
+                        if (socket !== null) {
+                            socket.on(event, (data: T) => {
+                                observer.next(data)
+                            })
+                        }
+                    })
+            )
+        )
+    }
+
+    private getSocket(): Observable<SocketIOClient.Socket | null> {
+        return this.store.pipe(
+            select(selectAccessToken),
+            first(),
+            switchMap((accessToken) => this.createSocket(accessToken)),
             switchMap((socket) => {
                 if (this.updatingCount >= UPDATE_TOKEN_MAX_COUNT) {
                     this.sessionService.remove()
@@ -46,16 +70,12 @@ export class WsService {
         )
     }
 
-    private updateSocket() {
-        return this.store.pipe(select(selectAccessToken), first(), switchMap(this.createSocket.bind(this)))
-    }
-
-    private createSocket(accessToken: string): Observable<ISocket | null> {
+    private createSocket(accessToken: string): Observable<SocketIOClient.Socket | null> {
         const deviceInfo = this.deviceService.getDeviceInfo()
 
         return new Observable((observer) => {
             if (accessToken) {
-                const socket: ISocket = socketio(environment.url, {
+                const socket = socketio(environment.url, {
                     reconnectionDelay: WS_RECONNECTION_DELAY,
                     reconnection: true,
                     query: {
@@ -65,22 +85,24 @@ export class WsService {
                     },
                 })
 
+                socket.on('connect', () => {
+                    socket.emit(WsEvents.user.connect)
+                })
+
                 socket.on('connect_error', () => {
                     this.connectionError = true
                 })
 
-                socket.on('error:invalid_token', () => {
+                socket.on(WsEvents.user.invalidToken, () => {
                     this.connectionError = true
                     socket.disconnect()
                     observer.next(null)
                 })
 
-                socket.on('user:connect_success', () => {
+                socket.on(WsEvents.user.connectSuccess, () => {
                     this.connectionError = false
                     this.updatingCount = 0
                 })
-
-                socket.emit('user:connect')
 
                 observer.next(socket)
             } else {

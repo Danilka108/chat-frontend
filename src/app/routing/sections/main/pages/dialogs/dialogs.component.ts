@@ -5,10 +5,13 @@ import { select, Store } from '@ngrx/store'
 import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs'
 import { catchError, delay, first, map, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
+import { updateAccessToken } from 'src/app/store/actions/auth.actions'
 import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
 import { selectConnectionError } from 'src/app/store/selectors/auth.selectors'
 import { selectDialogs, selectDialogsReceiverIDs, selectRequestLoading } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
+import { WsEvents } from 'src/app/ws/ws.events'
+import { WsService } from 'src/app/ws/ws.service'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
 
 @Component({
@@ -59,7 +62,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
         this.sub = this.store
             .pipe(
                 select(selectDialogs),
-                skipWhile((dialogs) => dialogs.length === 0),
+                skipWhile((dialogs) => dialogs === null || dialogs.length === 0),
                 switchMap(() =>
                     combineLatest([this.route.params, this.store.pipe(select(selectDialogsReceiverIDs), first())])
                 ),

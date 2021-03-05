@@ -40,7 +40,11 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         this.dialogs$ = this.store.pipe(
             select(selectDialogs),
             map((dialogs) => {
-                return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
+                if (dialogs !== null) {
+                    return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
+                }
+
+                return []
             })
         )
 
@@ -48,7 +52,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
             .pipe(
                 select(selectDialogs),
                 filter((dialogs) => {
-                    return dialogs.length === 0
+                    return dialogs === null
                 }),
                 switchMap(() => {
                     return this.httpService.getDialogs()

@@ -6,9 +6,10 @@ import { catchError, first, switchMap, tap } from 'rxjs/operators'
 import { selectAccessToken } from '../store/selectors/auth.selectors'
 import { AppState } from '../store/state/app.state'
 import { SessionService } from '../session/session.service'
+import { UPDATE_TOKEN_MAX_COUNT } from '../session/session.constants'
+import { updateConnectionError } from '../store/actions/auth.actions'
 
 const REQUEST_INVALID_TOKEN_ERROR_STATUS = 401
-const UPDATE_TOKEN_MAX_COUNT = 2
 
 @Injectable()
 export class AuthService {
@@ -42,6 +43,7 @@ export class AuthService {
                     return this.sessionService.update().pipe(switchMap(() => this.request(request)))
                 }
 
+                this.store.dispatch(updateConnectionError({ connectionError: true }))
                 return of(null)
             })
         )

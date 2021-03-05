@@ -9,6 +9,16 @@
     z-index: 2000;
     padding-top: 0.2rem;
     background-color: map-get($custom-colors, main);
+
+    &:after {
+        display: block;
+        content: '';
+        position: absolute;
+        bottom: 0;
+        height: 0.5rem;
+        width: 100%;
+        background-color: map-get($custom-colors, main);
+    }
 }
 
 .hidden-wrapper {

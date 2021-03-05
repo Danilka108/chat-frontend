@@ -7,10 +7,12 @@ import { environment } from 'src/environments/environment'
 import { StoreModule } from '@ngrx/store'
 import { appReducer } from './store/reducers/app.reducer'
 import { StoreDevtoolsModule } from '@ngrx/store-devtools'
+import { MaterialModule } from './material/material.module'
 
 @NgModule({
     declarations: [AppComponent],
     imports: [
+        MaterialModule,
         BrowserModule,
         BrowserAnimationsModule,
         RoutingModule,

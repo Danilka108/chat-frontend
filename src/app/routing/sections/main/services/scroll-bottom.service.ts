@@ -4,13 +4,13 @@ import { BehaviorSubject, Subject } from 'rxjs'
 @Injectable()
 export class ScrollBottomService {
     private readonly scrollBottom = new Subject<{
-        isSmooth: boolean
+        isUpdatingHeight: boolean
     }>()
     private readonly isViewed = new BehaviorSubject<boolean>(false)
 
-    emitScrollBottom(isSmooth: boolean = true) {
+    emitScrollBottom(isUpdatingHeight = true) {
         this.scrollBottom.next({
-            isSmooth,
+            isUpdatingHeight,
         })
     }
 

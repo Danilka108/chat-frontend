@@ -2,16 +2,13 @@ import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 import { ActivatedRoute, Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
-import { combineLatest, Observable, of, Subject, Subscription } from 'rxjs'
+import { combineLatest, Observable, of, Subscription } from 'rxjs'
 import { catchError, delay, first, map, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
-import { updateAccessToken } from 'src/app/store/actions/auth.actions'
 import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
 import { selectConnectionError } from 'src/app/store/selectors/auth.selectors'
 import { selectDialogs, selectDialogsReceiverIDs, selectRequestLoading } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
-import { WsEvents } from 'src/app/ws/ws.events'
-import { WsService } from 'src/app/ws/ws.service'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
 
 @Component({
@@ -25,9 +22,6 @@ export class DialogsComponent implements OnInit, OnDestroy {
     requestLoading$!: Observable<boolean>
 
     subscription = new Subscription()
-
-    topReachedEvent = new Subject<void>()
-    topReachedEvent$ = this.topReachedEvent.asObservable()
 
     constructor(
         private readonly store: Store<AppState>,
@@ -79,10 +73,6 @@ export class DialogsComponent implements OnInit, OnDestroy {
                 catchError(() => of())
             )
             .subscribe()
-    }
-
-    onTopReached() {
-        this.topReachedEvent.next()
     }
 
     ngOnDestroy() {

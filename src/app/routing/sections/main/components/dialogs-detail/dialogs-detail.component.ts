@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component, HostListener, Input, OnDestroy, OnInit } from '@angular/core'
+import { ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { forkJoin, Observable, of, Subscription } from 'rxjs'
+import { forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
 import { filter, first, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import {
@@ -25,7 +25,7 @@ import { IMessage, IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
 
-const TAKE_MESSAGES_FACTOR = 1 / 10
+const TAKE_MESSAGES_FACTOR = 1 / 5
 
 @Component({
     selector: 'app-main-dialogs-detail',
@@ -34,10 +34,12 @@ const TAKE_MESSAGES_FACTOR = 1 / 10
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsDetailComponent implements OnInit, OnDestroy {
-    @Input() topReachedEvent!: Observable<void>
-
-    messages$!: Observable<IMessageWithIsLast[]>
     isSelectedReceiver$ = of(true)
+
+    messages$: Observable<IMessageWithIsLast[]> = of([])
+
+    topReached = new Subject<void>()
+    topReached$ = this.topReached.asObservable()
 
     take = 0
 
@@ -58,14 +60,11 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.onWindowResize()
 
-        this.sub = this.topReachedEvent.pipe(tap(() => this.onTopReached())).subscribe()
-
         this.isSelectedReceiver$ = this.store.pipe(
             select(selectActiveReceiverID),
-            switchMap((activeReceiverID) => {
-                if (activeReceiverID === null) return of(null)
-                return this.store.select(selectDialog, { receiverID: activeReceiverID })
-            }),
+            switchMap((activeReceiverID) =>
+                activeReceiverID === null ? of(null) : this.store.select(selectDialog, { receiverID: activeReceiverID })
+            ),
             map((dialog) => {
                 return !!dialog
             })
@@ -73,76 +72,80 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
 
         this.messages$ = this.store.pipe(
             select(selectActiveReceiverID),
-            switchMap((activeReceiverID) => {
-                if (activeReceiverID === null) return of(null)
-                return this.store.select(selectDialogMessages, { receiverID: activeReceiverID })
-            }),
-            map((dialogMessages) => {
-                if (dialogMessages === null) return []
-                return this.messageService.parseMessages(dialogMessages.slice())
-            })
+            switchMap((activeReceiverID) =>
+                activeReceiverID === null
+                    ? of(null)
+                    : this.store.select(selectDialogMessages, { receiverID: activeReceiverID })
+            ),
+            map((dialogMessages) =>
+                dialogMessages === null ? [] : this.messageService.parseMessages(dialogMessages.slice())
+            )
         )
 
+        /**
+         * Initial loading of messages
+         */
         this.sub = this.store
             .pipe(
                 select(selectActiveReceiverID),
-                switchMap((activeReceiverID) => {
-                    if (activeReceiverID === null) {
-                        return of(false)
-                    }
-
-                    return this.store.pipe(
-                        select(selectDialogMessages, { receiverID: activeReceiverID }),
-                        first(),
-                        map((messages) => {
-                            return messages === null
-                        })
-                    )
-                }),
+                switchMap((activeReceiverID) =>
+                    activeReceiverID === null
+                        ? of(false)
+                        : this.store.pipe(
+                              select(selectDialogMessages, { receiverID: activeReceiverID }),
+                              first(),
+                              map((messages) => messages === null)
+                          )
+                ),
                 filter((isGetMsgs) => isGetMsgs),
                 switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
-                switchMap((activeReceiverID) => {
-                    if (activeReceiverID !== null) {
-                        return forkJoin({
-                            activeReceiverID: of(activeReceiverID),
-                            messages: this.httpService.getMessages(activeReceiverID, this.take, 0),
-                        })
-                    }
+                switchMap((activeReceiverID) =>
+                    activeReceiverID === null
+                        ? of(null)
+                        : forkJoin({
+                              activeReceiverID: of(activeReceiverID),
+                              messages: this.httpService.getMessages(activeReceiverID, this.take, 0),
+                          })
+                ),
+                tap((result) => {
+                    if (!result) return
 
-                    return of(null)
-                }),
-                map((result) => {
-                    if (result) {
-                        const { activeReceiverID, messages } = result
-                        this.store.dispatch(
-                            addDialogMessages({
-                                receiverID: activeReceiverID,
-                                messages,
-                            })
-                        )
-                        this.store.dispatch(
-                            updateDialogSkip({
-                                receiverID: activeReceiverID,
-                                skip: this.take,
-                            })
-                        )
-                        this.store.dispatch(
-                            updateDialogIsUploaded({
-                                receiverID: activeReceiverID,
-                                isUploaded: false,
-                            })
-                        )
-                        this.store.dispatch(
-                            updateDialogNewMessagesCount({
-                                receiverID: activeReceiverID,
-                                newMessagesCount: 0,
-                            })
-                        )
-                    }
+                    const { activeReceiverID, messages } = result
+
+                    this.store.dispatch(
+                        addDialogMessages({
+                            receiverID: activeReceiverID,
+                            messages,
+                        })
+                    )
+
+                    this.store.dispatch(
+                        updateDialogSkip({
+                            receiverID: activeReceiverID,
+                            skip: this.take,
+                        })
+                    )
+
+                    this.store.dispatch(
+                        updateDialogIsUploaded({
+                            receiverID: activeReceiverID,
+                            isUploaded: false,
+                        })
+                    )
+
+                    this.store.dispatch(
+                        updateDialogNewMessagesCount({
+                            receiverID: activeReceiverID,
+                            newMessagesCount: 0,
+                        })
+                    )
                 })
             )
             .subscribe()
 
+        /**
+         * Getting messages across websocket
+         */
         this.sub = this.wsService
             .fromEvent<IMessage>(WsEvents.user.newMessage)
             .pipe(
@@ -191,10 +194,67 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                         })
                     )
 
+                    // this.store.dispatch(
+                    //     updateDialogNewMessagesCount({
+                    //         receiverID,
+                    //         newMessagesCount: dlgNewMessagesCount + 1,
+                    //     })
+                    // )
+                })
+            )
+            .subscribe()
+
+        /**
+         * Upload new messages by topReached
+         */
+        this.sub = this.topReached$
+            .pipe(
+                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
+                switchMap((activeReceiverID) =>
+                    forkJoin({
+                        activeReceiverID: of(activeReceiverID),
+                        dialogSkip:
+                            activeReceiverID === null
+                                ? of(null)
+                                : this.store.pipe(select(selectDialogSkip, { receiverID: activeReceiverID }), first()),
+                    })
+                ),
+                switchMap(({ activeReceiverID, dialogSkip }) =>
+                    activeReceiverID == null || dialogSkip === null
+                        ? of(null)
+                        : forkJoin({
+                              messages: this.httpService.getMessages(activeReceiverID, this.take, dialogSkip),
+                              activeReceiverID: of(activeReceiverID),
+                              dialogSkip: of(dialogSkip),
+                          })
+                ),
+                tap((result) => {
+                    if (result === null) return
+
+                    const { messages, activeReceiverID, dialogSkip } = result
+
+                    if (messages.length === 0) {
+                        this.store.dispatch(
+                            updateDialogIsUploaded({
+                                receiverID: activeReceiverID,
+                                isUploaded: true,
+                            })
+                        )
+
+                        return
+                    }
+
                     this.store.dispatch(
-                        updateDialogNewMessagesCount({
-                            receiverID,
-                            newMessagesCount: dlgNewMessagesCount + 1,
+                        addDialogMessages({
+                            receiverID: activeReceiverID,
+                            messages,
+                        })
+                    )
+
+                    this.store.dispatch(
+                        updateDialogSkip({
+                            receiverID: activeReceiverID,
+                            skip: dialogSkip + this.take,
                         })
                     )
                 })
@@ -208,71 +268,15 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     }
 
     onTopReached() {
-        this.sub = this.store
-            .pipe(
-                select(selectActiveReceiverID),
-                first(),
-                switchMap((activeReceiverID) => {
-                    if (activeReceiverID === null) {
-                        return forkJoin({
-                            activeReceiverID: of(null),
-                            dialogSkip: of(null),
-                        })
-                    }
-
-                    return forkJoin({
-                        activeReceiverID: of(activeReceiverID),
-                        dialogSkip: this.store.pipe(
-                            select(selectDialogSkip, { receiverID: activeReceiverID }),
-                            first()
-                        ),
-                    })
-                }),
-                switchMap(({ activeReceiverID, dialogSkip }) => {
-                    if (activeReceiverID !== null && dialogSkip !== null) {
-                        return forkJoin({
-                            activeReceiverID: of(activeReceiverID),
-                            dialogSkip: of(dialogSkip),
-                            messages: this.httpService.getMessages(activeReceiverID, this.take, dialogSkip),
-                        })
-                    }
-
-                    return of(null)
-                }),
-                tap((result) => {
-                    if (result) {
-                        const { messages, activeReceiverID, dialogSkip } = result
-
-                        if (messages.length === 0) {
-                            this.store.dispatch(
-                                updateDialogIsUploaded({
-                                    receiverID: activeReceiverID,
-                                    isUploaded: true,
-                                })
-                            )
-                        } else {
-                            this.store.dispatch(
-                                addDialogMessages({
-                                    receiverID: activeReceiverID,
-                                    messages,
-                                })
-                            )
-
-                            this.store.dispatch(
-                                updateDialogSkip({
-                                    receiverID: activeReceiverID,
-                                    skip: dialogSkip + this.take,
-                                })
-                            )
-                        }
-                    }
-                })
-            )
-            .subscribe()
+        this.topReached.next()
     }
 
     getUserID() {
         return this.store.select(selectUserID)
+    }
+
+    messageIdentify(_: any, item: IMessageWithIsLast) {
+        return item.messageID
     }
 
     ngOnDestroy() {

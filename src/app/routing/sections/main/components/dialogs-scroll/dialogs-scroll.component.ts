@@ -1,17 +1,8 @@
-import {
-    AfterViewChecked,
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    ElementRef,
-    EventEmitter,
-    OnDestroy,
-    Output,
-    ViewChild,
-} from '@angular/core'
+import { ScrollDispatcher } from '@angular/cdk/scrolling'
+import { AfterViewChecked, Component, EventEmitter, NgZone, OnDestroy, OnInit, Output } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { forkJoin, fromEvent, of, Subject, Subscription } from 'rxjs'
-import { catchError, debounceTime, first, map, switchMap, tap } from 'rxjs/operators'
+import { asyncScheduler, BehaviorSubject, forkJoin, of, Subscription } from 'rxjs'
+import { filter, first, observeOn, switchMap, tap } from 'rxjs/operators'
 import { updateDialogScroll } from 'src/app/store/actions/main.actions'
 import {
     selectActiveReceiverID,
@@ -28,51 +19,56 @@ const SCROLLBAR_UPLOAD_EVENT_FACTOR = 0.3
     selector: 'app-main-dialogs-scroll',
     templateUrl: './dialogs-scroll.component.html',
     styleUrls: ['./dialogs-scroll.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
-    @ViewChild('scrollbar') scrollbar!: ElementRef<HTMLElement>
-    @ViewChild('content') content!: ElementRef<HTMLElement>
-
+export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestroy {
     @Output() topReached = new EventEmitter<void>()
 
-    contentHeight = {
-        current: 0,
-        previous: 0,
-    }
-
-    height = new Subject<void>()
+    height = new BehaviorSubject(0)
     height$ = this.height.asObservable()
 
-    ignoreScroll = true
-
-    updatingContent = false
-
-    scrollToBottom = false
+    uploadingContent = false
 
     subscription = new Subscription()
 
-    constructor(private readonly store: Store<AppState>, private readonly scrollBottomService: ScrollBottomService) {}
+    constructor(
+        private readonly store: Store<AppState>,
+        private readonly scrollBottomService: ScrollBottomService,
+        private readonly scrollDispatcher: ScrollDispatcher,
+        private readonly ngZone: NgZone
+    ) {}
 
     set sub(sub: Subscription) {
         this.subscription.add(sub)
     }
 
-    ngAfterViewInit() {
-        const scrollbar = this.scrollbar.nativeElement as HTMLElement
+    ngOnInit() {
+        const viewport = document.documentElement
 
         this.sub = this.scrollBottomService
             .getScrollBottom()
             .pipe(
-                map(({ isUpdatingHeight }) => {
-                    if (isUpdatingHeight) {
-                        this.scrollToBottom = true
-                        this.updatingContent = true
-                    } else {
-                        scrollbar.scrollTo({
-                            top: this.contentHeight.current,
-                            behavior: 'smooth',
-                        })
+                tap(() => {
+                    viewport.scrollTo({
+                        top: viewport.scrollHeight,
+                        behavior: 'smooth',
+                    })
+                })
+            )
+            .subscribe()
+
+        this.sub = this.height$
+            .pipe(
+                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
+                switchMap((receiverID) =>
+                    receiverID === null ? of(null) : this.store.pipe(select(selectDialogScroll, { receiverID }))
+                ),
+                tap((scroll) => {
+                    if (!this.uploadingContent) {
+                        if (scroll === null) {
+                            viewport.scrollTop = viewport.scrollHeight
+                        } else {
+                            viewport.scrollTop = scroll
+                        }
                     }
                 })
             )
@@ -81,116 +77,51 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
         this.sub = this.store
             .pipe(
                 select(selectActiveReceiverID),
-                switchMap((activeReceiverID) => {
-                    if (activeReceiverID === null) throw null
-                    return this.store.select(selectDialogMessages, { receiverID: activeReceiverID })
-                }),
-                switchMap(() => this.height$),
+                switchMap((receiverID) =>
+                    receiverID === null ? of(null) : this.store.pipe(select(selectDialogMessages, { receiverID }))
+                ),
+                observeOn(asyncScheduler),
                 tap(() => {
-                    if (this.updatingContent) {
-                        setTimeout(() => {
-                            this.updatingContent = false
-                        })
-                    }
-                }),
-                catchError(() => of())
-            )
-            .subscribe()
-
-        this.sub = this.height$
-            .pipe(
-                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
-                switchMap((activeReceiverID) => {
-                    if (activeReceiverID === null) {
-                        return forkJoin({
-                            activeReceiverID: of(null),
-                            dialogScroll: of(null),
-                        })
-                    }
-
-                    return forkJoin({
-                        activeReceiverID: of(activeReceiverID),
-                        dialogScroll: this.store.pipe(
-                            select(selectDialogScroll, { receiverID: activeReceiverID }),
-                            first()
-                        ),
-                    })
-                }),
-                tap(({ activeReceiverID, dialogScroll }) => {
-                    if (this.updatingContent) {
-                        scrollbar.scrollTop += this.contentHeight.current - this.contentHeight.previous
-                    } else if (activeReceiverID !== null) {
-                        if (dialogScroll !== null) {
-                            scrollbar.scrollTop = dialogScroll
-                        } else {
-                            scrollbar.scrollTop = scrollbar.scrollHeight
-                        }
-                    }
-
-                    if (this.scrollToBottom) {
-                        this.updatingContent = false
-                        this.scrollToBottom = false
-
-                        scrollbar.scrollTo({
-                            top: this.contentHeight.current,
-                            behavior: 'smooth',
-                        })
-                    }
+                    if (this.uploadingContent) this.uploadingContent = false
                 })
             )
             .subscribe()
 
-        this.sub = fromEvent(scrollbar, 'scroll')
+        this.sub = this.scrollDispatcher
+            .scrolled(150)
             .pipe(
-                debounceTime(20),
+                filter((scrollable) => !scrollable),
                 switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
-                switchMap((activeReceiverID) => {
-                    if (activeReceiverID === null) {
-                        return forkJoin({
-                            activeReceiverID: of(null),
-                            isUploaded: of(null),
+                switchMap((activeReceiverID) =>
+                    forkJoin({
+                        activeReceiverID: of(activeReceiverID),
+                        isUploaded:
+                            activeReceiverID === null
+                                ? of(null)
+                                : this.store.pipe(
+                                      select(selectDialogIsUploaded, { receiverID: activeReceiverID }),
+                                      first()
+                                  ),
+                    })
+                ),
+                tap(({ isUploaded, activeReceiverID }) => {
+                    if (activeReceiverID === null) return
+
+                    this.store.dispatch(
+                        updateDialogScroll({ receiverID: activeReceiverID, scroll: viewport.scrollTop })
+                    )
+
+                    if (!isUploaded && viewport.scrollTop <= viewport.scrollHeight * SCROLLBAR_UPLOAD_EVENT_FACTOR) {
+                        this.ngZone.run(() => {
+                            this.topReached.emit()
+                            this.uploadingContent = true
                         })
                     }
 
-                    return forkJoin({
-                        activeReceiverID: of(activeReceiverID),
-                        isUploaded: this.store.pipe(
-                            select(selectDialogIsUploaded, { receiverID: activeReceiverID }),
-                            first()
-                        ),
-                    })
-                }),
-                tap(({ activeReceiverID, isUploaded }) => {
-                    const ignore = this.ignoreScroll
-                    this.ignoreScroll = false
-
-                    if (activeReceiverID !== null) {
-                        if (!ignore) {
-                            this.store.dispatch(
-                                updateDialogScroll({
-                                    receiverID: activeReceiverID,
-                                    scroll: scrollbar.scrollTop,
-                                })
-                            )
-                        }
-
-                        if (
-                            (isUploaded === false || isUploaded === null) &&
-                            scrollbar.scrollTop <= this.contentHeight.current * SCROLLBAR_UPLOAD_EVENT_FACTOR &&
-                            !ignore
-                        ) {
-                            this.updatingContent = true
-                            this.topReached.emit()
-                        }
-
-                        if (
-                            scrollbar.scrollTop + scrollbar.offsetHeight <=
-                            scrollbar.scrollHeight - scrollbar.offsetHeight
-                        ) {
-                            this.scrollBottomService.emitIsViewed(true)
-                        } else {
-                            this.scrollBottomService.emitIsViewed(false)
-                        }
+                    if (viewport.scrollTop <= viewport.scrollHeight - viewport.offsetHeight * 2) {
+                        this.scrollBottomService.emitIsViewed(true)
+                    } else {
+                        this.scrollBottomService.emitIsViewed(false)
                     }
                 })
             )
@@ -198,19 +129,10 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
     }
 
     ngAfterViewChecked() {
-        const content = this.content.nativeElement
+        const viewport = document.documentElement
 
-        if (content.offsetHeight !== this.contentHeight.current) {
-            this.ignoreScroll = true
-
-            if (content.offsetHeight >= this.contentHeight.current) {
-                this.contentHeight.previous = this.contentHeight.current
-                this.contentHeight.current = content.offsetHeight
-
-                this.height.next()
-            } else {
-                this.contentHeight.current = content.offsetHeight
-            }
+        if (viewport.scrollHeight !== this.height.getValue()) {
+            this.height.next(viewport.scrollHeight)
         }
     }
 

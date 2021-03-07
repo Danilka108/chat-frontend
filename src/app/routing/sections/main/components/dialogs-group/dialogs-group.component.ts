@@ -40,23 +40,17 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         this.dialogs$ = this.store.pipe(
             select(selectDialogs),
             map((dialogs) => {
-                if (dialogs !== null) {
-                    return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
-                }
+                if (dialogs === null) return []
 
-                return []
+                return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
             })
         )
 
         this.sub = this.store
             .pipe(
                 select(selectDialogs),
-                filter((dialogs) => {
-                    return dialogs === null
-                }),
-                switchMap(() => {
-                    return this.httpService.getDialogs()
-                }),
+                filter((dialogs) => dialogs === null),
+                switchMap(() => this.httpService.getDialogs()),
                 tap((dialogs) => {
                     this.store.dispatch(addDialogs({ dialogs }))
                 })
@@ -64,6 +58,10 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
             .subscribe()
 
         this.onResize()
+    }
+
+    itemIdentity(_: any, item: IDialog) {
+        return item.receiverID
     }
 
     ngOnDestroy() {

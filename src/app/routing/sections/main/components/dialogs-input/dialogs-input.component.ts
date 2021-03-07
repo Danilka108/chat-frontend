@@ -1,9 +1,32 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field'
-import { ChangeDetectionStrategy, Component, NgZone, OnDestroy, OnInit, ViewChild } from '@angular/core'
+import {
+    AfterContentChecked,
+    AfterViewChecked,
+    AfterViewInit,
+    ChangeDetectionStrategy,
+    Component,
+    ElementRef,
+    NgZone,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+} from '@angular/core'
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
 import { select, Store } from '@ngrx/store'
-import { forkJoin, of, Subscription } from 'rxjs'
-import { first, map, switchMap, take } from 'rxjs/operators'
+import { NgScrollbar } from 'ngx-scrollbar'
+import { BehaviorSubject, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
+import {
+    debounceTime,
+    distinctUntilChanged,
+    filter,
+    first,
+    map,
+    pairwise,
+    startWith,
+    switchMap,
+    take,
+    tap,
+} from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, updateDialogLastMessage } from 'src/app/store/actions/main.actions'
 import { selectActiveReceiverIDAndUserID } from 'src/app/store/selectors/app.selectors'
@@ -16,16 +39,20 @@ import { ScrollBottomService } from '../../services/scroll-bottom.service'
     selector: 'app-main-dialogs-input',
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
+    // changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogsInputComponent implements OnInit, OnDestroy {
+export class DialogsInputComponent implements OnInit, AfterViewChecked, OnDestroy {
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
+    @ViewChild('scrollbar') scrollbarEl!: ElementRef<HTMLElement>
+    @ViewChild(NgScrollbar) scrollbar!: NgScrollbar
+    @ViewChild('textarea') textarea!: ElementRef<HTMLElement>
 
     btnRippleColor = 'rgba(220, 220, 220, 0.17)'
     formGroup!: FormGroup
-    btnSize = 0
+    btnMargin = 0.6
+    btnSize = ''
     loading = false
-    sub = new Subscription()
+    subscription = new Subscription()
 
     height = 0
 
@@ -37,6 +64,10 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         private readonly scrollBottomService: ScrollBottomService,
         private readonly store: Store<AppState>
     ) {}
+
+    set sub(sub: Subscription) {
+        this.subscription.add(sub)
+    }
 
     triggerZone() {
         this.sub.add(
@@ -52,16 +83,20 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         })
     }
 
-    ngOnDestroy() {
-        this.sub.unsubscribe()
+    ngAfterViewChecked() {
+        const height = this.textarea.nativeElement.offsetHeight
+
+        if (height !== this.height) {
+            if (this.height === 0) this.btnSize = `calc(${height}px + ${this.btnMargin * 2}rem)`
+
+            this.height = height
+
+            this.scrollbarEl.nativeElement.style.height = this.height + 'px'
+        }
     }
 
-    onMessageInputHeightChange(event: number) {
-        this.height = event
-
-        if (this.btnSize === 0 && event !== 0) {
-            setTimeout(() => (this.btnSize = event))
-        }
+    ngOnDestroy() {
+        this.subscription.unsubscribe()
     }
 
     onSubmit() {
@@ -70,59 +105,57 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         if (!this.loading && message !== null) {
             this.loading = true
 
-            this.sub.add(
-                this.store
-                    .pipe(
-                        select(selectActiveReceiverID),
-                        switchMap((activeReceiverID) => {
-                            if (activeReceiverID === null) return of(null)
+            this.sub = this.store
+                .pipe(
+                    select(selectActiveReceiverID),
+                    switchMap((activeReceiverID) => {
+                        if (activeReceiverID === null) return of(null)
 
-                            return this.httpService.sendMessage(activeReceiverID, message)
-                        }),
-                        switchMap((messageID) =>
-                            forkJoin({
-                                messageID: of(messageID),
-                                state: this.store.pipe(select(selectActiveReceiverIDAndUserID), first()),
-                            })
-                        ),
-                        map(({ messageID, state: { activeReceiverID, userID } }) => {
-                            if (messageID && activeReceiverID && userID) {
-                                const nowDate = this.dateService.now()
-
-                                this.store.dispatch(
-                                    addDialogMessages({
-                                        receiverID: activeReceiverID,
-                                        messages: [
-                                            {
-                                                senderID: userID,
-                                                receiverID: activeReceiverID,
-                                                message,
-                                                messageID,
-                                                createdAt: nowDate,
-                                                updatedAt: nowDate,
-                                                isReaded: false,
-                                                isUpdated: false,
-                                            },
-                                        ],
-                                    })
-                                )
-
-                                this.store.dispatch(
-                                    updateDialogLastMessage({
-                                        receiverID: activeReceiverID,
-                                        lastMessage: message,
-                                        createdAt: nowDate,
-                                    })
-                                )
-
-                                this.scrollBottomService.emitScrollBottom()
-                            }
-
-                            this.completeSubmit()
+                        return this.httpService.sendMessage(activeReceiverID, message)
+                    }),
+                    switchMap((messageID) =>
+                        forkJoin({
+                            messageID: of(messageID),
+                            state: this.store.pipe(select(selectActiveReceiverIDAndUserID), first()),
                         })
-                    )
-                    .subscribe()
-            )
+                    ),
+                    map(({ messageID, state: { activeReceiverID, userID } }) => {
+                        if (messageID && activeReceiverID && userID) {
+                            const nowDate = this.dateService.now()
+
+                            this.store.dispatch(
+                                addDialogMessages({
+                                    receiverID: activeReceiverID,
+                                    messages: [
+                                        {
+                                            senderID: userID,
+                                            receiverID: activeReceiverID,
+                                            message,
+                                            messageID,
+                                            createdAt: nowDate,
+                                            updatedAt: nowDate,
+                                            isReaded: false,
+                                            isUpdated: false,
+                                        },
+                                    ],
+                                })
+                            )
+
+                            this.store.dispatch(
+                                updateDialogLastMessage({
+                                    receiverID: activeReceiverID,
+                                    lastMessage: message,
+                                    createdAt: nowDate,
+                                })
+                            )
+
+                            this.scrollBottomService.emitScrollBottom()
+                        }
+
+                        this.completeSubmit()
+                    })
+                )
+                .subscribe()
         }
     }
 
@@ -133,7 +166,7 @@ export class DialogsInputComponent implements OnInit, OnDestroy {
         })
     }
 
-    onTextareaKeydown(event: KeyboardEvent) {
+    onKeydown(event: KeyboardEvent) {
         if (event.key === 'Enter' && event.ctrlKey) {
             const messageValue = this.formGroup.get('message')?.value as string | null
 

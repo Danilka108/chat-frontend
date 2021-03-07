@@ -16,12 +16,14 @@ import { DialogsInputComponent } from './components/dialogs-input/dialogs-input.
 import { DialogsSeparatorComponent } from './components/dialogs-separator/dialogs-separator.component'
 import { NgScrollbarModule } from 'ngx-scrollbar'
 import { MessageService } from './services/message.service'
-import { MessageInputDirective } from './directives/message-input.directive'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { DialogsScrollComponent } from './components/dialogs-scroll/dialogs-scroll.component'
 import { DialogsScrollBottomComponent } from './components/dialogs-scroll-bottom/dialogs-scroll-bottom.component'
 import { ScrollBottomService } from './services/scroll-bottom.service'
 import { WsModule } from 'src/app/ws/ws.module'
+import { ScrollingModule } from '@angular/cdk/scrolling'
+import { ScrollingModule as ScrollingModuleEx } from '@angular/cdk-experimental/scrolling'
+import { InfiniteScrollModule } from 'ngx-infinite-scroll'
 
 @NgModule({
     declarations: [
@@ -33,7 +35,6 @@ import { WsModule } from 'src/app/ws/ws.module'
         DialogsMessageComponent,
         DialogsInputComponent,
         DialogsSeparatorComponent,
-        MessageInputDirective,
         DialogsScrollComponent,
         DialogsScrollBottomComponent,
     ],
@@ -47,6 +48,8 @@ import { WsModule } from 'src/app/ws/ws.module'
         ReactiveFormsModule,
         FormsModule,
         WsModule,
+        ScrollingModule,
+        ScrollingModuleEx,
     ],
     providers: [MainSectionHttpService, MessageService, ScrollBottomService],
 })

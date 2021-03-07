@@ -9,13 +9,13 @@ button {
     width: 100%;
     margin: 0.3rem 0;
     border: 0;
-    background: none;
+    background-color: transparent;
     border-radius: 0.3rem;
     padding: 0.5rem 0.5rem;
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: background 0.25s;
+    transition: 0.5s;
     position: relative;
 
     &.active {
@@ -88,6 +88,7 @@ button {
 
 .time {
     color: map-get($custom-colors, dark-gray);
+    line-height: 1;
 }
 
 .receiver,

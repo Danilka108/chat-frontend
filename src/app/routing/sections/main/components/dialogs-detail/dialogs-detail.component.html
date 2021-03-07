@@ -4,20 +4,22 @@
 </div>
 <div class="wrapper" *ngIf="isSelectedReceiver$ | async">
     <div #wrapper class="scrollable-wrapper">
-        <ng-template ngFor let-message [ngForOf]="messages$ | async">
-            <app-main-dialogs-separator
-                *ngIf="message.isDiffDays"
-                [date]="message.diffDate">
-            </app-main-dialogs-separator>
-            <app-main-dialogs-message
-                [wrapperWidth]="wrapper.offsetWidth"
-                [message]="message.message"
-                [date]="message.createdAt"
-                [isLastInGroup]="message.isLastInGroup"
-                [isOwnMsg]="message.senderID === (getUserID() | async)"
-                [isReaded]="message.isReaded"
-            ></app-main-dialogs-message>
-        </ng-template>
+        <app-main-dialogs-scroll (topReached)="onTopReached()">
+            <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
+                <app-main-dialogs-separator
+                    *ngIf="message.isDiffDays"
+                    [date]="message.diffDate">
+                </app-main-dialogs-separator>
+                <app-main-dialogs-message
+                    [wrapperWidth]="wrapper.offsetWidth"
+                    [message]="message.message"
+                    [date]="message.createdAt"
+                    [isLastInGroup]="message.isLastInGroup"
+                    [isOwnMsg]="message.senderID === (getUserID() | async)"
+                    [isReaded]="message.isReaded"
+                ></app-main-dialogs-message>
+            </ng-container>
+        </app-main-dialogs-scroll>
     </div>
     <app-main-dialogs-input *ngIf="isSelectedReceiver$ | async"></app-main-dialogs-input>
 </div>

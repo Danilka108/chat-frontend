@@ -21,7 +21,7 @@ export class DialogsScrollBottomComponent implements OnInit, OnDestroy {
         this.sub.add(
             this.isViewed$.subscribe((isViewed) => {
                 if (isViewed) {
-                    this.isDisabled = false
+                    // this.isDisabled = false
                 }
             })
         )

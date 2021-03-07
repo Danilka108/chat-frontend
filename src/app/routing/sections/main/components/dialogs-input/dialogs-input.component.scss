@@ -10,15 +10,15 @@
     padding-top: 0.2rem;
     background-color: map-get($custom-colors, main);
 
-    &:after {
-        display: block;
-        content: '';
-        position: absolute;
-        bottom: 0;
-        height: 0.5rem;
-        width: 100%;
-        background-color: map-get($custom-colors, main);
-    }
+    // &:after {
+    //     display: block;
+    //     content: '';
+    //     position: absolute;
+    //     bottom: 0;
+    //     height: 0.5rem;
+    //     width: 100%;
+    //     background-color: map-get($custom-colors, main);
+    // }
 }
 
 .hidden-wrapper {
@@ -32,28 +32,22 @@
     z-index: 1000;
 }
 
-.wrapper {
+.scrollbar {
+    display: block;
     width: 100%;
     max-height: calc(4px * 2 + 1rem * 8);
     flex: 1;
-}
-
-.scrollbar {
-    display: block;
-    height: 100%;
+    margin: 0.6rem 0;
 }
 
 .textarea-wrapper {
     padding: 0 1rem;
-    padding-top: 4px;
 }
 
 .textarea {
     overflow: hidden;
     width: 100%;
     margin: 0;
-    padding: 0.6rem 0;
-    box-sizing: content-box;
     resize: none;
     word-break: break-word;
 
@@ -64,9 +58,19 @@
     }
 }
 
+.btn-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .btn-send {
-    margin-right: 0.5rem;
-    margin-left: 0.5rem;
+    
+    padding: 0;
+    margin: 0;
+    width: 80%;
+    height: 80%;
+    box-sizing: content-box;
     border: 0;
     display: flex;
     align-items: center;

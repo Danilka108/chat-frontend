@@ -5,19 +5,19 @@
     background-color: map-get($custom-colors, light-gray);
 }
 
+.wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
 .scrollable-wrapper {
     width: 80%;
     margin: 0 auto;
     margin-top: 1rem;
     margin-bottom: 1rem;
     flex: 1;
-}
-
-.wrapper {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    min-height: 100vh;
 }
 
 .no-selected {
@@ -31,9 +31,4 @@
         color: map-get($custom-colors, dark-gray);
         text-align: center;
     }
-}
-
-.spinner {
-    margin: 0 auto;
-    margin-top: 1rem;
 }

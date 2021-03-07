@@ -1,6 +1,6 @@
 <ng-scrollbar class="scrollbar">
     <div class="wrapper">
-        <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async"
+        <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async; trackBy: itemIdentity"
             [message]="dialog.lastMessage"
             [date]="parseDate(dialog.createdAt)"
             [active]="(activeReceiverID$ | async) ===  dialog.receiverID"

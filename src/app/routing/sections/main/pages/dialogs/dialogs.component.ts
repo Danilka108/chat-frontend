@@ -1,13 +1,13 @@
 import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
-import { ActivatedRoute, Router } from '@angular/router'
+import { ActivatedRoute, NavigationEnd, Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
 import { combineLatest, Observable, of, Subscription } from 'rxjs'
-import { catchError, delay, first, map, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
+import { delay, filter, map, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import { updateActiveReceiverID } from 'src/app/store/actions/main.actions'
 import { selectConnectionError } from 'src/app/store/selectors/auth.selectors'
-import { selectDialogs, selectDialogsReceiverIDs, selectRequestLoading } from 'src/app/store/selectors/main.selectors'
+import { selectActiveReceiverID, selectDialogs, selectRequestLoading } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
 
@@ -15,7 +15,6 @@ import { NoConnectionComponent } from '../../components/no-connection/no-connect
     selector: 'app-dialogs',
     templateUrl: './dialogs.component.html',
     styleUrls: ['./dialogs.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsComponent implements OnInit, OnDestroy {
     noConnectionDialog: MatDialogRef<NoConnectionComponent> | null = null
@@ -53,26 +52,41 @@ export class DialogsComponent implements OnInit, OnDestroy {
             )
             .subscribe()
 
-        this.sub = this.store
-            .pipe(
-                select(selectDialogs),
-                skipWhile((dialogs) => dialogs === null || dialogs.length === 0),
-                switchMap(() =>
-                    combineLatest([this.route.params, this.store.pipe(select(selectDialogsReceiverIDs), first())])
-                ),
-                tap(([params, dialogsIDs]) => {
-                    const id = Number(params['id'])
+        this.sub = this.router.events.pipe(
+            filter((event) => event instanceof NavigationEnd),
+            startWith(undefined),
+            switchMap(() => {
+                if (!this.route.firstChild) return of(null)
 
-                    if (isNaN(id) || !dialogsIDs.includes(id)) {
-                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
-                        this.router.navigateByUrl(mainSectionDialogsPath.full)
-                    } else {
-                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: id }))
-                    }
-                }),
-                catchError(() => of())
-            )
-            .subscribe()
+                return this.route.firstChild.params
+            }),
+            switchMap((params) => combineLatest([
+                of(params),
+                this.store.pipe(
+                    select(selectDialogs),
+                    skipWhile((dialogs) => dialogs === null || dialogs.length === 0),
+                    map((dialogs) => dialogs === null ? [] : dialogs.map((dialog) => dialog.receiverID))
+                )
+            ])),
+            tap((result) => {
+                const [params, dialogsID] = result
+
+                if (!params || !dialogsID.length) {
+                    this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
+                    this.router.navigateByUrl(mainSectionDialogsPath.full)
+                    return
+                }
+
+                const id = Number(params['id'])
+
+                if (isNaN(id) || !dialogsID.includes(id)) {
+                    this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
+                    this.router.navigateByUrl(mainSectionDialogsPath.full)
+                } else {
+                    this.store.dispatch(updateActiveReceiverID({ activeReceiverID: id }))
+                }
+            })
+        ).subscribe()
     }
 
     ngOnDestroy() {

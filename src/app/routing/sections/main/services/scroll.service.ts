@@ -2,16 +2,21 @@ import { Injectable } from '@angular/core'
 import { BehaviorSubject, Subject } from 'rxjs'
 
 @Injectable()
-export class ScrollBottomService {
-    private readonly scrollBottom = new Subject<{
-        isUpdatingHeight: boolean
-    }>()
+export class ScrollService {
+    private readonly scrollBottom = new Subject<void>()
     private readonly isViewed = new BehaviorSubject<boolean>(false)
+    private readonly topReached = new Subject<void>()
 
-    emitScrollBottom(isUpdatingHeight = true) {
-        this.scrollBottom.next({
-            isUpdatingHeight,
-        })
+    emitTopReached() {
+        this.topReached.next()
+    }
+
+    getTopReached() {
+        return this.topReached.asObservable()
+    }
+
+    emitScrollBottom() {
+        this.scrollBottom.next()
     }
 
     getScrollBottom() {

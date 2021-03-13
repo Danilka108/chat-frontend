@@ -3,7 +3,6 @@ import { ChangeDetectionStrategy, Component } from '@angular/core'
     selector: 'app-password-reseted',
     templateUrl: './password-reseted.component.html',
     styleUrls: ['./password-reseted.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class PasswordResetedComponent {
     redirectLink = ''

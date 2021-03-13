@@ -32,6 +32,7 @@
     "ngx-infinite-scroll": "^10.0.1",
     "ngx-scrollbar": "^7.5.4",
     "ngx-socket-io": "^3.2.0",
+    "ngx-ui-scroll": "^2.0.0-rc.7",
     "rxjs": "^6.6.6",
     "socket.io-client": "^2.4.0",
     "tslib": "^2.0.0",

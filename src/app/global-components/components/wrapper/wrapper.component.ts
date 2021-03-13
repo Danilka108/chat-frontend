@@ -5,7 +5,6 @@ import { FormGroup } from '@angular/forms'
     selector: 'app-wrapper',
     templateUrl: './wrapper.component.html',
     styleUrls: ['./wrapper.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class WrapperComponent {
     @Input() formGroup!: FormGroup

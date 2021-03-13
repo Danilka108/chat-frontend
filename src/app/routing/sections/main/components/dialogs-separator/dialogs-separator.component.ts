@@ -5,7 +5,6 @@ import { DateService } from 'src/app/common/date.service'
     selector: 'app-main-dialogs-separator',
     templateUrl: './dialogs-separator.component.html',
     styleUrls: ['./dialogs-separator.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsSeparatorComponent {
     @Input() date!: string

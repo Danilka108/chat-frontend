@@ -4,24 +4,25 @@
     position: absolute;
     top: 0;
     right: 0;
-    transform: translateY(-100%);
     padding: 1rem;
+    transform: translateY(-100%);
     z-index: 6000;
 }
 
 button {
     width: 3rem;
     height: 3rem;
-    position: relative;
     mat-icon {
         transform: scale(2.2);
     }
 
     opacity: 0;
-    top: 0.5rem;
+    transform: translateY(-100%);
+    transform: translateY(0.5rem);
     transition: 150ms;
+
     &.isView {
         opacity: 1;
-        top: 0;
+        transform: translateY(0);
     }
 }

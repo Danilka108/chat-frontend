@@ -8,7 +8,6 @@ import { SESSION_ERROR_MESSAGE } from './session/session.constants'
 @Component({
     selector: 'app-root',
     templateUrl: './app.component.html',
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class AppComponent implements OnInit, OnDestroy {
     subscription = new Subscription()

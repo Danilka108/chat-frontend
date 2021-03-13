@@ -1,7 +1,7 @@
 <button class="btn-send"
         color="accent"
         (click)="onClick()"
-        [class.isView]="isViewed$ | async"
+        [ngClass]="isViewed ? 'isView' : ''"
         [disabled]="isDisabled"
         mat-fab>
     <mat-icon>keyboard_arrow_down</mat-icon>

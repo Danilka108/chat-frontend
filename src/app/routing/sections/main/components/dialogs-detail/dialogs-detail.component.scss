@@ -1,34 +1,18 @@
-@import '../../../../../styles/vars.scss';
-
 :host {
     flex: 1;
-    background-color: map-get($custom-colors, light-gray);
 }
 
 .wrapper {
+    height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
 }
 
-.scrollable-wrapper {
+.scroll-wrapper {
+    flex: 1;
     width: 80%;
     margin: 0 auto;
     margin-top: 1rem;
     margin-bottom: 1rem;
-    flex: 1;
-}
-
-.no-selected {
-    width: 100%;
-    height: 100%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-
-    h2 {
-        color: map-get($custom-colors, dark-gray);
-        text-align: center;
-    }
 }

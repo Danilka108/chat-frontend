@@ -5,7 +5,6 @@ import { authSectionSignInPath } from 'src/app/routing/routing.constants'
     selector: 'app-reset-password-check-email',
     templateUrl: './reset-password-check-email.component.html',
     styleUrls: ['./reset-password-check-email.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ResetPasswordCheckEmailComponent {
     redirectLink = authSectionSignInPath.full

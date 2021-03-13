@@ -1,5 +1,7 @@
 import { Routes } from '@angular/router'
 import { mainSectionDialogsPath } from '../../routing.constants'
+import { DialogsDetailNotSelectedComponent } from './components/dialogs-detail-not-selected/dialogs-detail-not-selected.component'
+import { DialogsDetailComponent } from './components/dialogs-detail/dialogs-detail.component'
 import { DialogsComponent } from './pages/dialogs/dialogs.component'
 
 export const routes: Routes = [
@@ -11,9 +13,15 @@ export const routes: Routes = [
     {
         path: mainSectionDialogsPath.relative,
         component: DialogsComponent,
-    },
-    {
-        path: mainSectionDialogsPath.relative + '/:id',
-        component: DialogsComponent,
+        children: [
+            {
+                path: '',
+                component: DialogsDetailNotSelectedComponent,
+            },
+            {
+                path: ':id',
+                component: DialogsDetailComponent,
+            },
+        ]
     },
 ]

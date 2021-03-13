@@ -2,7 +2,7 @@ import { ChangeDetectionStrategy, Component, HostBinding, HostListener, OnDestro
 import { IDialog } from '../../interface/dialog.interface'
 import { Router } from '@angular/router'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
-import { Observable, Subscription } from 'rxjs'
+import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs'
 import { filter, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
@@ -17,12 +17,11 @@ const SMALL_SIZE_MAX_WIDTH = 800
     selector: 'app-main-dialogs-group',
     templateUrl: './dialogs-group.component.html',
     styleUrls: ['./dialogs-group.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsGroupComponent implements OnInit, OnDestroy {
     dialogs$!: Observable<IDialog[]>
     activeReceiverID$!: Observable<number | null>
-    sub!: Subscription
+    subscription = new Subscription()
 
     @HostBinding('class.small') isSmallSize = false
     smallSizeMax = SMALL_SIZE_MAX_WIDTH
@@ -34,15 +33,21 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         private readonly httpService: MainSectionHttpService
     ) {}
 
+    set sub(sub: Subscription) {
+        this.subscription.add(sub)
+    }
+
     ngOnInit() {
-        this.activeReceiverID$ = this.store.select(selectActiveReceiverID)
+        this.activeReceiverID$ = this.store.pipe(
+            select(selectActiveReceiverID)
+        )
 
         this.dialogs$ = this.store.pipe(
             select(selectDialogs),
             map((dialogs) => {
                 if (dialogs === null) return []
 
-                return dialogs.sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
+                return dialogs.slice().sort((a, b) => this.dateService.compareDates(a.createdAt, b.createdAt))
             })
         )
 
@@ -65,7 +70,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        if (this.sub) this.sub.unsubscribe()
+        this.subscription.unsubscribe()
     }
 
     @HostListener('window:resize')

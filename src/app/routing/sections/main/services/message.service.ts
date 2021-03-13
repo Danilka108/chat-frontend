@@ -27,7 +27,6 @@ export class MessageService {
 
     parseMessages(messages: IMessage[]): IMessageWithIsLast[] {
         return messages
-            .sort((a, b) => this.dateService.compareDatesASC(a.createdAt, b.createdAt))
             .map((message, i, arr) => {
                 if (message.senderID !== arr[i + 1]?.senderID) {
                     const [isUnequalDays, diffDate] = this.parseMessagesDays(message, arr, i)
@@ -60,5 +59,6 @@ export class MessageService {
 
                 return msg
             })
+            .sort((a, b) => this.dateService.compareDatesASC(a.createdAt, b.createdAt))
     }
 }

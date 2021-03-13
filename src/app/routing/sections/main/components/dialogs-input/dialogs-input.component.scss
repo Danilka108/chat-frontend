@@ -22,7 +22,7 @@
 }
 
 .hidden-wrapper {
-    overflow: hidden;
+    // overflow: hidden;
 }
 
 .form {
@@ -32,12 +32,17 @@
     z-index: 1000;
 }
 
-.scrollbar {
-    display: block;
-    width: 100%;
+.scrollbar-wrapper {
     max-height: calc(4px * 2 + 1rem * 8);
+    width: 100%;
     flex: 1;
     margin: 0.6rem 0;
+}
+
+.scrollbar {
+    // display: block;
+    width: 100%;
+    height: 100%;
 }
 
 .textarea-wrapper {

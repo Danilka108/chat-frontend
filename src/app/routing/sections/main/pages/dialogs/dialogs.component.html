@@ -1,5 +1,7 @@
-<app-loading *ngIf="requestLoading$ | async"></app-loading>
-<section>
-    <app-main-dialogs-group></app-main-dialogs-group>
-    <app-main-dialogs-detail></app-main-dialogs-detail>
-</section>
+<app-main-dialogs-scroll>
+    <app-loading *ngIf="requestLoading$ | async"></app-loading>
+    <div class="wrapper">
+        <app-main-dialogs-group></app-main-dialogs-group>
+        <router-outlet></router-outlet>
+    </div>
+</app-main-dialogs-scroll>

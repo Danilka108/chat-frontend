@@ -19,10 +19,11 @@ import { MessageService } from './services/message.service'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { DialogsScrollComponent } from './components/dialogs-scroll/dialogs-scroll.component'
 import { DialogsScrollBottomComponent } from './components/dialogs-scroll-bottom/dialogs-scroll-bottom.component'
-import { ScrollBottomService } from './services/scroll-bottom.service'
+import { ScrollService } from './services/scroll.service'
 import { WsModule } from 'src/app/ws/ws.module'
+import { DialogsDetailNotSelectedComponent } from './components/dialogs-detail-not-selected/dialogs-detail-not-selected.component'
+import { UiScrollModule } from 'ngx-ui-scroll'
 import { ScrollingModule } from '@angular/cdk/scrolling'
-import { ScrollingModule as ScrollingModuleEx } from '@angular/cdk-experimental/scrolling'
 import { InfiniteScrollModule } from 'ngx-infinite-scroll'
 
 @NgModule({
@@ -37,6 +38,7 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll'
         DialogsSeparatorComponent,
         DialogsScrollComponent,
         DialogsScrollBottomComponent,
+        DialogsDetailNotSelectedComponent,
     ],
     imports: [
         MaterialModule,
@@ -49,8 +51,8 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll'
         FormsModule,
         WsModule,
         ScrollingModule,
-        ScrollingModuleEx,
+        InfiniteScrollModule,
     ],
-    providers: [MainSectionHttpService, MessageService, ScrollBottomService],
+    providers: [MainSectionHttpService, MessageService, ScrollService],
 })
 export class MainSectionModule {}

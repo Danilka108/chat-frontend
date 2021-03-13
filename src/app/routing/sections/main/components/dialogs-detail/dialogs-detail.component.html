@@ -1,25 +1,19 @@
-<div class="no-selected"
-     *ngIf="!(isSelectedReceiver$ | async)">
-    <h2>Please select chat to start messaging</h2>
-</div>
-<div class="wrapper" *ngIf="isSelectedReceiver$ | async">
-    <div #wrapper class="scrollable-wrapper">
-        <app-main-dialogs-scroll (topReached)="onTopReached()">
-            <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
-                <app-main-dialogs-separator
-                    *ngIf="message.isDiffDays"
-                    [date]="message.diffDate">
-                </app-main-dialogs-separator>
-                <app-main-dialogs-message
-                    [wrapperWidth]="wrapper.offsetWidth"
-                    [message]="message.message"
-                    [date]="message.createdAt"
-                    [isLastInGroup]="message.isLastInGroup"
-                    [isOwnMsg]="message.senderID === (getUserID() | async)"
-                    [isReaded]="message.isReaded"
-                ></app-main-dialogs-message>
-            </ng-container>
-        </app-main-dialogs-scroll>
+<div class="wrapper">
+    <div #scrollWrapper class="scroll-wrapper">
+        <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
+            <app-main-dialogs-separator
+                *ngIf="message.isDiffDays"
+                [date]="message.diffDate">
+            </app-main-dialogs-separator>
+            <app-main-dialogs-message
+                [wrapperWidth]="scrollWrapper.offsetWidth"
+                [message]="message.message"
+                [date]="message.createdAt"
+                [isLastInGroup]="message.isLastInGroup"
+                [isOwnMsg]="message.senderID === (getUserID() | async)"
+                [isReaded]="message.isReaded"
+            ></app-main-dialogs-message>
+        </ng-container>
     </div>
-    <app-main-dialogs-input *ngIf="isSelectedReceiver$ | async"></app-main-dialogs-input>
+    <!-- <app-main-dialogs-input></app-main-dialogs-input> -->
 </div>

@@ -1,9 +1,9 @@
 <ng-scrollbar class="scrollbar">
     <div class="wrapper">
-        <app-main-dialogs-item *ngFor="let dialog of dialogs$ | async; trackBy: itemIdentity"
+        <app-main-dialogs-item *ngFor="let dialog of (dialogs$ | async)"
             [message]="dialog.lastMessage"
             [date]="parseDate(dialog.createdAt)"
-            [active]="(activeReceiverID$ | async) ===  dialog.receiverID"
+            [active]="(activeReceiverID$ | async) === dialog.receiverID"
             [receiver]="dialog.receiverName"
             (click)="onClick(dialog.receiverID)"
             [isSmallSize]="isSmallSize"

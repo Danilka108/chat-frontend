@@ -14,15 +14,10 @@ import {
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
 import { select, Store } from '@ngrx/store'
 import { NgScrollbar } from 'ngx-scrollbar'
-import { BehaviorSubject, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
+import { forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
 import {
-    debounceTime,
-    distinctUntilChanged,
-    filter,
     first,
     map,
-    pairwise,
-    startWith,
     switchMap,
     take,
     tap,
@@ -33,36 +28,41 @@ import { selectActiveReceiverIDAndUserID } from 'src/app/store/selectors/app.sel
 import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
-import { ScrollBottomService } from '../../services/scroll-bottom.service'
+import { ScrollService } from '../../services/scroll.service'
 
 @Component({
     selector: 'app-main-dialogs-input',
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
-    // changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogsInputComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class DialogsInputComponent{
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
-    @ViewChild('scrollbar') scrollbarEl!: ElementRef<HTMLElement>
-    @ViewChild(NgScrollbar) scrollbar!: NgScrollbar
     @ViewChild('textarea') textarea!: ElementRef<HTMLElement>
 
     btnRippleColor = 'rgba(220, 220, 220, 0.17)'
+
     formGroup!: FormGroup
+
     btnMargin = 0.6
     btnSize = ''
+    scrollbarHeight = 0
+
     loading = false
     subscription = new Subscription()
 
     height = 0
+
+    isViewed = new Subject<boolean>()
+    isViewed$ = this.isViewed.asObservable()
+    isDisabled = false
 
     constructor(
         private readonly ngZone: NgZone,
         private readonly fb: FormBuilder,
         private readonly httpService: MainSectionHttpService,
         private readonly dateService: DateService,
-        private readonly scrollBottomService: ScrollBottomService,
-        private readonly store: Store<AppState>
+        private readonly scrollService: ScrollService,
+        private readonly store: Store<AppState>,
     ) {}
 
     set sub(sub: Subscription) {
@@ -78,21 +78,21 @@ export class DialogsInputComponent implements OnInit, AfterViewChecked, OnDestro
     }
 
     ngOnInit() {
+        this.sub = this.scrollService.getIsViewed().pipe(
+            tap((isViewed) => {
+                setTimeout(() => this.isViewed.next(isViewed))
+            })
+        ).subscribe()
+
+        this.sub = this.isViewed$.subscribe((isViewed) => {
+            if (isViewed) {
+                this.isDisabled = false
+            }
+        })
+
         this.formGroup = this.fb.group({
             message: new FormControl(null),
         })
-    }
-
-    ngAfterViewChecked() {
-        const height = this.textarea.nativeElement.offsetHeight
-
-        if (height !== this.height) {
-            if (this.height === 0) this.btnSize = `calc(${height}px + ${this.btnMargin * 2}rem)`
-
-            this.height = height
-
-            this.scrollbarEl.nativeElement.style.height = this.height + 'px'
-        }
     }
 
     ngOnDestroy() {
@@ -149,7 +149,7 @@ export class DialogsInputComponent implements OnInit, AfterViewChecked, OnDestro
                                 })
                             )
 
-                            this.scrollBottomService.emitScrollBottom()
+                            this.scrollService.emitScrollBottom()
                         }
 
                         this.completeSubmit()
@@ -187,5 +187,10 @@ export class DialogsInputComponent implements OnInit, AfterViewChecked, OnDestro
             return true
         }
         return false
+    }
+
+    onClick() {
+        this.scrollService.emitScrollBottom()
+        this.isDisabled = true
     }
 }

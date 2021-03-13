@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, Output } from '@angular/core'
+import { Router } from '@angular/router'
+import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 
 @Component({
     selector: 'app-main-dialogs-item',
     templateUrl: './dialogs-item.component.html',
     styleUrls: ['./dialogs-item.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DialogsItemComponent {
-    click = new EventEmitter<null>()
+    @Output() click = new EventEmitter<undefined>()
 
     @Input() active!: boolean
     @Input() receiver!: string
@@ -15,6 +16,7 @@ export class DialogsItemComponent {
     @Input() message!: string
     @Input() isSmallSize!: boolean
     @Input() notReadedMessagesCount!: number
+    @Input() receiverID!: number
 
     rippleColorActive = 'rgba(220, 220, 220, 0.17)'
     rippleColor = ''

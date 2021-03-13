@@ -1,35 +1,35 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
+import { AfterViewInit, ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core'
 import { Observable, Subscription } from 'rxjs'
-import { ScrollBottomService } from '../../services/scroll-bottom.service'
+import { tap } from 'rxjs/operators'
+import { ScrollService } from '../../services/scroll.service'
 
 @Component({
     selector: 'app-main-dialogs-scroll-bottom',
     templateUrl: './dialogs-scroll-bottom.component.html',
     styleUrls: ['./dialogs-scroll-bottom.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogsScrollBottomComponent implements OnInit, OnDestroy {
-    isViewed$!: Observable<boolean>
+export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
+    isViewed = false
     isDisabled = false
     sub = new Subscription()
 
-    constructor(private readonly scrollBottomService: ScrollBottomService) {}
+    constructor(private readonly scrollService: ScrollService) {}
 
-    ngOnInit() {
-        this.isViewed$ = this.scrollBottomService.getIsViewed()
-
-        this.sub.add(
-            this.isViewed$.subscribe((isViewed) => {
-                if (isViewed) {
-                    // this.isDisabled = false
-                }
-            })
-        )
+    ngAfterViewInit() {
+        this.sub.add(this.scrollService.getIsViewed().pipe(
+            tap((isViewed) => setTimeout(() => {
+                this.isViewed = isViewed
+                this.isDisabled = !isViewed
+            }))
+        ).subscribe())
     }
 
     onClick() {
-        this.scrollBottomService.emitScrollBottom(false)
-        this.isDisabled = true
+        this.scrollService.emitScrollBottom()
+        setTimeout(() => {
+            this.isDisabled = true
+            this.isViewed = false
+        })
     }
 
     ngOnDestroy() {

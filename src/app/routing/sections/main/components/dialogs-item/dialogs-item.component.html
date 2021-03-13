@@ -1,4 +1,4 @@
-<button matRipple [ngClass]="active ? 'active' : ''" (click)="onClick()" [matRippleColor]="active ? rippleColorActive : rippleColor">
+<button matRipple [ngClass]="active ? 'active button' : 'button'" (click)="onClick()" [matRippleColor]="active ? rippleColorActive : rippleColor">
     <div class="photo"><div *ngIf="isSmallSize && notReadedMessagesCount !== 0" class="badge">{{notReadedMessagesCount}}</div></div>
     <div *ngIf="!isSmallSize" class="info"> 
         <div class="top">

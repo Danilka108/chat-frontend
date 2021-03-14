@@ -16,12 +16,19 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
     constructor(private readonly scrollService: ScrollService) {}
 
     ngAfterViewInit() {
-        this.sub.add(this.scrollService.getIsViewed().pipe(
-            tap((isViewed) => setTimeout(() => {
-                this.isViewed = isViewed
-                this.isDisabled = !isViewed
-            }))
-        ).subscribe())
+        this.sub.add(
+            this.scrollService
+                .getIsViewed()
+                .pipe(
+                    tap((isViewed) =>
+                        setTimeout(() => {
+                            this.isViewed = isViewed
+                            this.isDisabled = !isViewed
+                        })
+                    )
+                )
+                .subscribe()
+        )
     }
 
     onClick() {

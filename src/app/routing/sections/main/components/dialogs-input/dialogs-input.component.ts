@@ -15,13 +15,7 @@ import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
 import { select, Store } from '@ngrx/store'
 import { NgScrollbar } from 'ngx-scrollbar'
 import { forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
-import {
-    first,
-    map,
-    switchMap,
-    take,
-    tap,
-} from 'rxjs/operators'
+import { first, map, switchMap, take, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, updateDialogLastMessage } from 'src/app/store/actions/main.actions'
 import { selectActiveReceiverIDAndUserID } from 'src/app/store/selectors/app.selectors'
@@ -35,7 +29,7 @@ import { ScrollService } from '../../services/scroll.service'
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
 })
-export class DialogsInputComponent{
+export class DialogsInputComponent {
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
     @ViewChild('textarea') textarea!: ElementRef<HTMLElement>
 
@@ -62,7 +56,7 @@ export class DialogsInputComponent{
         private readonly httpService: MainSectionHttpService,
         private readonly dateService: DateService,
         private readonly scrollService: ScrollService,
-        private readonly store: Store<AppState>,
+        private readonly store: Store<AppState>
     ) {}
 
     set sub(sub: Subscription) {
@@ -78,11 +72,14 @@ export class DialogsInputComponent{
     }
 
     ngOnInit() {
-        this.sub = this.scrollService.getIsViewed().pipe(
-            tap((isViewed) => {
-                setTimeout(() => this.isViewed.next(isViewed))
-            })
-        ).subscribe()
+        this.sub = this.scrollService
+            .getIsViewed()
+            .pipe(
+                tap((isViewed) => {
+                    setTimeout(() => this.isViewed.next(isViewed))
+                })
+            )
+            .subscribe()
 
         this.sub = this.isViewed$.subscribe((isViewed) => {
             if (isViewed) {

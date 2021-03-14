@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Store } from '@ngrx/store'
-import { map } from 'rxjs/operators'
+import { map, share } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/auth.service'
 import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { AppState } from 'src/app/store/state/app.state'

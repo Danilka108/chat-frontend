@@ -5,14 +5,14 @@ import { BehaviorSubject, Subject } from 'rxjs'
 export class ScrollService {
     private readonly scrollBottom = new Subject<void>()
     private readonly isViewed = new BehaviorSubject<boolean>(false)
-    private readonly topReached = new Subject<void>()
+    private readonly sideReached = new Subject<'top' | 'bottom'>()
 
-    emitTopReached() {
-        this.topReached.next()
+    emitSideReached(side: 'top' | 'bottom') {
+        this.sideReached.next(side)
     }
 
-    getTopReached() {
-        return this.topReached.asObservable()
+    getSideReached() {
+        return this.sideReached.asObservable()
     }
 
     emitScrollBottom() {

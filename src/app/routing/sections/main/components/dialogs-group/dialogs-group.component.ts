@@ -38,9 +38,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.activeReceiverID$ = this.store.pipe(
-            select(selectActiveReceiverID)
-        )
+        this.activeReceiverID$ = this.store.pipe(select(selectActiveReceiverID))
 
         this.dialogs$ = this.store.pipe(
             select(selectDialogs),

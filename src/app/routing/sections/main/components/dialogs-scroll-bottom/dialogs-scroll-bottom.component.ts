@@ -18,12 +18,12 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
     ngAfterViewInit() {
         this.sub.add(
             this.scrollService
-                .getIsViewed()
+                .getIsViewedScrollBottom()
                 .pipe(
                     tap((isViewed) =>
                         setTimeout(() => {
-                            // this.isViewed = isViewed
-                            // this.isDisabled = !isViewed
+                            this.isViewed = isViewed
+                            this.isDisabled = !isViewed
                         })
                     )
                 )
@@ -34,8 +34,8 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
     onClick() {
         this.scrollService.emitScrollBottom('updateContent')
         setTimeout(() => {
-            // this.isDisabled = true
-            // this.isViewed = false
+            this.isDisabled = true
+            this.isViewed = false
         })
     }
 

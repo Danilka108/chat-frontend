@@ -239,7 +239,15 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
                     this.ignoreUploadNewMesssages = false
                     return this.updateMessages(receiverID)
                 }),
-                tap((messages) => this.messages.next(messages))
+                tap((messages) => {
+                    if (this.skip > this.take * 2) {
+                        this.scrollService.emitAllowScrollBottom(true)
+                    } else {
+                        this.scrollService.emitAllowScrollBottom(false)
+                    }
+
+                    this.messages.next(messages)
+                })
             )
             .subscribe()
 

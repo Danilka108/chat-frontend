@@ -8,7 +8,7 @@ import { AppState } from 'src/app/store/state/app.state'
 import { ScrollService } from '../../services/scroll.service'
 
 const SCROLLBAR_UPDATE_DISTANCE_FACTOR = 0.3
-const SCROLLBAR_UPDATE_DISTANCE_DELTA = 5
+const SCROLLBAR_DISTANCE_DELTA = 5
 
 @Component({
     selector: 'app-main-dialogs-scroll',
@@ -105,12 +105,12 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                 switchMap(() => this.height$),
                 tap((height) => {
                     if (this.isTopUpdatingContent) {
-                        this.bottomReachedDistance = viewport.scrollTop + SCROLLBAR_UPDATE_DISTANCE_DELTA
+                        this.bottomReachedDistance = viewport.scrollTop + SCROLLBAR_DISTANCE_DELTA
                         this.topReachedDistance =
                             (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR
                     }
                     if (this.isBottomUpdatingContent) {
-                        this.topReachedDistance = viewport.scrollTop - SCROLLBAR_UPDATE_DISTANCE_DELTA
+                        this.topReachedDistance = viewport.scrollTop - SCROLLBAR_DISTANCE_DELTA
                         this.bottomReachedDistance =
                             (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
                     }
@@ -182,17 +182,17 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                             this.isEmitBottomReachedEvent = true
                         }
 
-                        if (
-                            !this.isScrollDown &&
-                            viewport.scrollTop <= viewport.scrollHeight - viewport.offsetHeight * 2
-                        ) {
-                            this.scrollService.emitIsViewed(true)
-                        } else {
-                            this.scrollService.emitIsViewed(false)
-                        }
+                        const allowScrollBottom = this.scrollService.getAllowScrollBottom()
 
-                        if (viewport.scrollTop >= viewport.scrollHeight - viewport.clientHeight - 5) {
-                            this.isScrollDown = false
+                        if (
+                            this.isScrollDown ||
+                            (allowScrollBottom === false &&
+                                viewport.scrollTop >=
+                                    viewport.scrollHeight - viewport.clientHeight - viewport.clientHeight)
+                        ) {
+                            this.scrollService.emitIsViewedScrollBottom(false)
+                        } else {
+                            this.scrollService.emitIsViewedScrollBottom(true)
                         }
                     })
                 )
@@ -202,6 +202,13 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
     ngAfterViewChecked() {
         const viewport = document.documentElement
+
+        if (
+            this.isScrollDown &&
+            viewport.scrollTop >= viewport.scrollHeight - viewport.clientHeight - SCROLLBAR_DISTANCE_DELTA
+        ) {
+            this.isScrollDown = false
+        }
 
         if (viewport.scrollHeight !== this.height.getValue()) {
             this.ignoreScroll = true

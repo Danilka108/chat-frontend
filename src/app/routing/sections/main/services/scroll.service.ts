@@ -4,8 +4,17 @@ import { BehaviorSubject, Subject } from 'rxjs'
 @Injectable()
 export class ScrollService {
     private readonly scrollBottom = new Subject<'updateContent' | 'updateScroll'>()
-    private readonly isViewed = new BehaviorSubject<boolean>(false)
+    private readonly isViewedScrollBottom = new BehaviorSubject<boolean>(false)
     private readonly sideReached = new Subject<'top' | 'bottom'>()
+    private allowScrollBottom: null | boolean = null
+
+    emitAllowScrollBottom(allowScrollBottom: boolean) {
+        this.allowScrollBottom = allowScrollBottom
+    }
+
+    getAllowScrollBottom() {
+        return this.allowScrollBottom
+    }
 
     emitSideReached(side: 'top' | 'bottom') {
         this.sideReached.next(side)
@@ -23,11 +32,11 @@ export class ScrollService {
         return this.scrollBottom.asObservable()
     }
 
-    emitIsViewed(isViewed: boolean) {
-        this.isViewed.next(isViewed)
+    emitIsViewedScrollBottom(isViewed: boolean) {
+        this.isViewedScrollBottom.next(isViewed)
     }
 
-    getIsViewed() {
-        return this.isViewed.asObservable()
+    getIsViewedScrollBottom() {
+        return this.isViewedScrollBottom.asObservable()
     }
 }

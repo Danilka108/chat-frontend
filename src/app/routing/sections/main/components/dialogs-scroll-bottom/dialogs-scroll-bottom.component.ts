@@ -1,7 +1,7 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core'
 import { Subscription } from 'rxjs'
 import { tap } from 'rxjs/operators'
-import { ScrollService } from '../../services/scroll.service'
+import { ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scroll.service'
 
 @Component({
     selector: 'app-main-dialogs-scroll-bottom',
@@ -32,7 +32,7 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
     }
 
     onClick() {
-        this.scrollService.emitScrollBottom('updateContent')
+        this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_CONTENT)
         setTimeout(() => {
             this.isDisabled = true
             this.isViewed = false

@@ -11,6 +11,11 @@ export const updateRequestLoading = createAction('[Main] Update Request Loading'
 
 export const addDialogs = createAction('[Dialogs] Add Dialogs', props<{ dialogs: IDialog[] }>())
 
+export const markDialogMessagesAsRead = createAction(
+    '[Dialog] Mark Dialog Messages As Read',
+    props<{ receiverID: number }>()
+)
+
 export const updateDialogNewMessagesCount = createAction(
     '[Dialogs] Update Dialog New Messages Count',
     props<{ receiverID: number; newMessagesCount: number }>()
@@ -40,37 +45,3 @@ export const updateDialogIsUploaded = createAction(
     '[Dialogs] Update Dialog Is Updated',
     props<{ receiverID: number; isUploaded: boolean }>()
 )
-
-// export const updateActiveReceiverID = createAction(
-//     '[Main] Update Active Receiver ID',
-//     props<{ activeReceiverID: number | null }>()
-// )
-
-// export const addDialogs = createAction('[Main] Add Dialogs', props<{ dialogs: IDialog[] }>())
-
-// export const updateDialogLastMessage = createAction(
-//     '[Main] Update Dialog Last Message',
-//     props<{ receiverID: number; lastMessage: string; createdAt: string }>()
-// )
-
-// export const updateDialogNewMessagesCount = createAction(
-//     '[Main] Update Dialog New Messsages Count',
-//     props<{ receiverID: number; newMessagesCount: number }>()
-// )
-
-// export const addDialogMessages = createAction(
-//     '[Main] Add Dialog Messages',
-//     props<{ receiverID: number; messages: IMessage[] }>()
-// )
-
-// export const updateDialogScroll = createAction(
-//     '[Main] Update Dialog Scroll',
-//     props<{ receiverID: number; scroll: number }>()
-// )
-
-// export const updateDialogSkip = createAction('[Main] Update Dialog Skip', props<{ receiverID: number; skip: number }>())
-
-// export const updateDialogIsUploaded = createAction(
-//     '[Main] Update Dialog Is Uploaded',
-//     props<{ receiverID: number; isUploaded: boolean }>()
-// )

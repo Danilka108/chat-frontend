@@ -1,11 +1,19 @@
 import { ScrollDispatcher } from '@angular/cdk/scrolling'
 import { AfterViewChecked, Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, BehaviorSubject, combineLatest, of, Subscription } from 'rxjs'
-import { filter, observeOn, switchMap, tap } from 'rxjs/operators'
-import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
+import { asyncScheduler, BehaviorSubject, combineLatest, forkJoin, of, Subject, Subscription } from 'rxjs'
+import { filter, first, observeOn, switchMap, tap } from 'rxjs/operators'
+import { updateDialogNewMessagesCount } from 'src/app/store/actions/main.actions'
+import { selectActiveReceiverID, selectDialogNewMessagesCount } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
-import { ScrollService } from '../../services/scroll.service'
+import { MainSectionHttpService } from '../../services/main-section-http.service'
+import {
+    NEW_MESSAGE_END,
+    ScrollService,
+    SCROLL_BOTTOM_UPDATE_SCROLL,
+    SIDE_REACED_BOTTOM,
+    SIDE_REACHED_TOP,
+} from '../../services/scroll.service'
 
 const SCROLLBAR_UPDATE_DISTANCE_FACTOR = 0.3
 const SCROLLBAR_DISTANCE_DELTA = 5
@@ -25,7 +33,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
     isEmitTopReachedEvent = false
     isEmitBottomReachedEvent = false
 
-    topReachedDistance: null | number = 300
+    topReachedDistance: null | number = null
     bottomReachedDistance: null | number = null
 
     isTopUpdatingContent = false
@@ -35,12 +43,18 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
     ignoreScroll = false
 
+    isNewMessage = false
+
+    allMessagesRead = new Subject<void>()
+    allMessagesRead$ = this.allMessagesRead.asObservable()
+
     subscription = new Subscription()
 
     constructor(
         private readonly store: Store<AppState>,
         private readonly scrollService: ScrollService,
         private readonly scrollDispatcher: ScrollDispatcher,
+        private readonly httpService: MainSectionHttpService,
         private readonly ngZone: NgZone
     ) {}
 
@@ -70,10 +84,33 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                 select(selectActiveReceiverID),
                 tap(() => {
                     this.isEmitBottomReachedEvent = false
+                    this.isEmitTopReachedEvent = true
                     this.isTopUpdatingContent = false
                     this.isBottomUpdatingContent = false
+                    this.topReachedDistance = null
+                    this.bottomReachedDistance = null
                     this.isScrollDown = false
+                    this.isNewMessage = false
                     this.scroll.next(null)
+                })
+            )
+            .subscribe()
+
+        this.sub = this.scrollService
+            .getNewMessage()
+            .pipe(
+                tap((type) => {
+                    if (type === NEW_MESSAGE_END) {
+                        this.isNewMessage = false
+                        return
+                    }
+
+                    this.isNewMessage = true
+
+                    this.topReachedDistance =
+                        (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR
+                    this.bottomReachedDistance =
+                        (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
                 })
             )
             .subscribe()
@@ -81,7 +118,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
         this.sub = this.scrollService
             .getScrollBottom()
             .pipe(
-                filter((step) => step === 'updateScroll'),
+                filter((step) => step === SCROLL_BOTTOM_UPDATE_SCROLL),
                 observeOn(asyncScheduler),
                 tap(() => {
                     this.isScrollDown = true
@@ -91,10 +128,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                     this.bottomReachedDistance =
                         (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
 
-                    viewport.scrollTo({
-                        top: this.height.getValue(),
-                        behavior: 'smooth',
-                    })
+                    viewport.scrollTop = viewport.scrollHeight - viewport.clientHeight
                 })
             )
             .subscribe()
@@ -104,6 +138,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                 select(selectActiveReceiverID),
                 switchMap(() => this.height$),
                 tap((height) => {
+                    if (this.isNewMessage) return
+
                     if (this.isTopUpdatingContent) {
                         this.bottomReachedDistance = viewport.scrollTop + SCROLLBAR_DISTANCE_DELTA
                         this.topReachedDistance =
@@ -122,6 +158,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                             (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
 
                         const scroll = this.scroll.getValue()
+
                         if (scroll === null) {
                             viewport.scrollTop = height
                         } else {
@@ -139,7 +176,16 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                     combineLatest([of(activeReceiverID), this.scrollDispatcher.scrolled(200)])
                 ),
                 filter(([_, scrollable]) => !scrollable),
-                tap(([activeReceiverID]) =>
+                switchMap(([receiverID]) =>
+                    forkJoin({
+                        activeReceiverID: of(receiverID),
+                        newMessagesCount:
+                            receiverID === null
+                                ? of(null)
+                                : this.store.pipe(select(selectDialogNewMessagesCount, { receiverID }), first()),
+                    })
+                ),
+                tap(({ activeReceiverID, newMessagesCount }) =>
                     this.ngZone.run(() => {
                         if (activeReceiverID === null) return
 
@@ -151,7 +197,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                         if (
                             this.topReachedDistance !== null &&
                             viewport.scrollTop < this.topReachedDistance &&
-                            !this.isScrollDown
+                            !this.isScrollDown &&
+                            !this.isNewMessage
                         ) {
                             if (this.isEmitTopReachedEvent) {
                                 this.isEmitTopReachedEvent = false
@@ -159,7 +206,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                                 this.isTopUpdatingContent = true
                                 this.isBottomUpdatingContent = false
 
-                                this.scrollService.emitSideReached('top')
+                                this.scrollService.emitSideReached(SIDE_REACHED_TOP)
                             }
                         } else {
                             this.isEmitTopReachedEvent = true
@@ -168,7 +215,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                         if (
                             this.bottomReachedDistance !== null &&
                             viewport.scrollTop > this.bottomReachedDistance &&
-                            !this.isScrollDown
+                            !this.isScrollDown &&
+                            !this.isNewMessage
                         ) {
                             if (this.isEmitBottomReachedEvent) {
                                 this.isEmitBottomReachedEvent = false
@@ -176,7 +224,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                                 this.isBottomUpdatingContent = true
                                 this.isTopUpdatingContent = false
 
-                                this.scrollService.emitSideReached('bottom')
+                                this.scrollService.emitSideReached(SIDE_REACED_BOTTOM)
                             }
                         } else {
                             this.isEmitBottomReachedEvent = true
@@ -190,12 +238,44 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                                 viewport.scrollTop >=
                                     viewport.scrollHeight - viewport.clientHeight - viewport.clientHeight)
                         ) {
+                            if (newMessagesCount !== 0) {
+                                this.allMessagesRead.next()
+                            }
+
                             this.scrollService.emitIsViewedScrollBottom(false)
                         } else {
                             this.scrollService.emitIsViewedScrollBottom(true)
                         }
                     })
                 )
+            )
+            .subscribe()
+
+        this.sub = this.allMessagesRead$
+            .pipe(
+                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
+                switchMap((receiverID) => {
+                    if (receiverID === null)
+                        return forkJoin({
+                            receiverID: of(null),
+                            allRead: of(null),
+                        })
+
+                    return forkJoin({
+                        receiverID: of(receiverID),
+                        allRead: this.httpService.allRead(receiverID).pipe(first()),
+                    })
+                }),
+                tap(({ receiverID, allRead }) => {
+                    if (receiverID !== null && allRead !== null) {
+                        this.store.dispatch(
+                            updateDialogNewMessagesCount({
+                                receiverID,
+                                newMessagesCount: 0,
+                            })
+                        )
+                    }
+                })
             )
             .subscribe()
     }

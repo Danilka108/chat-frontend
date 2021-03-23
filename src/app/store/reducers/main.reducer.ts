@@ -3,6 +3,7 @@ import { IMessage } from 'src/app/routing/sections/main/interface/message.interf
 import {
     addDialogMessages,
     addDialogs,
+    markDialogMessagesAsRead,
     updateActiveReceiverID,
     updateDialogIsUploaded,
     updateDialogLastMessage,
@@ -70,6 +71,34 @@ export const mainReducer = createReducer(
             scroll: stateScroll,
             skip: stateSkip,
             isUploaded: stateIsUploaded,
+        }
+    }),
+    on(markDialogMessagesAsRead, (state, { receiverID }) => {
+        if (state.dialogs === null) return state
+
+        const dialogsMessages = [...state.messages]
+        const dialogIndex = state.messages.findIndex((dialog) => dialog.receiverID === receiverID)
+
+        const dialogMessages = dialogsMessages[dialogIndex].messages
+        if (dialogIndex > -1 && dialogMessages !== null) {
+            const newDialogMessages: IMessage[] = []
+
+            for (const message of dialogMessages) {
+                newDialogMessages.push({
+                    ...message,
+                    isReaded: true,
+                })
+            }
+
+            dialogsMessages[dialogIndex] = {
+                receiverID,
+                messages: newDialogMessages,
+            }
+        }
+
+        return {
+            ...state,
+            messages: dialogsMessages,
         }
     }),
     on(updateDialogNewMessagesCount, (state, { receiverID, newMessagesCount }) => {

@@ -1,7 +1,7 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Store } from '@ngrx/store'
-import { map, share } from 'rxjs/operators'
+import { map, share, tap } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/auth.service'
 import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { AppState } from 'src/app/store/state/app.state'
@@ -102,6 +102,24 @@ export class MainSectionHttpService {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
 
                     return message
+                })
+            )
+    }
+
+    allRead(receiverID: number) {
+        this.store.dispatch(updateRequestLoading({ requestLoading: true }))
+
+        return this.authService
+            .authRequest((accessToken: string) => {
+                return this.httpClient.get<void>(`${environment.apiUrl}/message/${receiverID}/all-read`, {
+                    headers: {
+                        authorization: `Bearer ${accessToken}`,
+                    },
+                })
+            })
+            .pipe(
+                tap(() => {
+                    this.store.dispatch(updateRequestLoading({ requestLoading: false }))
                 })
             )
     }

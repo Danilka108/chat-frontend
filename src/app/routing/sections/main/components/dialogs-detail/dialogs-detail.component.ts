@@ -1,23 +1,41 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
-import { first, map, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
+import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subject, Subscription } from 'rxjs'
+import { filter, first, map, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { addDialogMessages, updateDialogIsUploaded } from 'src/app/store/actions/main.actions'
+import {
+    addDialogMessages,
+    markDialogMessagesAsRead,
+    updateDialogIsUploaded,
+    updateDialogLastMessage,
+    updateDialogNewMessagesCount,
+} from 'src/app/store/actions/main.actions'
 import { selectUserID } from 'src/app/store/selectors/auth.selectors'
 import {
     selectActiveReceiverID,
     selectDialogIsUploaded,
     selectDialogMessages,
+    selectDialogNewMessagesCount,
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
+import { WsEvents } from 'src/app/ws/ws.events'
 import { WsService } from 'src/app/ws/ws.service'
 import { IMessage, IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
-import { ScrollService } from '../../services/scroll.service'
+import {
+    NEW_MESSAGE_END,
+    NEW_MESSAGE_START,
+    ScrollService,
+    SCROLL_BOTTOM_UPDATE_CONTENT,
+    SCROLL_BOTTOM_UPDATE_SCROLL,
+    SIDE_REACED_BOTTOM,
+    SIDE_REACHED_TOP,
+} from '../../services/scroll.service'
 
-const TAKE_MESSAGES_FACTOR = 1 / 15
+const TAKE_MESSAGES_FACTOR = 1 / 20
+
+const ALL_MESSAGES_READ = 'ALL_MESSAGES_READ'
 
 @Component({
     selector: 'app-main-dialogs-detail',
@@ -29,6 +47,9 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
 
     messages = new BehaviorSubject<IMessageWithIsLast[]>([])
     messages$ = this.messages.asObservable()
+
+    allMessagesRead = new Subject<typeof ALL_MESSAGES_READ>()
+    allMessagesRead$ = this.allMessagesRead.asObservable()
 
     take = 0
     skip = 0
@@ -178,8 +199,10 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
 
     updateMessages(receiverID: number | null): Observable<IMessageWithIsLast[]> {
         return merge(
-            this.scrollService.getSideReached().pipe(startWith('top')),
-            this.scrollService.getScrollBottom()
+            this.scrollService.getSideReached().pipe(startWith(SIDE_REACHED_TOP)),
+            this.scrollService.getScrollBottom(),
+            this.scrollService.getNewMessage().pipe(filter((type) => type === NEW_MESSAGE_START)),
+            this.allMessagesRead$
         ).pipe(
             switchMap((event) => {
                 if (receiverID === null)
@@ -205,20 +228,35 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
                 })
             }),
             switchMap(({ storeMessages, outputMessages, isUploaded, event }) => {
-                if (event === 'top') {
+                if (event === SIDE_REACHED_TOP) {
                     return this.onTopReached(receiverID, storeMessages, isUploaded)
                 }
 
-                if (event === 'bottom') {
+                if (event === SIDE_REACED_BOTTOM) {
                     return this.onBottomReached(storeMessages, outputMessages)
                 }
 
-                if (event === 'updateContent') {
+                if (event === SCROLL_BOTTOM_UPDATE_CONTENT) {
                     return this.onScrollBottom(receiverID, storeMessages).pipe(
                         tap(() => {
-                            this.scrollService.emitScrollBottom('updateScroll')
+                            this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_SCROLL)
                         })
                     )
+                }
+
+                if (event === NEW_MESSAGE_START) {
+                    if (this.skip - this.messages.getValue().length === 0) {
+                        return this.onScrollBottom(receiverID, storeMessages)
+                    } else {
+                        this.skip += 1
+                        return this.messages$.pipe(first())
+                    }
+                }
+
+                if (event === ALL_MESSAGES_READ) {
+                    this.skip -= this.messages.getValue().length
+
+                    return this.onTopReached(receiverID, storeMessages, isUploaded)
                 }
 
                 return of([])
@@ -240,79 +278,95 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
                     return this.updateMessages(receiverID)
                 }),
                 tap((messages) => {
-                    if (this.skip > this.take * 2) {
-                        this.scrollService.emitAllowScrollBottom(true)
-                    } else {
-                        this.scrollService.emitAllowScrollBottom(false)
-                    }
-
                     this.messages.next(messages)
                 })
             )
             .subscribe()
 
-        this.sub = this.messages$.pipe(observeOn(asyncScheduler)).subscribe()
+        this.sub = this.messages$
+            .pipe(
+                tap(() => {}),
+                observeOn(asyncScheduler),
+                tap(() => {
+                    this.scrollService.emitNewMessage(NEW_MESSAGE_END)
 
-        // /**
-        //  * Getting messages across websocket
-        //  */
-        // this.sub = this.wsService
-        //     .fromEvent<IMessage>(WsEvents.user.newMessage)
-        //     .pipe(
-        //         switchMap((message) =>
-        //             forkJoin({
-        //                 message: of(message),
-        //                 userID: this.store.pipe(select(selectUserID), first()),
-        //             })
-        //         ),
-        //         switchMap(({ message, userID }) => {
-        //             const receiverID = userID === message.receiverID ? message.senderID : message.receiverID
+                    if (this.skip > this.take * 2) {
+                        this.scrollService.updateAllowScrollBottom(true)
+                    } else {
+                        this.scrollService.updateAllowScrollBottom(false)
+                    }
+                })
+            )
+            .subscribe()
 
-        //             return forkJoin({
-        //                 receiverID: of(receiverID),
-        //                 message: of(message),
-        //                 dialogSkip: this.store.pipe(select(selectDialogSkip, { receiverID }), first()),
-        //                 dialogNewMessagesCount: this.store.pipe(
-        //                     select(selectDialogNewMessagesCount, { receiverID }),
-        //                     first()
-        //                 ),
-        //             })
-        //         }),
-        //         map(({ message, receiverID, dialogSkip, dialogNewMessagesCount }) => {
-        //             const dlgSkip = dialogSkip === null ? 0 : dialogSkip
-        //             const dlgNewMessagesCount = dialogNewMessagesCount === null ? 0 : dialogNewMessagesCount
+        this.sub = this.wsService
+            .fromEvent<IMessage>(WsEvents.user.newMessage)
+            .pipe(
+                switchMap((message) =>
+                    forkJoin({
+                        message: of(message),
+                        userID: this.store.pipe(select(selectUserID), first()),
+                    })
+                ),
+                switchMap(({ message, userID }) => {
+                    const receiverID = userID === message.receiverID ? message.senderID : message.receiverID
 
-        //             this.store.dispatch(
-        //                 addDialogMessages({
-        //                     receiverID,
-        //                     messages: [message],
-        //                 })
-        //             )
+                    return forkJoin({
+                        receiverID: of(receiverID),
+                        message: of(message),
+                        dialogNewMessagesCount: this.store.pipe(
+                            select(selectDialogNewMessagesCount, { receiverID }),
+                            first()
+                        ),
+                    })
+                }),
+                map(({ message, receiverID, dialogNewMessagesCount }) => {
+                    const dlgNewMessagesCount = dialogNewMessagesCount === null ? 0 : dialogNewMessagesCount
 
-        //             this.store.dispatch(
-        //                 updateDialogLastMessage({
-        //                     receiverID,
-        //                     lastMessage: message.message,
-        //                     createdAt: this.dateService.now(),
-        //                 })
-        //             )
+                    this.store.dispatch(
+                        addDialogMessages({
+                            receiverID,
+                            messages: [message],
+                        })
+                    )
 
-        //             this.store.dispatch(
-        //                 updateDialogSkip({
-        //                     receiverID,
-        //                     skip: dlgSkip,
-        //                 })
-        //             )
+                    this.store.dispatch(
+                        updateDialogLastMessage({
+                            receiverID,
+                            lastMessage: message.message,
+                            createdAt: this.dateService.now(),
+                        })
+                    )
 
-        //             // this.store.dispatch(
-        //             //     updateDialogNewMessagesCount({
-        //             //         receiverID,
-        //             //         newMessagesCount: dlgNewMessagesCount + 1,
-        //             //     })
-        //             // )
-        //         })
-        //     )
-        //     .subscribe()
+                    this.scrollService.emitNewMessage(NEW_MESSAGE_START)
+
+                    if (message.senderID === receiverID) {
+                        this.store.dispatch(
+                            updateDialogNewMessagesCount({
+                                receiverID,
+                                newMessagesCount: dlgNewMessagesCount + 1,
+                            })
+                        )
+                    }
+                })
+            )
+            .subscribe()
+
+        this.sub = this.wsService
+            .fromEvent<void>(WsEvents.user.allMessagesRead)
+            .pipe(
+                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
+                tap((receiverID) => {
+                    if (receiverID !== null) {
+                        this.store.dispatch(markDialogMessagesAsRead({ receiverID }))
+
+                        if (!this.scrollService.getAllowScrollBottom()) {
+                            this.allMessagesRead.next(ALL_MESSAGES_READ)
+                        }
+                    }
+                })
+            )
+            .subscribe()
     }
 
     @HostListener('window:resize')

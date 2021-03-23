@@ -1,29 +1,16 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field'
-import {
-    AfterContentChecked,
-    AfterViewChecked,
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    ElementRef,
-    NgZone,
-    OnDestroy,
-    OnInit,
-    ViewChild,
-} from '@angular/core'
-import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
+import { AfterViewInit, Component, NgZone, ViewChild } from '@angular/core'
+import { FormControl, FormGroup } from '@angular/forms'
 import { MatFormField } from '@angular/material/form-field'
 import { select, Store } from '@ngrx/store'
-import { NgScrollbar } from 'ngx-scrollbar'
-import { asyncScheduler, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
+import { asyncScheduler, forkJoin, of, Subscription } from 'rxjs'
 import { first, map, observeOn, switchMap, take, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, updateDialogLastMessage } from 'src/app/store/actions/main.actions'
-import { selectActiveReceiverIDAndUserID } from 'src/app/store/selectors/app.selectors'
 import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
-import { ScrollService } from '../../services/scroll.service'
+import { ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scroll.service'
 
 @Component({
     selector: 'app-main-dialogs-input',
@@ -43,13 +30,8 @@ export class DialogsInputComponent implements AfterViewInit {
     loading = false
     subscription = new Subscription()
 
-    // isViewed = new Subject<boolean>()
-    // isViewed$ = this.isViewed.asObservable()
-    // isDisabled = false
-
     constructor(
         private readonly ngZone: NgZone,
-        private readonly fb: FormBuilder,
         private readonly httpService: MainSectionHttpService,
         private readonly dateService: DateService,
         private readonly scrollService: ScrollService,
@@ -70,22 +52,6 @@ export class DialogsInputComponent implements AfterViewInit {
         setTimeout(() => {
             this.btnSize = this.matFormField._elementRef.nativeElement.offsetHeight
         })
-    }
-
-    ngOnInit() {
-        // this.sub = this.scrollService
-        //     .getIsViewed()
-        //     .pipe(
-        //         tap((isViewed) => {
-        //             setTimeout(() => this.isViewed.next(isViewed))
-        //         })
-        //     )
-        //     .subscribe()
-        // this.sub = this.isViewed$.subscribe((isViewed) => {
-        //     if (isViewed) {
-        //         this.isDisabled = false
-        //     }
-        // })
     }
 
     ngOnDestroy() {
@@ -136,7 +102,7 @@ export class DialogsInputComponent implements AfterViewInit {
                         this.completeSubmit()
                     }),
                     observeOn(asyncScheduler),
-                    tap(() => this.scrollService.emitScrollBottom('updateContent'))
+                    tap(() => this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_CONTENT))
                 )
                 .subscribe()
         }

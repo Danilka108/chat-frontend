@@ -1,13 +1,11 @@
-<ng-scrollbar class="scrollbar">
-    <div class="wrapper">
-        <app-main-dialogs-item *ngFor="let dialog of (dialogs$ | async)"
-            [message]="dialog.lastMessage"
-            [date]="parseDate(dialog.createdAt)"
-            [active]="(activeReceiverID$ | async) === dialog.receiverID"
-            [receiver]="dialog.receiverName"
-            (click)="onClick(dialog.receiverID)"
-            [isSmallSize]="isSmallSize"
-            [notReadedMessagesCount]="dialog.newMessagesCount"
-        ></app-main-dialogs-item>
-    </div>
-</ng-scrollbar>
+<div class="wrapper">
+    <app-main-dialogs-item *ngFor="let dialog of (dialogs$ | async)"
+        [message]="dialog.lastMessage"
+        [date]="parseDate(dialog.createdAt)"
+        [active]="(activeReceiverID$ | async) === dialog.receiverID"
+        [receiver]="dialog.receiverName"
+        (click)="onClick(dialog.receiverID)"
+        [isSmallSize]="isSmallSize"
+        [notReadedMessagesCount]="dialog.newMessagesCount"
+    ></app-main-dialogs-item>
+</div>

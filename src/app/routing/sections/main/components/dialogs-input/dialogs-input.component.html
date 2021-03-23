@@ -1,22 +1,19 @@
 <app-main-dialogs-scroll-bottom></app-main-dialogs-scroll-bottom>
-<form [formGroup]="formGroup" class="form">
-    <!-- <textarea class="textarea mat-body"
-            type="text"
-            cdkTextareaAutosize
-            autosize="CdkTextareaAutosize"
-            cdkAutosizeMaxRows="4"
-            cdkAutosizeMinRows="1"
-            formControlName="message"
-            (keydown)="onKeydown($event)"
-            placeholder="Send message..."></textarea> -->
-    <div class="btn-wrapper"
-         [style.height]="btnSize"
-         [style.width]="btnSize">
-        <button class="btn-send"
-                matRipple
-                aria-label="Send message"
-                [disabled]="loading || isMessageEmpty()"
-                (click)="onSubmit()">
+<form class="form" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
+    <mat-form-field #textarea appearance="fill" class="form-field">
+        <textarea class="scrollbar textarea"
+                  matInput
+                  cdkTextareaAutosize
+                  #autosize="cdkTextareaAutosize"
+                  cdkAutosizeMinRows="1"
+                  cdkAutosizeMaxRows="5"
+                  placeholder="Send message..."
+                  formControlName="message"
+                  (keydown)="onKeydown($event)"
+        ></textarea>
+    </mat-form-field>
+    <div class="button-wrapper" [style.height]="btnSize + 'px'" [style.width]="btnSize + 'px'">
+        <button mat-icon-button color="primary" [disabled]="loading || isMessageEmpty()">
             <mat-icon>send</mat-icon>
         </button>
     </div>

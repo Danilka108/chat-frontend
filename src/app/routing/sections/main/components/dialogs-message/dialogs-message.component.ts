@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, HostBinding, Input } from '@angular/core'
+import { ChangeDetectionStrategy, Component, HostBinding, Input, OnInit } from '@angular/core'
 import { DateService } from 'src/app/common/date.service'
 
 @Component({
@@ -7,19 +7,21 @@ import { DateService } from 'src/app/common/date.service'
     styleUrls: ['./dialogs-message.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogsMessageComponent {
+export class DialogsMessageComponent implements OnInit {
     @Input() @HostBinding('class.own-msg') isOwnMsg!: boolean
     @Input() @HostBinding('class.last-in-group') isLastInGroup!: boolean
     @Input() message!: string
     @Input() date!: string
-    @Input() wrapperWidth!: number
+    @Input() wrapperWidth!: number | null
     @Input() isReaded!: boolean
 
     wrapperWidthFactor = 0.5
 
     constructor(private readonly dateService: DateService) {}
 
+    ngOnInit() {}
+
     parseDate(date: string) {
-        return this.dateService.parseDateOnlyTime(date)
+        return this.dateService.parseDate(date)
     }
 }

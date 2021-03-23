@@ -1,5 +1,5 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, HostListener, OnDestroy, OnInit } from '@angular/core'
-import { Observable, Subscription } from 'rxjs'
+import { AfterViewInit, Component, OnDestroy } from '@angular/core'
+import { Subscription } from 'rxjs'
 import { tap } from 'rxjs/operators'
 import { ScrollService } from '../../services/scroll.service'
 
@@ -9,7 +9,7 @@ import { ScrollService } from '../../services/scroll.service'
     styleUrls: ['./dialogs-scroll-bottom.component.scss'],
 })
 export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
-    isViewed = false
+    isViewed = true
     isDisabled = false
     sub = new Subscription()
 
@@ -22,8 +22,8 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
                 .pipe(
                     tap((isViewed) =>
                         setTimeout(() => {
-                            this.isViewed = isViewed
-                            this.isDisabled = !isViewed
+                            // this.isViewed = isViewed
+                            // this.isDisabled = !isViewed
                         })
                     )
                 )
@@ -32,10 +32,10 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
     }
 
     onClick() {
-        this.scrollService.emitScrollBottom()
+        this.scrollService.emitScrollBottom('updateContent')
         setTimeout(() => {
-            this.isDisabled = true
-            this.isViewed = false
+            // this.isDisabled = true
+            // this.isViewed = false
         })
     }
 

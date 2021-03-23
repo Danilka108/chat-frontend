@@ -12,10 +12,11 @@ import {
     ViewChild,
 } from '@angular/core'
 import { FormBuilder, FormControl, FormGroup } from '@angular/forms'
+import { MatFormField } from '@angular/material/form-field'
 import { select, Store } from '@ngrx/store'
 import { NgScrollbar } from 'ngx-scrollbar'
-import { forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
-import { first, map, switchMap, take, tap } from 'rxjs/operators'
+import { asyncScheduler, forkJoin, Observable, of, Subject, Subscription } from 'rxjs'
+import { first, map, observeOn, switchMap, take, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, updateDialogLastMessage } from 'src/app/store/actions/main.actions'
 import { selectActiveReceiverIDAndUserID } from 'src/app/store/selectors/app.selectors'
@@ -29,26 +30,22 @@ import { ScrollService } from '../../services/scroll.service'
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
 })
-export class DialogsInputComponent {
+export class DialogsInputComponent implements AfterViewInit {
+    @ViewChild('textarea') matFormField!: MatFormField
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
-    @ViewChild('textarea') textarea!: ElementRef<HTMLElement>
 
-    btnRippleColor = 'rgba(220, 220, 220, 0.17)'
+    formGroup = new FormGroup({
+        message: new FormControl(null),
+    })
 
-    formGroup!: FormGroup
-
-    btnMargin = 0.6
-    btnSize = ''
-    scrollbarHeight = 0
+    btnSize = 0
 
     loading = false
     subscription = new Subscription()
 
-    height = 0
-
-    isViewed = new Subject<boolean>()
-    isViewed$ = this.isViewed.asObservable()
-    isDisabled = false
+    // isViewed = new Subject<boolean>()
+    // isViewed$ = this.isViewed.asObservable()
+    // isDisabled = false
 
     constructor(
         private readonly ngZone: NgZone,
@@ -63,33 +60,32 @@ export class DialogsInputComponent {
         this.subscription.add(sub)
     }
 
-    triggerZone() {
-        this.sub.add(
-            this.ngZone.onStable.pipe(take(1)).subscribe(() => {
-                this.autosize.resizeToFitContent(true)
-            })
-        )
+    triggerResize() {
+        this.sub = this.ngZone.onStable.pipe(take(1)).subscribe(() => {
+            this.autosize.resizeToFitContent(true)
+        })
+    }
+
+    ngAfterViewInit() {
+        setTimeout(() => {
+            this.btnSize = this.matFormField._elementRef.nativeElement.offsetHeight
+        })
     }
 
     ngOnInit() {
-        this.sub = this.scrollService
-            .getIsViewed()
-            .pipe(
-                tap((isViewed) => {
-                    setTimeout(() => this.isViewed.next(isViewed))
-                })
-            )
-            .subscribe()
-
-        this.sub = this.isViewed$.subscribe((isViewed) => {
-            if (isViewed) {
-                this.isDisabled = false
-            }
-        })
-
-        this.formGroup = this.fb.group({
-            message: new FormControl(null),
-        })
+        // this.sub = this.scrollService
+        //     .getIsViewed()
+        //     .pipe(
+        //         tap((isViewed) => {
+        //             setTimeout(() => this.isViewed.next(isViewed))
+        //         })
+        //     )
+        //     .subscribe()
+        // this.sub = this.isViewed$.subscribe((isViewed) => {
+        //     if (isViewed) {
+        //         this.isDisabled = false
+        //     }
+        // })
     }
 
     ngOnDestroy() {
@@ -97,7 +93,7 @@ export class DialogsInputComponent {
     }
 
     onSubmit() {
-        const message = this.formGroup.get('message')?.value as string | null
+        const message = this.formGroup.get('message')!.value as string
 
         if (!this.loading && message !== null) {
             this.loading = true
@@ -105,36 +101,26 @@ export class DialogsInputComponent {
             this.sub = this.store
                 .pipe(
                     select(selectActiveReceiverID),
+                    first(),
                     switchMap((activeReceiverID) => {
                         if (activeReceiverID === null) return of(null)
 
                         return this.httpService.sendMessage(activeReceiverID, message)
                     }),
-                    switchMap((messageID) =>
+                    switchMap((newMessage) =>
                         forkJoin({
-                            messageID: of(messageID),
-                            state: this.store.pipe(select(selectActiveReceiverIDAndUserID), first()),
+                            newMessage: of(newMessage),
+                            activeReceiverID: this.store.pipe(select(selectActiveReceiverID), first()),
                         })
                     ),
-                    map(({ messageID, state: { activeReceiverID, userID } }) => {
-                        if (messageID && activeReceiverID && userID) {
+                    map(({ newMessage, activeReceiverID }) => {
+                        if (newMessage && activeReceiverID) {
                             const nowDate = this.dateService.now()
 
                             this.store.dispatch(
                                 addDialogMessages({
                                     receiverID: activeReceiverID,
-                                    messages: [
-                                        {
-                                            senderID: userID,
-                                            receiverID: activeReceiverID,
-                                            message,
-                                            messageID,
-                                            createdAt: nowDate,
-                                            updatedAt: nowDate,
-                                            isReaded: false,
-                                            isUpdated: false,
-                                        },
-                                    ],
+                                    messages: [newMessage],
                                 })
                             )
 
@@ -145,12 +131,12 @@ export class DialogsInputComponent {
                                     createdAt: nowDate,
                                 })
                             )
-
-                            this.scrollService.emitScrollBottom()
                         }
 
                         this.completeSubmit()
-                    })
+                    }),
+                    observeOn(asyncScheduler),
+                    tap(() => this.scrollService.emitScrollBottom('updateContent'))
                 )
                 .subscribe()
         }
@@ -165,7 +151,7 @@ export class DialogsInputComponent {
 
     onKeydown(event: KeyboardEvent) {
         if (event.key === 'Enter' && event.ctrlKey) {
-            const messageValue = this.formGroup.get('message')?.value as string | null
+            const messageValue = this.formGroup.get('message')!.value as string
 
             this.formGroup.setValue({
                 message: messageValue + '\n',
@@ -187,7 +173,7 @@ export class DialogsInputComponent {
     }
 
     onClick() {
-        this.scrollService.emitScrollBottom()
-        this.isDisabled = true
+        // this.scrollService.emitScrollBottom()
+        // this.isDisabled = true
     }
 }

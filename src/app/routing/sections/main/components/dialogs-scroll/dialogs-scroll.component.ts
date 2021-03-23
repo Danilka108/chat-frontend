@@ -1,29 +1,14 @@
 import { ScrollDispatcher } from '@angular/cdk/scrolling'
-import {
-    AfterContentChecked,
-    AfterViewChecked,
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    EventEmitter,
-    HostListener,
-    NgZone,
-    OnDestroy,
-    OnInit,
-    Output,
-} from '@angular/core'
+import { AfterViewChecked, Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, BehaviorSubject, combineLatest, forkJoin, of, Subscription } from 'rxjs'
-import { filter, first, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
-import {
-    selectActiveReceiverID,
-    selectDialogIsUploaded,
-    selectDialogMessages,
-} from 'src/app/store/selectors/main.selectors'
+import { asyncScheduler, BehaviorSubject, combineLatest, of, Subscription } from 'rxjs'
+import { filter, observeOn, switchMap, tap } from 'rxjs/operators'
+import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { ScrollService } from '../../services/scroll.service'
 
-const SCROLLBAR_UPLOAD_EVENT_DISTANCE_FACTOR = 0.3
+const SCROLLBAR_UPDATE_DISTANCE_FACTOR = 0.3
+const SCROLLBAR_UPDATE_DISTANCE_DELTA = 5
 
 @Component({
     selector: 'app-main-dialogs-scroll',
@@ -34,12 +19,21 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
     height = new BehaviorSubject(0)
     height$ = this.height.asObservable()
 
-    isUpdatingContent = false
+    scroll = new BehaviorSubject<null | number>(null)
+    scroll$ = this.scroll.asObservable()
 
     isEmitTopReachedEvent = false
     isEmitBottomReachedEvent = false
 
-    disableScroll = false
+    topReachedDistance: null | number = 300
+    bottomReachedDistance: null | number = null
+
+    isTopUpdatingContent = false
+    isBottomUpdatingContent = false
+
+    isScrollDown = false
+
+    ignoreScroll = false
 
     subscription = new Subscription()
 
@@ -56,14 +50,14 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
     @HostListener('mousewheel', ['$event'])
     onMousewheel(event: WheelEvent) {
-        if (!event.ctrlKey && this.disableScroll) {
+        if (!event.ctrlKey && this.isScrollDown) {
             event.preventDefault()
         }
     }
 
     @HostListener('touchmove', ['$event'])
     onMousemove(event: TouchEvent) {
-        if (this.disableScroll) {
+        if (this.isScrollDown) {
             event.preventDefault()
         }
     }
@@ -71,14 +65,34 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
     ngOnInit() {
         const viewport = document.documentElement
 
+        this.sub = this.store
+            .pipe(
+                select(selectActiveReceiverID),
+                tap(() => {
+                    this.isEmitBottomReachedEvent = false
+                    this.isTopUpdatingContent = false
+                    this.isBottomUpdatingContent = false
+                    this.isScrollDown = false
+                    this.scroll.next(null)
+                })
+            )
+            .subscribe()
+
         this.sub = this.scrollService
             .getScrollBottom()
             .pipe(
+                filter((step) => step === 'updateScroll'),
+                observeOn(asyncScheduler),
                 tap(() => {
-                    this.disableScroll = true
+                    this.isScrollDown = true
+
+                    this.topReachedDistance =
+                        (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR
+                    this.bottomReachedDistance =
+                        (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
 
                     viewport.scrollTo({
-                        top: viewport.scrollHeight,
+                        top: this.height.getValue(),
                         behavior: 'smooth',
                     })
                 })
@@ -88,26 +102,32 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
         this.sub = this.store
             .pipe(
                 select(selectActiveReceiverID),
-                tap(() => {
-                    this.isUpdatingContent = false
-                }),
                 switchMap(() => this.height$),
-                startWith(0),
                 tap((height) => {
-                    if (!this.isUpdatingContent) viewport.scrollTop = height
-                })
-            )
-            .subscribe()
+                    if (this.isTopUpdatingContent) {
+                        this.bottomReachedDistance = viewport.scrollTop + SCROLLBAR_UPDATE_DISTANCE_DELTA
+                        this.topReachedDistance =
+                            (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR
+                    }
+                    if (this.isBottomUpdatingContent) {
+                        this.topReachedDistance = viewport.scrollTop - SCROLLBAR_UPDATE_DISTANCE_DELTA
+                        this.bottomReachedDistance =
+                            (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
+                    }
 
-        this.sub = this.store
-            .pipe(
-                select(selectActiveReceiverID),
-                switchMap((receiverID) =>
-                    receiverID === null ? of(null) : this.store.pipe(select(selectDialogMessages, { receiverID }))
-                ),
-                observeOn(asyncScheduler),
-                tap(() => {
-                    this.isUpdatingContent = false
+                    if (!this.isTopUpdatingContent && !this.isBottomUpdatingContent && !this.isScrollDown) {
+                        this.topReachedDistance =
+                            (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR
+                        this.bottomReachedDistance =
+                            (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
+
+                        const scroll = this.scroll.getValue()
+                        if (scroll === null) {
+                            viewport.scrollTop = height
+                        } else {
+                            viewport.scrollTop = scroll
+                        }
+                    }
                 })
             )
             .subscribe()
@@ -116,39 +136,66 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
             .pipe(
                 select(selectActiveReceiverID),
                 switchMap((activeReceiverID) =>
-                    combineLatest([of(activeReceiverID), this.scrollDispatcher.scrolled(150)])
+                    combineLatest([of(activeReceiverID), this.scrollDispatcher.scrolled(200)])
                 ),
                 filter(([_, scrollable]) => !scrollable),
-                tap(([activeReceiverID]) => {
-                    if (activeReceiverID === null) return
+                tap(([activeReceiverID]) =>
+                    this.ngZone.run(() => {
+                        if (activeReceiverID === null) return
 
-                    if (viewport.scrollTop <= viewport.scrollHeight * SCROLLBAR_UPLOAD_EVENT_DISTANCE_FACTOR) {
-                        if (this.isEmitTopReachedEvent) {
-                            this.isEmitTopReachedEvent = false
-                            this.isUpdatingContent = true
-                            console.log('top rea')
-                            this.scrollService.emitSideReached('top')
+                        const ignoreScroll = this.ignoreScroll
+                        this.ignoreScroll = false
+
+                        if (!ignoreScroll) this.scroll.next(viewport.scrollTop)
+
+                        if (
+                            this.topReachedDistance !== null &&
+                            viewport.scrollTop < this.topReachedDistance &&
+                            !this.isScrollDown
+                        ) {
+                            if (this.isEmitTopReachedEvent) {
+                                this.isEmitTopReachedEvent = false
+
+                                this.isTopUpdatingContent = true
+                                this.isBottomUpdatingContent = false
+
+                                this.scrollService.emitSideReached('top')
+                            }
+                        } else {
+                            this.isEmitTopReachedEvent = true
                         }
-                    } else {
-                        this.isEmitTopReachedEvent = true
-                    }
 
-                    if (
-                        !this.disableScroll &&
-                        viewport.scrollTop <= viewport.scrollHeight - viewport.offsetHeight * 2
-                    ) {
-                        this.scrollService.emitIsViewed(true)
-                    } else {
-                        this.scrollService.emitIsViewed(false)
-                    }
+                        if (
+                            this.bottomReachedDistance !== null &&
+                            viewport.scrollTop > this.bottomReachedDistance &&
+                            !this.isScrollDown
+                        ) {
+                            if (this.isEmitBottomReachedEvent) {
+                                this.isEmitBottomReachedEvent = false
 
-                    if (
-                        viewport.scrollTop <= viewport.scrollHeight - viewport.offsetHeight + 10 &&
-                        viewport.scrollTop >= viewport.scrollHeight - viewport.offsetHeight - 10
-                    ) {
-                        this.disableScroll = false
-                    }
-                })
+                                this.isBottomUpdatingContent = true
+                                this.isTopUpdatingContent = false
+
+                                this.scrollService.emitSideReached('bottom')
+                            }
+                        } else {
+                            this.isEmitBottomReachedEvent = true
+                        }
+
+                        if (
+                            !this.isScrollDown &&
+                            viewport.scrollTop <= viewport.scrollHeight - viewport.offsetHeight * 2
+                        ) {
+                            this.scrollService.emitIsViewed(true)
+                        } else {
+                            this.scrollService.emitIsViewed(false)
+                        }
+
+                        if (viewport.scrollTop >= viewport.scrollHeight - viewport.clientHeight - 5) {
+                            this.isScrollDown = false
+                        }
+                    })
+                )
             )
             .subscribe()
     }
@@ -157,6 +204,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
         const viewport = document.documentElement
 
         if (viewport.scrollHeight !== this.height.getValue()) {
+            this.ignoreScroll = true
             this.height.next(viewport.scrollHeight)
         }
     }

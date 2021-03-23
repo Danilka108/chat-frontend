@@ -34,7 +34,11 @@ export class DialogsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.requestLoading$ = this.store.pipe(select(selectRequestLoading), observeOn(asyncScheduler))
+        this.requestLoading$ = this.store.pipe(
+            select(selectRequestLoading),
+            observeOn(asyncScheduler),
+            startWith(false)
+        )
 
         this.sub = this.store
             .pipe(

@@ -5,10 +5,6 @@
     font-size: 18px;
 }
 
-html, body {
-    // height: 100%;
-}
-
 .cdk-overlay-container {
     z-index: 10000;
 }
@@ -18,13 +14,31 @@ body {
     overflow-y: scroll;
     margin: 0;
 
-    .scrollbar {
-        --scrollbar-thumb-color: #{map-get($custom-colors, dark-main-middle-gray)};
-        --scrollbar-thumb-hover-color: #{map-get($custom-colors, dark-gray)};
-        --scrollbar-thumb-transition: background 250ms width 250ms height 250ms;
+    &::-webkit-scrollbar {
+        width: 0.6vmax !important;
+    }
+}
+
+@media(max-width: 1600px) {
+    body::-webkit-scrollbar-track {
+        background-color: map-get($custom-colors, light-gray) !important;
+    }
+}
+
+.scrollbar {
+    &::-webkit-scrollbar {
+        width: 0.35rem;
+    }
     
-        --scrollbar-size: 4px;
-        --scrollbar-hover-size: 8px;
-        --scrollbar-padding: 2.5px;
+    &::-webkit-scrollbar-track {
+        background-color: transparent;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+        background-color: map-get($custom-colors, dark-main-middle-gray);
+    
+        &:hover {
+            background-color: map-get($custom-colors, dark-gray);
+        }
     }
 }

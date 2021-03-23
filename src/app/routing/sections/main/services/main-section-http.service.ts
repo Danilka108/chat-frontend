@@ -19,9 +19,7 @@ interface IGetMessagesResponse extends IResponse {
 }
 
 interface ISendMessageResponse extends IResponse {
-    data: {
-        messageID: number
-    }
+    data: IMessage
 }
 
 @Injectable()
@@ -97,13 +95,13 @@ export class MainSectionHttpService {
                             },
                         }
                     )
-                    .pipe(map((result) => (result as ISendMessageResponse).data.messageID))
+                    .pipe(map((result) => (result as ISendMessageResponse).data))
             })
             .pipe(
-                map((messageID) => {
+                map((message) => {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
 
-                    return messageID
+                    return message
                 })
             )
     }

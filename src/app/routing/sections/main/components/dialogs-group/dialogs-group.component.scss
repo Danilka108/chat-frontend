@@ -9,6 +9,7 @@
     background-color: map-get($custom-colors, main);
     z-index: 6000;
     border-right: 1px solid map-get($custom-colors, main-gray);
+    overflow-y: scroll;
 
     &.small {
         width: 5.6rem;
@@ -17,7 +18,8 @@
 
 .wrapper {
     width: 100%;
-    padding: 0 0.7rem;
+    padding-left: 0.7rem;
+    padding-right: 0.35rem;
 }
 
 .scrollbar {

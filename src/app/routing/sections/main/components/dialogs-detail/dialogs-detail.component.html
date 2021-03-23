@@ -1,12 +1,12 @@
 <div class="wrapper">
-    <div #scrollWrapper class="scroll-wrapper">
+    <div #wrapper class="scroll-wrapper">
         <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
             <app-main-dialogs-separator
                 *ngIf="message.isDiffDays"
                 [date]="message.diffDate">
             </app-main-dialogs-separator>
             <app-main-dialogs-message
-                [wrapperWidth]="scrollWrapper.offsetWidth"
+                [wrapperWidth]="wrapperWidth$ | async"
                 [message]="message.message"
                 [date]="message.createdAt"
                 [isLastInGroup]="message.isLastInGroup"
@@ -15,5 +15,5 @@
             ></app-main-dialogs-message>
         </ng-container>
     </div>
-    <!-- <app-main-dialogs-input></app-main-dialogs-input> -->
+    <app-main-dialogs-input></app-main-dialogs-input>
 </div>

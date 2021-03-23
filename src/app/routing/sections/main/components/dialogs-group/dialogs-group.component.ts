@@ -24,6 +24,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     subscription = new Subscription()
 
     @HostBinding('class.small') isSmallSize = false
+    @HostBinding('class.scrollbar') isScrollable = true
     smallSizeMax = SMALL_SIZE_MAX_WIDTH
 
     constructor(

@@ -1,33 +1,7 @@
-import { DataSource } from '@angular/cdk/collections'
-import {
-    AfterViewChecked,
-    AfterViewInit,
-    ChangeDetectionStrategy,
-    Component,
-    HostListener,
-    OnChanges,
-    OnDestroy,
-    OnInit,
-    SimpleChange,
-    SimpleChanges,
-} from '@angular/core'
+import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { IDatasource } from 'ngx-ui-scroll'
-import { BehaviorSubject, combineLatest, forkJoin, merge, Observable, of, pipe, Subject, Subscription } from 'rxjs'
-import {
-    catchError,
-    combineAll,
-    distinctUntilChanged,
-    filter,
-    first,
-    map,
-    skip,
-    skipUntil,
-    skipWhile,
-    startWith,
-    switchMap,
-    tap,
-} from 'rxjs/operators'
+import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
+import { first, map, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, updateDialogIsUploaded } from 'src/app/store/actions/main.actions'
 import { selectUserID } from 'src/app/store/selectors/auth.selectors'
@@ -49,15 +23,19 @@ const TAKE_MESSAGES_FACTOR = 1 / 15
     selector: 'app-main-dialogs-detail',
     templateUrl: './dialogs-detail.component.html',
     styleUrls: ['./dialogs-detail.component.scss'],
-    changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class DialogsDetailComponent implements OnInit, OnDestroy {
+export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy {
+    @ViewChild('wrapper') wrapper!: ElementRef<HTMLElement>
+
     messages = new BehaviorSubject<IMessageWithIsLast[]>([])
     messages$ = this.messages.asObservable()
 
     take = 0
     skip = 0
-    ignoreTopReached = false
+    ignoreUploadNewMesssages = false
+
+    wrapperWidth = new BehaviorSubject(0)
+    wrapperWidth$ = this.wrapperWidth.asObservable()
 
     subscription = new Subscription()
 
@@ -74,68 +52,103 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
         this.subscription.add(sub)
     }
 
+    onBottomReached(
+        storeMessages: IMessage[] | null,
+        outputMessages: IMessage[] | null
+    ): Observable<IMessageWithIsLast[]> {
+        if (storeMessages !== null) {
+            let start, end: number
+            const parsedMessages = this.messageService.parseMessages(storeMessages)
+
+            if (this.skip - this.take * 3 <= 0) {
+                start = 0
+                end = this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
+            } else {
+                const bottomSkip = this.skip - (outputMessages === null ? 0 : outputMessages.length)
+
+                start = bottomSkip - this.take < 0 ? 0 : bottomSkip - this.take
+                end = bottomSkip + this.take > storeMessages.length ? storeMessages.length : bottomSkip + this.take
+            }
+
+            const filteredMessages = parsedMessages.slice(start, end).reverse()
+
+            if (filteredMessages.length !== 0) {
+                this.skip = end
+
+                return of(filteredMessages)
+            }
+        }
+
+        return this.messages$.pipe(first())
+    }
+
+    onScrollBottom(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
+        if (receiverID === null) return of([])
+
+        if (storeMessages !== null) {
+            const parsedMessages = this.messageService.parseMessages(storeMessages)
+
+            const end = this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
+
+            const filteredMessages = parsedMessages.slice(0, end).reverse()
+
+            this.skip = end
+
+            return of(filteredMessages)
+        }
+
+        return this.messages$.pipe(first())
+    }
+
     onTopReached(
         receiverID: number | null,
-        {
-            messages,
-            isUploaded,
-        }: {
-            messages: IMessage[] | null
-            isUploaded: boolean | null
-        }
+        storeMessages: IMessage[] | null,
+        isUploaded: boolean | null
     ): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
 
-        if (messages !== null && this.skip < messages.length) {
-            const filteredMessages: IMessage[] = []
+        if (storeMessages !== null && this.skip < storeMessages.length - 1) {
+            let start, end: number
+            const parsedMessages = this.messageService.parseMessages(storeMessages)
 
-            if (this.skip + this.take > messages.length) {
-                for (let i = messages.length - this.take * 2; i < messages.length; i++) {
-                    if (i >= 0) filteredMessages.push(messages[i])
-                }
+            if (this.skip === 0) {
+                start = 0
 
-                if (filteredMessages.length !== 0) {
-                    this.skip = messages.length
-                }
-            } else if (this.skip === 0) {
-                for (let i = 0; i < this.take * 2 && i < messages.length; i++) {
-                    filteredMessages.push(messages[i])
-                }
+                end = this.skip + this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
+            } else if (this.skip + this.take > storeMessages.length) {
+                start = storeMessages.length - this.take * 2 < 0 ? 0 : storeMessages.length - this.take * 2
 
-                if (filteredMessages.length !== 0) {
-                    this.skip = filteredMessages.length
-                }
+                end = storeMessages.length
             } else {
-                for (let i = this.skip; i < this.skip + this.take; i++) {
-                    if (i >= 0) filteredMessages.push(messages[i])
-                }
+                start = this.skip - this.take < 0 ? 0 : this.skip - this.take
 
-                const skip = this.skip
-
-                if (filteredMessages.length !== 0) {
-                    this.skip += filteredMessages.length
-                }
-
-                for (let i = skip - this.take; i < skip; i++) {
-                    if (i < messages.length && i >= 0) filteredMessages.push(messages[i])
-                }
+                end = this.skip + this.take
             }
 
+            const filteredMessages = parsedMessages.slice(start, end)
+
             if (filteredMessages.length !== 0) {
-                return of(this.messageService.parseMessages(filteredMessages.reverse().slice()))
+                this.skip = end
+
+                return of(filteredMessages.reverse())
             }
         }
 
         if (isUploaded) {
-            if (messages) return this.messages$.pipe(first())
+            if (storeMessages) return this.messages$.pipe(first())
             else return of([])
         }
 
+        return this.uploadNewMessages(receiverID)
+    }
+
+    uploadNewMessages(receiverID: number): Observable<IMessageWithIsLast[]> {
+        if (this.ignoreUploadNewMesssages) return this.updateMessages(receiverID)
+
         return this.httpService.getMessages(receiverID, this.skip === 0 ? this.take * 2 : this.take, this.skip).pipe(
             switchMap((newMessages) => {
-                console.log(newMessages)
                 if (newMessages.length === 0) {
-                    this.ignoreTopReached = true
+                    this.ignoreUploadNewMesssages = true
                     this.store.dispatch(
                         updateDialogIsUploaded({
                             receiverID,
@@ -164,17 +177,21 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     }
 
     updateMessages(receiverID: number | null): Observable<IMessageWithIsLast[]> {
-        return this.scrollService.getSideReached().pipe(
-            startWith('top'),
-            switchMap(() => {
+        return merge(
+            this.scrollService.getSideReached().pipe(startWith('top')),
+            this.scrollService.getScrollBottom()
+        ).pipe(
+            switchMap((event) => {
                 if (receiverID === null)
                     return forkJoin({
-                        messages: of(null),
+                        storeMessages: of(null),
+                        outputMessages: of(null),
                         isUploaded: of(null),
+                        event: of(null),
                     })
 
                 return forkJoin({
-                    messages: this.store.pipe(
+                    storeMessages: this.store.pipe(
                         select(selectDialogMessages, { receiverID }),
                         first(),
                         map((messages) => {
@@ -182,32 +199,51 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                             return messages.concat([])
                         })
                     ),
+                    outputMessages: this.messages$.pipe(first()),
                     isUploaded: this.store.pipe(select(selectDialogIsUploaded, { receiverID }), first()),
+                    event: of(event),
                 })
             }),
-            switchMap((result) => {
-                return this.onTopReached(receiverID, result).pipe(filter(() => !this.ignoreTopReached))
+            switchMap(({ storeMessages, outputMessages, isUploaded, event }) => {
+                if (event === 'top') {
+                    return this.onTopReached(receiverID, storeMessages, isUploaded)
+                }
+
+                if (event === 'bottom') {
+                    return this.onBottomReached(storeMessages, outputMessages)
+                }
+
+                if (event === 'updateContent') {
+                    return this.onScrollBottom(receiverID, storeMessages).pipe(
+                        tap(() => {
+                            this.scrollService.emitScrollBottom('updateScroll')
+                        })
+                    )
+                }
+
+                return of([])
             })
-            // tap(console.log),
         )
     }
 
-    ngOnInit() {
+    ngAfterViewInit() {
         this.onWindowResize()
+    }
 
+    ngOnInit() {
         this.sub = this.store
             .pipe(
                 select(selectActiveReceiverID),
                 switchMap((receiverID) => {
                     this.skip = 0
-                    this.ignoreTopReached = false
+                    this.ignoreUploadNewMesssages = false
                     return this.updateMessages(receiverID)
                 }),
-                tap((messages) => {
-                    this.messages.next(messages)
-                })
+                tap((messages) => this.messages.next(messages))
             )
             .subscribe()
+
+        this.sub = this.messages$.pipe(observeOn(asyncScheduler)).subscribe()
 
         // /**
         //  * Getting messages across websocket
@@ -274,13 +310,14 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
     @HostListener('window:resize')
     onWindowResize() {
         this.take = Math.floor(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
+        this.wrapperWidth.next(this.wrapper.nativeElement.offsetWidth)
     }
 
     getUserID() {
         return this.store.select(selectUserID)
     }
 
-    messageIdentify(_: any, item: IMessageWithIsLast) {
+    messageIdentify(_: any, item: IMessage) {
         return item.messageID
     }
 

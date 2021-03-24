@@ -6,9 +6,20 @@ import { asyncScheduler, combineLatest, forkJoin, Observable, of, Subscription }
 import { delay, filter, first, map, observeOn, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
-import { addDialogMessages, markDialogMessagesAsRead, updateActiveReceiverID, updateDialogLastMessage, updateDialogNewMessagesCount } from 'src/app/store/actions/main.actions'
+import {
+    addDialogMessages,
+    markDialogMessagesAsRead,
+    updateActiveReceiverID,
+    updateDialogLastMessage,
+    updateDialogNewMessagesCount,
+} from 'src/app/store/actions/main.actions'
 import { selectConnectionError, selectUserID } from 'src/app/store/selectors/auth.selectors'
-import { selectActiveReceiverID, selectDialogNewMessagesCount, selectDialogs, selectRequestLoading } from 'src/app/store/selectors/main.selectors'
+import {
+    selectActiveReceiverID,
+    selectDialogNewMessagesCount,
+    selectDialogs,
+    selectRequestLoading,
+} from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { WsEvents } from 'src/app/ws/ws.events'
 import { WsService } from 'src/app/ws/ws.service'
@@ -42,11 +53,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
     }
 
     ngOnInit() {
-        this.requestLoading$ = this.store.pipe(
-            select(selectRequestLoading),
-            observeOn(asyncScheduler),
-            startWith(false)
-        )
+        this.requestLoading$ = this.store.pipe(select(selectRequestLoading), observeOn(asyncScheduler))
 
         this.sub = this.store
             .pipe(
@@ -104,8 +111,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
             )
             .subscribe()
 
-
-            this.sub = this.wsService
+        this.sub = this.wsService
             .fromEvent<IMessage>(WsEvents.user.newMessage)
             .pipe(
                 switchMap((message) =>

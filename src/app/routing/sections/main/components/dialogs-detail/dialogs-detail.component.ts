@@ -1,11 +1,8 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
-import { filter, first, map, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
-import {
-    addDialogMessages,
-    updateDialogIsUploaded,
-} from 'src/app/store/actions/main.actions'
+import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subject, Subscription } from 'rxjs'
+import { distinctUntilChanged, filter, first, map, observeOn, share, startWith, switchMap, tap } from 'rxjs/operators'
+import { addDialogMessages, updateDialogIsUploaded } from 'src/app/store/actions/main.actions'
 import { selectUserID } from 'src/app/store/selectors/auth.selectors'
 import {
     selectActiveReceiverID,
@@ -157,6 +154,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
             switchMap((newMessages) => {
                 if (newMessages.length === 0) {
                     this.ignoreUploadNewMesssages = true
+
                     this.store.dispatch(
                         updateDialogIsUploaded({
                             receiverID,
@@ -186,10 +184,11 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
 
     updateMessages(receiverID: number | null): Observable<IMessageWithIsLast[]> {
         return merge(
-            this.scrollService.getSideReached().pipe(startWith(SIDE_REACHED_TOP)),
+            this.scrollService.getSideReached(),
             this.scrollService.getScrollBottom(),
             this.scrollService.getNewMessage().pipe(filter((type) => type === NEW_MESSAGE_START)),
-            this.scrollService.getAllMessagesRead()
+            this.scrollService.getAllMessagesRead(),
+            of<typeof SIDE_REACHED_TOP>(SIDE_REACHED_TOP)
         ).pipe(
             switchMap((event) => {
                 if (receiverID === null)
@@ -256,6 +255,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     ngOnInit() {
+        this.onWindowResize(false)
+
         this.sub = this.store
             .pipe(
                 select(selectActiveReceiverID),
@@ -288,9 +289,9 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     @HostListener('window:resize')
-    onWindowResize() {
+    onWindowResize(updateWrapperWidth = true) {
         this.take = Math.floor(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
-        this.wrapperWidth.next(this.wrapper.nativeElement.offsetWidth)
+        if (updateWrapperWidth) this.wrapperWidth.next(this.wrapper.nativeElement.offsetWidth)
     }
 
     getUserID() {

@@ -263,7 +263,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
                     return forkJoin({
                         receiverID: of(receiverID),
-                        allRead: this.httpService.allRead(receiverID).pipe(first()),
+                        allRead: this.httpService.allRead(receiverID),
                     })
                 }),
                 tap(({ receiverID, allRead }) => {

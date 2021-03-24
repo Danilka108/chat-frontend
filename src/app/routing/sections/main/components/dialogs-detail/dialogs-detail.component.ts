@@ -1,29 +1,23 @@
 import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subject, Subscription } from 'rxjs'
+import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
 import { filter, first, map, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
-import { DateService } from 'src/app/common/date.service'
 import {
     addDialogMessages,
-    markDialogMessagesAsRead,
     updateDialogIsUploaded,
-    updateDialogLastMessage,
-    updateDialogNewMessagesCount,
 } from 'src/app/store/actions/main.actions'
 import { selectUserID } from 'src/app/store/selectors/auth.selectors'
 import {
     selectActiveReceiverID,
     selectDialogIsUploaded,
     selectDialogMessages,
-    selectDialogNewMessagesCount,
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
-import { WsEvents } from 'src/app/ws/ws.events'
-import { WsService } from 'src/app/ws/ws.service'
 import { IMessage, IMessageWithIsLast } from '../../interface/message.interface'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { MessageService } from '../../services/message.service'
 import {
+    ALL_MESSAGES_READ,
     NEW_MESSAGE_END,
     NEW_MESSAGE_START,
     ScrollService,
@@ -35,8 +29,6 @@ import {
 
 const TAKE_MESSAGES_FACTOR = 1 / 20
 
-const ALL_MESSAGES_READ = 'ALL_MESSAGES_READ'
-
 @Component({
     selector: 'app-main-dialogs-detail',
     templateUrl: './dialogs-detail.component.html',
@@ -47,9 +39,6 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
 
     messages = new BehaviorSubject<IMessageWithIsLast[]>([])
     messages$ = this.messages.asObservable()
-
-    allMessagesRead = new Subject<typeof ALL_MESSAGES_READ>()
-    allMessagesRead$ = this.allMessagesRead.asObservable()
 
     take = 0
     skip = 0
@@ -64,8 +53,6 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
         private readonly store: Store<AppState>,
         private readonly httpService: MainSectionHttpService,
         private readonly messageService: MessageService,
-        private readonly wsService: WsService,
-        private readonly dateService: DateService,
         private readonly scrollService: ScrollService
     ) {}
 
@@ -202,7 +189,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
             this.scrollService.getSideReached().pipe(startWith(SIDE_REACHED_TOP)),
             this.scrollService.getScrollBottom(),
             this.scrollService.getNewMessage().pipe(filter((type) => type === NEW_MESSAGE_START)),
-            this.allMessagesRead$
+            this.scrollService.getAllMessagesRead()
         ).pipe(
             switchMap((event) => {
                 if (receiverID === null)
@@ -294,75 +281,6 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
                         this.scrollService.updateAllowScrollBottom(true)
                     } else {
                         this.scrollService.updateAllowScrollBottom(false)
-                    }
-                })
-            )
-            .subscribe()
-
-        this.sub = this.wsService
-            .fromEvent<IMessage>(WsEvents.user.newMessage)
-            .pipe(
-                switchMap((message) =>
-                    forkJoin({
-                        message: of(message),
-                        userID: this.store.pipe(select(selectUserID), first()),
-                    })
-                ),
-                switchMap(({ message, userID }) => {
-                    const receiverID = userID === message.receiverID ? message.senderID : message.receiverID
-
-                    return forkJoin({
-                        receiverID: of(receiverID),
-                        message: of(message),
-                        dialogNewMessagesCount: this.store.pipe(
-                            select(selectDialogNewMessagesCount, { receiverID }),
-                            first()
-                        ),
-                    })
-                }),
-                map(({ message, receiverID, dialogNewMessagesCount }) => {
-                    const dlgNewMessagesCount = dialogNewMessagesCount === null ? 0 : dialogNewMessagesCount
-
-                    this.store.dispatch(
-                        addDialogMessages({
-                            receiverID,
-                            messages: [message],
-                        })
-                    )
-
-                    this.store.dispatch(
-                        updateDialogLastMessage({
-                            receiverID,
-                            lastMessage: message.message,
-                            createdAt: this.dateService.now(),
-                        })
-                    )
-
-                    this.scrollService.emitNewMessage(NEW_MESSAGE_START)
-
-                    if (message.senderID === receiverID) {
-                        this.store.dispatch(
-                            updateDialogNewMessagesCount({
-                                receiverID,
-                                newMessagesCount: dlgNewMessagesCount + 1,
-                            })
-                        )
-                    }
-                })
-            )
-            .subscribe()
-
-        this.sub = this.wsService
-            .fromEvent<void>(WsEvents.user.allMessagesRead)
-            .pipe(
-                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
-                tap((receiverID) => {
-                    if (receiverID !== null) {
-                        this.store.dispatch(markDialogMessagesAsRead({ receiverID }))
-
-                        if (!this.scrollService.getAllowScrollBottom()) {
-                            this.allMessagesRead.next(ALL_MESSAGES_READ)
-                        }
                     }
                 })
             )

@@ -92,9 +92,83 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                     this.isScrollDown = false
                     this.isNewMessage = false
                     this.scroll.next(null)
+                    this.scrollService.emitIsViewedScrollBottom(false)
                 })
             )
             .subscribe()
+
+        this.sub = this.scrollService
+            .getIsViewedScrollBottom()
+            .pipe(
+                switchMap((isViewed) =>
+                    forkJoin({
+                        isViewed: of(isViewed),
+                        receiverID: this.store.pipe(select(selectActiveReceiverID), first()),
+                    })
+                ),
+                switchMap(({ isViewed, receiverID }) =>
+                    forkJoin({
+                        isViewed: of(isViewed),
+                        receiverID: of(receiverID),
+                        newMessagesCount:
+                            receiverID === null
+                                ? of(null)
+                                : this.store.pipe(select(selectDialogNewMessagesCount, { receiverID }), first()),
+                    })
+                ),
+                switchMap(({ isViewed, newMessagesCount, receiverID }) => {
+                    if (!isViewed && newMessagesCount !== 0 && receiverID !== null) {
+                        return forkJoin({
+                            receiverID: of(receiverID),
+                            allRead: this.httpService.allRead(receiverID).pipe(first()),
+                        })
+                    }
+
+                    return forkJoin({
+                        receiverID: of(null),
+                        allRead: of(null),
+                    })
+                }),
+                tap(({ receiverID, allRead }) => {
+                    if (receiverID !== null && allRead !== null) {
+                        this.store.dispatch(
+                            updateDialogNewMessagesCount({
+                                receiverID,
+                                newMessagesCount: 0,
+                            })
+                        )
+                    }
+                })
+            )
+            .subscribe()
+
+        // this.sub = this.allMessagesRead$
+        // .pipe(
+        //     switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
+        //     switchMap((receiverID) => {
+        //         if (receiverID === null)
+        //             return forkJoin({
+        //                 receiverID: of(null),
+        //                 allRead: of(null),
+        //             })
+
+        //         return forkJoin({
+        //             receiverID: of(receiverID),
+        //             allRead: this.httpService.allRead(receiverID),
+        //         })
+        //     }),
+        //     tap(({ receiverID, allRead }) => {
+        //         if (receiverID !== null && allRead !== null) {
+        //             this.store.dispatch(
+        //                 updateDialogNewMessagesCount({
+        //                     receiverID,
+        //                     newMessagesCount: 0,
+        //                 })
+        //             )
+        //         }
+        //     })
+        // )
+        // .subscribe()
 
         this.sub = this.scrollService
             .getNewMessage()
@@ -238,44 +312,12 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                                 viewport.scrollTop >=
                                     viewport.scrollHeight - viewport.clientHeight - viewport.clientHeight)
                         ) {
-                            if (newMessagesCount !== 0) {
-                                this.allMessagesRead.next()
-                            }
-
                             this.scrollService.emitIsViewedScrollBottom(false)
                         } else {
                             this.scrollService.emitIsViewedScrollBottom(true)
                         }
                     })
                 )
-            )
-            .subscribe()
-
-        this.sub = this.allMessagesRead$
-            .pipe(
-                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
-                switchMap((receiverID) => {
-                    if (receiverID === null)
-                        return forkJoin({
-                            receiverID: of(null),
-                            allRead: of(null),
-                        })
-
-                    return forkJoin({
-                        receiverID: of(receiverID),
-                        allRead: this.httpService.allRead(receiverID),
-                    })
-                }),
-                tap(({ receiverID, allRead }) => {
-                    if (receiverID !== null && allRead !== null) {
-                        this.store.dispatch(
-                            updateDialogNewMessagesCount({
-                                receiverID,
-                                newMessagesCount: 0,
-                            })
-                        )
-                    }
-                })
             )
             .subscribe()
     }

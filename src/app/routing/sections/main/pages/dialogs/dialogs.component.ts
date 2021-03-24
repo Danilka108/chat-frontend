@@ -1,13 +1,14 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
 import { asyncScheduler, combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
-import { delay, filter, first, map, observeOn, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
+import { filter, first, map, observeOn, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import {
     addDialogMessages,
+    addDialogs,
     markDialogMessagesAsRead,
     updateActiveReceiverID,
     updateDialogLastMessage,
@@ -24,6 +25,7 @@ import { AppState } from 'src/app/store/state/app.state'
 import { WsEvents } from 'src/app/ws/ws.events'
 import { WsService } from 'src/app/ws/ws.service'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
+import { IDialog } from '../../interface/dialog.interface'
 import { IMessage } from '../../interface/message.interface'
 import { NEW_MESSAGE_START, ScrollService } from '../../services/scroll.service'
 
@@ -176,6 +178,15 @@ export class DialogsComponent implements OnInit, OnDestroy {
                             this.scrollService.emitAllMessagesRead()
                         }
                     }
+                })
+            )
+            .subscribe()
+
+        this.sub = this.wsService
+            .fromEvent<IDialog>(WsEvents.user.newDialog)
+            .pipe(
+                tap((newDialog) => {
+                    this.store.dispatch(addDialogs({ dialogs: [newDialog] }))
                 })
             )
             .subscribe()

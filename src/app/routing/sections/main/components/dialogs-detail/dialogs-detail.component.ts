@@ -1,7 +1,16 @@
-import { AfterViewInit, Component, ElementRef, HostListener, OnDestroy, OnInit, ViewChild } from '@angular/core'
+import {
+    AfterViewChecked,
+    ChangeDetectorRef,
+    Component,
+    ElementRef,
+    HostListener,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+} from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subject, Subscription } from 'rxjs'
-import { distinctUntilChanged, filter, first, map, observeOn, share, startWith, switchMap, tap } from 'rxjs/operators'
+import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
+import { filter, first, map, observeOn, switchMap, tap } from 'rxjs/operators'
 import { addDialogMessages, updateDialogIsUploaded } from 'src/app/store/actions/main.actions'
 import { selectUserID } from 'src/app/store/selectors/auth.selectors'
 import {
@@ -31,7 +40,7 @@ const TAKE_MESSAGES_FACTOR = 1 / 20
     templateUrl: './dialogs-detail.component.html',
     styleUrls: ['./dialogs-detail.component.scss'],
 })
-export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy {
+export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestroy {
     @ViewChild('wrapper') wrapper!: ElementRef<HTMLElement>
 
     messages = new BehaviorSubject<IMessageWithIsLast[]>([])
@@ -41,8 +50,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     skip = 0
     ignoreUploadNewMesssages = false
 
-    wrapperWidth = new BehaviorSubject(0)
-    wrapperWidth$ = this.wrapperWidth.asObservable()
+    wrapperWidth = 0
+    isInitWrapperWidth = true
 
     subscription = new Subscription()
 
@@ -50,7 +59,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
         private readonly store: Store<AppState>,
         private readonly httpService: MainSectionHttpService,
         private readonly messageService: MessageService,
-        private readonly scrollService: ScrollService
+        private readonly scrollService: ScrollService,
+        private readonly changeDetectorRef: ChangeDetectorRef
     ) {}
 
     set sub(sub: Subscription) {
@@ -112,7 +122,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     ): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
 
-        if (storeMessages !== null && this.skip < storeMessages.length - 1) {
+        console.log(this.skip)
+        if (storeMessages !== null && this.skip < storeMessages.length) {
             let start, end: number
             const parsedMessages = this.messageService.parseMessages(storeMessages)
 
@@ -152,6 +163,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
 
         return this.httpService.getMessages(receiverID, this.skip === 0 ? this.take * 2 : this.take, this.skip).pipe(
             switchMap((newMessages) => {
+                console.log(newMessages.length)
                 if (newMessages.length === 0) {
                     this.ignoreUploadNewMesssages = true
 
@@ -250,12 +262,20 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
         )
     }
 
-    ngAfterViewInit() {
-        this.onWindowResize()
+    ngAfterViewChecked() {
+        const wrapperWidth = this.wrapper.nativeElement.clientWidth
+
+        if (wrapperWidth > this.wrapperWidth && this.isInitWrapperWidth) {
+            console.log('asdfsdfdsf')
+            this.wrapperWidth = wrapperWidth
+            this.changeDetectorRef.detectChanges()
+        } else {
+            this.isInitWrapperWidth = false
+        }
     }
 
     ngOnInit() {
-        this.onWindowResize(false)
+        this.take = Math.floor(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
 
         this.sub = this.store
             .pipe(
@@ -263,6 +283,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
                 switchMap((receiverID) => {
                     this.skip = 0
                     this.ignoreUploadNewMesssages = false
+                    this.isInitWrapperWidth = true
                     return this.updateMessages(receiverID)
                 }),
                 tap((messages) => {
@@ -289,9 +310,9 @@ export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy 
     }
 
     @HostListener('window:resize')
-    onWindowResize(updateWrapperWidth = true) {
+    onWindowResize() {
         this.take = Math.floor(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
-        if (updateWrapperWidth) this.wrapperWidth.next(this.wrapper.nativeElement.offsetWidth)
+        this.wrapperWidth = this.wrapper.nativeElement.offsetWidth
     }
 
     getUserID() {

@@ -1,0 +1,28 @@
+@import '../../../../../styles/vars.scss';
+
+:host {
+    display: block;
+    user-select: none;
+}
+
+.wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.avatar {
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.symbol {
+    font-weight: 500;
+    text-transform: uppercase;
+    color: white;
+    line-height: 1;
+    margin-top: 0.1rem;
+}

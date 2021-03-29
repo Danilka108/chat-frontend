@@ -1,9 +1,9 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field'
-import { AfterViewInit, Component, NgZone, ViewChild } from '@angular/core'
+import { AfterViewInit, ChangeDetectorRef, Component, NgZone, ViewChild } from '@angular/core'
 import { FormControl, FormGroup } from '@angular/forms'
 import { MatFormField } from '@angular/material/form-field'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, forkJoin, of, Subscription } from 'rxjs'
+import { asyncScheduler, forkJoin, Observable, of, Subscription } from 'rxjs'
 import { first, map, observeOn, switchMap, take, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, updateDialogLastMessage } from 'src/app/store/actions/main.actions'
@@ -28,6 +28,9 @@ export class DialogsInputComponent implements AfterViewInit {
     btnSize = 0
 
     loading = false
+
+    isPlaceholderVisible = true
+
     subscription = new Subscription()
 
     constructor(
@@ -35,7 +38,8 @@ export class DialogsInputComponent implements AfterViewInit {
         private readonly httpService: MainSectionHttpService,
         private readonly dateService: DateService,
         private readonly scrollService: ScrollService,
-        private readonly store: Store<AppState>
+        private readonly store: Store<AppState>,
+        private readonly changeDetectorRef: ChangeDetectorRef
     ) {}
 
     set sub(sub: Subscription) {
@@ -49,9 +53,16 @@ export class DialogsInputComponent implements AfterViewInit {
     }
 
     ngAfterViewInit() {
-        setTimeout(() => {
-            this.btnSize = this.matFormField._elementRef.nativeElement.offsetHeight
-        })
+        this.sub = (this.formGroup.get('message')!.valueChanges as Observable<string | null>).pipe(
+            tap((messageValue) => {
+                if (messageValue === null || !messageValue.length) this.isPlaceholderVisible = true
+                else this.isPlaceholderVisible = false
+            })
+        ).subscribe()
+
+        this.btnSize = this.matFormField._elementRef.nativeElement.offsetHeight
+
+        this.changeDetectorRef.detectChanges()
     }
 
     ngOnDestroy() {
@@ -117,7 +128,7 @@ export class DialogsInputComponent implements AfterViewInit {
 
     onKeydown(event: KeyboardEvent) {
         if (event.key === 'Enter' && event.ctrlKey) {
-            const messageValue = this.formGroup.get('message')!.value as string
+            const messageValue = this.formGroup.get('message')!.value as (string | null)
 
             this.formGroup.setValue({
                 message: messageValue + '\n',

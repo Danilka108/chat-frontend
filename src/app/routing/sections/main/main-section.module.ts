@@ -22,9 +22,10 @@ import { DialogsScrollBottomComponent } from './components/dialogs-scroll-bottom
 import { ScrollService } from './services/scroll.service'
 import { WsModule } from 'src/app/ws/ws.module'
 import { DialogsDetailNotSelectedComponent } from './components/dialogs-detail-not-selected/dialogs-detail-not-selected.component'
-import { UiScrollModule } from 'ngx-ui-scroll'
 import { ScrollingModule } from '@angular/cdk/scrolling'
 import { InfiniteScrollModule } from 'ngx-infinite-scroll'
+import { DialogsInfoComponent } from './components/dialogs-info/dialogs-info.component'
+import { DialogsAvatarComponent } from './components/dialogs-avatar/dialogs-avatar.component'
 
 @NgModule({
     declarations: [
@@ -39,6 +40,8 @@ import { InfiniteScrollModule } from 'ngx-infinite-scroll'
         DialogsScrollComponent,
         DialogsScrollBottomComponent,
         DialogsDetailNotSelectedComponent,
+        DialogsInfoComponent,
+        DialogsAvatarComponent,
     ],
     imports: [
         MaterialModule,

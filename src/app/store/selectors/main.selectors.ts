@@ -50,28 +50,6 @@ export const selectDialogMessages = createSelector(
     }
 )
 
-export const selectDialogScroll = createSelector(
-    selectMain,
-    (state: MainState, { receiverID }: { receiverID: number }) => {
-        const index = state.scroll.findIndex((dialog) => dialog.receiverID === receiverID)
-
-        if (index === -1) return null
-
-        return state.scroll[index].scroll
-    }
-)
-
-export const selectDialogSkip = createSelector(
-    selectMain,
-    (state: MainState, { receiverID }: { receiverID: number }) => {
-        const index = state.skip.findIndex((dialog) => dialog.receiverID === receiverID)
-
-        if (index === -1) return null
-
-        return state.skip[index].skip
-    }
-)
-
 export const selectDialogIsUploaded = createSelector(
     selectMain,
     (state: MainState, { receiverID }: { receiverID: number }) => {
@@ -80,5 +58,18 @@ export const selectDialogIsUploaded = createSelector(
         if (index === -1) return null
 
         return state.isUploaded[index].isUploaded
+    }
+)
+
+export const selectDialogConnectionStatus = createSelector(
+    selectMain,
+    (state: MainState, { receiverID }: { receiverID: number }) => {
+        if (state.dialogs === null) return null
+
+        const index = state.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+
+        if (index === -1) return null
+
+        return state.dialogs[index].connectionStatus
     }
 )

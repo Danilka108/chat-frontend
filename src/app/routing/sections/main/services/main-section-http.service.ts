@@ -22,6 +22,10 @@ interface ISendMessageResponse extends IResponse {
     data: IMessage
 }
 
+interface IGetUserNameResponse extends IResponse {
+    data: string
+}
+
 @Injectable()
 export class MainSectionHttpService {
     constructor(
@@ -47,6 +51,7 @@ export class MainSectionHttpService {
                 map((dialogs) => {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
 
+                    console.log(dialogs)
                     if (!dialogs) return []
                     return dialogs
                 })
@@ -122,5 +127,21 @@ export class MainSectionHttpService {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
                 })
             )
+    }
+
+    getUserName(userID: number) {
+        this.store.dispatch(updateRequestLoading({ requestLoading: true }))
+
+        return this.authService.authRequest((accessToken) => {
+            return this.httpClient.get(`${environment.apiUrl}/user/${userID}/name`, {
+                headers: {
+                    authorization: `Bearer ${accessToken}`,
+                }
+            }).pipe(map((result) => (result as IGetUserNameResponse).data))
+        }).pipe(
+            tap(() => {
+                this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+            })
+        )
     }
 }

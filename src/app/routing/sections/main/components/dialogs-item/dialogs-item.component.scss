@@ -20,6 +20,10 @@
 
     &.active {
         background-color: map-get($basic-colors, primary);
+
+        .status {
+            border-color: map-get($basic-colors, primary);
+        }
         
         .receiver {
             transition: 0.25s;
@@ -43,8 +47,18 @@
 
     &:not(.active):hover,
     &:not(.active):focus {
+        .status {
+            border-color: map-get($custom-colors, main-gray);
+        }
+
         background-color: map-get($custom-colors, main-gray);
     }
+
+    // &::ng-deep {
+    //     .mat-ripple-element {
+    //         z-index: 2000;
+    //     }
+    // }
 }
 
 .photo,
@@ -54,12 +68,17 @@
 }
 
 .photo {
-    border-radius: 50%;
     width: 3rem;
     height: 3rem;
     flex-shrink: 0;
-    background-color: black;
     position: relative;
+
+    .avatar {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
 
     .badge {
         position: absolute;
@@ -114,6 +133,7 @@
     align-items: center;
     margin: 0 !important;
     min-width: 0;
+    height: 1.2rem;
 }
 
 .badge {
@@ -128,4 +148,18 @@
     margin-left: 0.25rem;
     color: map-get($custom-colors, main);
     z-index: 200;
+}
+
+.status {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    width: 0.45rem;
+    height: 0.45rem;
+    transform: translate(-10%, -10%);
+    background: map-get($custom-colors, online);
+    border-radius: 50%;
+    border: 0.18rem solid map-get($custom-colors, main);
+    box-sizing: content-box;
+    transition: 0.25s;
 }

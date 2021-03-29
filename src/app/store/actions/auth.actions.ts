@@ -8,3 +8,5 @@ export const updateConnectionError = createAction(
     '[Auth] Update Connection Error',
     props<{ connectionError: boolean }>()
 )
+
+export const updateUserName = createAction('[Auth] Update User Name', props<{ userName: string }>())

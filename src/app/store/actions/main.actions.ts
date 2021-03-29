@@ -18,30 +18,25 @@ export const markDialogMessagesAsRead = createAction(
 
 export const updateDialogNewMessagesCount = createAction(
     '[Dialogs] Update Dialog New Messages Count',
-    props<{ receiverID: number; newMessagesCount: number }>()
+    props<{ receiverID: number, newMessagesCount: number }>()
 )
 
 export const updateDialogLastMessage = createAction(
     '[Dialogs] Update Dialog Last Message',
-    props<{ receiverID: number; lastMessage: string; createdAt: string }>()
+    props<{ receiverID: number, lastMessage: string, createdAt: string }>()
 )
 
 export const addDialogMessages = createAction(
     '[Dialogs] Add Dialog Messages',
-    props<{ receiverID: number; messages: IMessage[] }>()
-)
-
-export const updateDialogScroll = createAction(
-    '[Dialogs] Update Dialog Scroll',
-    props<{ receiverID: number; scroll: number }>()
-)
-
-export const updateDialogSkip = createAction(
-    '[Dialogs] Update Dialog Skip',
-    props<{ receiverID: number; skip: number }>()
+    props<{ receiverID: number, messages: IMessage[] }>()
 )
 
 export const updateDialogIsUploaded = createAction(
     '[Dialogs] Update Dialog Is Updated',
-    props<{ receiverID: number; isUploaded: boolean }>()
+    props<{ receiverID: number, isUploaded: boolean }>()
+)
+
+export const updateDialogConnectionStatus = createAction(
+    '[Dialogs] Update Dialog Connection Status',
+    props<{ receiverID: number, connectionStatus: 'online' | 'offline' }>()
 )

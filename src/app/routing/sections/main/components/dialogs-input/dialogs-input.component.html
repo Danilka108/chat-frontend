@@ -1,16 +1,17 @@
 <app-main-dialogs-scroll-bottom></app-main-dialogs-scroll-bottom>
 <form class="form" [formGroup]="formGroup" (ngSubmit)="onSubmit()">
     <mat-form-field #textarea appearance="fill" class="form-field">
-        <textarea class="scrollbar textarea"
-                  matInput
-                  cdkTextareaAutosize
-                  #autosize="cdkTextareaAutosize"
-                  cdkAutosizeMinRows="1"
-                  cdkAutosizeMaxRows="5"
-                  placeholder="Send message..."
-                  formControlName="message"
-                  (keydown)="onKeydown($event)"
-        ></textarea>
+        <div class="textarea-placeholder" [class.not-visible]="!isPlaceholderVisible">
+            <textarea class="scrollbar textarea"
+                      matInput
+                      cdkTextareaAutosize
+                      #autosize="cdkTextareaAutosize"
+                      cdkAutosizeMinRows="1"
+                      cdkAutosizeMaxRows="5"
+                      formControlName="message"
+                      (keydown)="onKeydown($event)"
+            ></textarea>
+        </div>
     </mat-form-field>
     <div class="button-wrapper" [style.height]="btnSize + 'px'" [style.width]="btnSize + 'px'">
         <button mat-icon-button color="primary" [disabled]="loading || isMessageEmpty()">

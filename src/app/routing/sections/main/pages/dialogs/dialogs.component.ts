@@ -6,6 +6,7 @@ import { asyncScheduler, combineLatest, forkJoin, Observable, of, Subscription }
 import { filter, first, map, observeOn, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
+import { updateUserName } from 'src/app/store/actions/auth.actions'
 import {
     addDialogMessages,
     addDialogs,
@@ -27,6 +28,7 @@ import { WsService } from 'src/app/ws/ws.service'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
 import { IDialog } from '../../interface/dialog.interface'
 import { IMessage } from '../../interface/message.interface'
+import { MainSectionHttpService } from '../../services/main-section-http.service'
 import { NEW_MESSAGE_START, ScrollService } from '../../services/scroll.service'
 
 @Component({
@@ -47,7 +49,8 @@ export class DialogsComponent implements OnInit, OnDestroy {
         private readonly router: Router,
         private readonly wsService: WsService,
         private readonly dateService: DateService,
-        private readonly scrollService: ScrollService
+        private readonly scrollService: ScrollService,
+        private readonly httpService: MainSectionHttpService,
     ) {}
 
     set sub(sub: Subscription) {
@@ -56,6 +59,16 @@ export class DialogsComponent implements OnInit, OnDestroy {
 
     ngOnInit() {
         this.requestLoading$ = this.store.pipe(select(selectRequestLoading), observeOn(asyncScheduler))
+
+        this.sub = this.store.pipe(
+            select(selectUserID),
+            switchMap((userID) => userID === null ? of(null) : this.httpService.getUserName(userID)),
+            tap((userName) => {
+                if (userName !== null) {
+                    this.store.dispatch(updateUserName({ userName }))
+                }
+            })
+        ).subscribe()
 
         this.sub = this.store
             .pipe(

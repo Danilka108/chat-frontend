@@ -11,14 +11,6 @@ export interface MainState {
         receiverID: number
         messages: IMessage[] | null
     }[]
-    scroll: {
-        receiverID: number
-        scroll: number | null
-    }[]
-    skip: {
-        receiverID: number
-        skip: number | null
-    }[]
     isUploaded: {
         receiverID: number
         isUploaded: boolean | null
@@ -30,7 +22,5 @@ export const mainInitialState: MainState = {
     requestLoading: false,
     dialogs: null,
     messages: [],
-    scroll: [],
-    skip: [],
     isUploaded: [],
 }

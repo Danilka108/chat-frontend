@@ -5,11 +5,10 @@ import {
     addDialogs,
     markDialogMessagesAsRead,
     updateActiveReceiverID,
+    updateDialogConnectionStatus,
     updateDialogIsUploaded,
     updateDialogLastMessage,
     updateDialogNewMessagesCount,
-    updateDialogScroll,
-    updateDialogSkip,
     updateRequestLoading,
 } from '../actions/main.actions'
 import { mainInitialState } from '../state/main.state'
@@ -29,8 +28,6 @@ export const mainReducer = createReducer(
     on(addDialogs, (state, { dialogs }) => {
         const stateDialogs = state.dialogs === null ? [] : [...state.dialogs]
         const stateMessages = [...state.messages]
-        const stateScroll = [...state.scroll]
-        const stateSkip = [...state.skip]
         const stateIsUploaded = [...state.isUploaded]
 
         for (const dialog of dialogs) {
@@ -49,14 +46,6 @@ export const mainReducer = createReducer(
                     receiverID: dialog.receiverID,
                     messages: null,
                 })
-                stateScroll.push({
-                    receiverID: dialog.receiverID,
-                    scroll: null,
-                })
-                stateSkip.push({
-                    receiverID: dialog.receiverID,
-                    skip: null,
-                })
                 stateIsUploaded.push({
                     receiverID: dialog.receiverID,
                     isUploaded: null,
@@ -68,8 +57,6 @@ export const mainReducer = createReducer(
             ...state,
             dialogs: stateDialogs,
             messages: stateMessages,
-            scroll: stateScroll,
-            skip: stateSkip,
             isUploaded: stateIsUploaded,
         }
     }),
@@ -176,38 +163,6 @@ export const mainReducer = createReducer(
             messages: dialogsMessages,
         }
     }),
-    on(updateDialogScroll, (state, { receiverID, scroll }) => {
-        const dialogsScroll = [...state.scroll]
-        const dialogIndex = dialogsScroll.findIndex((dialogScroll) => dialogScroll.receiverID === receiverID)
-
-        if (dialogIndex > -1) {
-            dialogsScroll[dialogIndex] = {
-                receiverID,
-                scroll,
-            }
-        }
-
-        return {
-            ...state,
-            scroll: dialogsScroll,
-        }
-    }),
-    on(updateDialogSkip, (state, { receiverID, skip }) => {
-        const dialogsSkip = [...state.skip]
-        const dialogIndex = dialogsSkip.findIndex((dialogSkip) => dialogSkip.receiverID === receiverID)
-
-        if (dialogIndex > -1) {
-            dialogsSkip[dialogIndex] = {
-                receiverID,
-                skip,
-            }
-        }
-
-        return {
-            ...state,
-            skip: dialogsSkip,
-        }
-    }),
     on(updateDialogIsUploaded, (state, { receiverID, isUploaded }) => {
         const dialogsIsUploaded = [...state.isUploaded]
         const dialogIndex = dialogsIsUploaded.findIndex(
@@ -224,6 +179,24 @@ export const mainReducer = createReducer(
         return {
             ...state,
             isUploaded: dialogsIsUploaded,
+        }
+    }),
+    on(updateDialogConnectionStatus, (state, { receiverID, connectionStatus }) => {
+        if (state.dialogs === null) return state
+
+        const dialogs = [...state.dialogs]
+        const dialogIndex = dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
+
+        if (dialogIndex > -1) {
+            dialogs[dialogIndex] = {
+                ...dialogs[dialogIndex],
+                connectionStatus,
+            }
+        }
+
+        return {
+            ...state,
+            dialogs
         }
     })
 )

@@ -20,8 +20,8 @@
                 border-bottom-left-radius: 0;
             }
 
-            .avatar-wrapper {
-                display: flex;
+            .avatar {
+                display: block;
                 left: -2.5rem;
             }
         }
@@ -41,8 +41,8 @@
                 border-bottom-right-radius: 0;
             }
 
-            .avatar-wrapper {
-                display: flex;
+            .avatar {
+                display: block;
             }
         }
 
@@ -105,23 +105,11 @@
 }
 
 
-.avatar-wrapper {
+.avatar {
     display: none;
-    width: 2.2rem;
-    height: 2.2rem;
-    z-index: 1000;
     position: absolute;
     bottom: 0;
     right: -2.5rem;
-    justify-content: center;
-    align-items: center;
-}
-
-.avatar {
-    width: 2rem;
-    height: 2rem;
-    background-color: #000;
-    border-radius: 50%;
 }
 
 .is-read {

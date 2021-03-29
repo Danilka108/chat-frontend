@@ -21,9 +21,3 @@
     padding-left: 0.7rem;
     padding-right: 0.7rem;
 }
-
-.scrollbar {
-    &::ng-deep .ng-scroll-content {
-        width: 100%;
-    }
-}

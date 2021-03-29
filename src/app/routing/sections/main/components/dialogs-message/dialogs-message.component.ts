@@ -14,6 +14,7 @@ export class DialogsMessageComponent implements OnInit {
     @Input() date!: string
     @Input() wrapperWidth!: number | null
     @Input() isReaded!: boolean
+    @Input() name!: string | null
 
     wrapperWidthFactor = 0.5
 

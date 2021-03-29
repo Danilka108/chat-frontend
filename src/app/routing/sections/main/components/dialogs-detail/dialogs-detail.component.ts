@@ -12,9 +12,10 @@ import { select, Store } from '@ngrx/store'
 import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
 import { filter, first, map, observeOn, switchMap, tap } from 'rxjs/operators'
 import { addDialogMessages, updateDialogIsUploaded } from 'src/app/store/actions/main.actions'
-import { selectUserID } from 'src/app/store/selectors/auth.selectors'
+import { selectUserID, selectUserName } from 'src/app/store/selectors/auth.selectors'
 import {
     selectActiveReceiverID,
+    selectDialog,
     selectDialogIsUploaded,
     selectDialogMessages,
 } from 'src/app/store/selectors/main.selectors'
@@ -122,7 +123,6 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
     ): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
 
-        console.log(this.skip)
         if (storeMessages !== null && this.skip < storeMessages.length) {
             let start, end: number
             const parsedMessages = this.messageService.parseMessages(storeMessages)
@@ -163,7 +163,6 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
         return this.httpService.getMessages(receiverID, this.skip === 0 ? this.take * 2 : this.take, this.skip).pipe(
             switchMap((newMessages) => {
-                console.log(newMessages.length)
                 if (newMessages.length === 0) {
                     this.ignoreUploadNewMesssages = true
 
@@ -266,7 +265,6 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         const wrapperWidth = this.wrapper.nativeElement.clientWidth
 
         if (wrapperWidth > this.wrapperWidth && this.isInitWrapperWidth) {
-            console.log('asdfsdfdsf')
             this.wrapperWidth = wrapperWidth
             this.changeDetectorRef.detectChanges()
         } else {
@@ -317,6 +315,25 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
     getUserID() {
         return this.store.select(selectUserID)
+    }
+
+    getSenderName(senderID: number) {
+        return this.store.pipe(
+            select(selectUserID),
+            first(),
+            switchMap((userID) => {
+                if (userID === senderID) return this.store.pipe(
+                    select(selectUserName),
+                    first()
+                )
+
+                return this.store.pipe(
+                    select(selectDialog, { receiverID: senderID }),
+                    first(),
+                    map((dialog) => dialog === null ? '' : dialog.receiverName)
+                )
+            })
+        )
     }
 
     messageIdentify(_: any, item: IMessage) {

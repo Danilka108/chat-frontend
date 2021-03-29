@@ -1,5 +1,6 @@
-<div #wrapper class="wrapper">
-    <div class="scroll-wrapper">
+<app-main-dialogs-info></app-main-dialogs-info>
+<div class="wrapper">
+    <div #wrapper class="scroll-wrapper">
         <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
             <app-main-dialogs-separator
                 *ngIf="message.isDiffDays"
@@ -12,6 +13,7 @@
                 [isLastInGroup]="message.isLastInGroup"
                 [isOwnMsg]="message.senderID === (getUserID() | async)"
                 [isReaded]="message.isReaded"
+                [name]="getSenderName(message.senderID) | async"
             ></app-main-dialogs-message>
         </ng-container>
     </div>

@@ -1,0 +1,48 @@
+@import '../../../../../styles/vars.scss';
+
+:host {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    background-color: map-get($custom-colors, main);
+    position: sticky;
+    top: 0;
+    z-index: 2000;
+    border-bottom: 1px solid map-get($custom-colors, main-gray);
+    padding: 0.7rem 0;
+}
+
+.name, .status {
+    margin: 0;
+    line-height: 1;
+}
+
+.status {
+    color: map-get($custom-colors, dark-gray);
+
+    position: relative;
+
+    &:after {
+        position: absolute;
+        display: block;
+        content: '';
+        top: calc(50% + 0.1rem);
+        left: -0.3rem;
+        transform: translate(-100%, -50%);
+        background: map-get($custom-colors, online);
+        border-radius: 50%;
+        width: 0.5rem;
+        height: 0.5rem;
+    }
+
+    &:not(.online):after {
+        background-color: map-get($custom-colors, main-gray);
+    }
+}
+
+.name {
+    font-weight: 500;
+    margin-bottom: 0.3rem;
+}

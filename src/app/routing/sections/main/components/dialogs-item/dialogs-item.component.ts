@@ -1,6 +1,4 @@
-import { ChangeDetectionStrategy, Component, EventEmitter, HostListener, Input, Output } from '@angular/core'
-import { Router } from '@angular/router'
-import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
+import { Component, EventEmitter, Input, Output } from '@angular/core'
 
 @Component({
     selector: 'app-main-dialogs-item',
@@ -17,9 +15,7 @@ export class DialogsItemComponent {
     @Input() isSmallSize!: boolean
     @Input() notReadedMessagesCount!: number
     @Input() receiverID!: number
-
-    rippleColorActive = 'rgba(220, 220, 220, 0.17)'
-    rippleColor = ''
+    @Input() connectionStatus!: 'offline' | 'online'
 
     onClick() {
         this.click.emit()

@@ -1,0 +1,12 @@
+<div class="wrapper"
+     [style.width]="size * 2.2 + 'rem'"
+     [style.height]="size * 2.2 + 'rem'">
+    <div class="avatar"
+         [style.width]="size * 2 + 'rem'"
+         [style.height]="size * 2 + 'rem'"
+         [style.background]="color">
+        <span class="symbol mat-body" *ngFor="let symbol of symbols" [style.fontSize]="size * 0.9 + 'rem'">
+            {{symbol}}
+        </span>
+    </div>
+</div>

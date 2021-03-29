@@ -3,5 +3,6 @@ export interface IDialog {
     receiverName: string
     lastMessage: string
     createdAt: string
-    newMessagesCount: number
+    newMessagesCount: number,
+    connectionStatus: 'offline' | 'online',
 }

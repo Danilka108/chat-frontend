@@ -44,6 +44,7 @@ import { DialogsAvatarComponent } from './components/dialogs-avatar/dialogs-avat
         DialogsAvatarComponent,
     ],
     imports: [
+        InfiniteScrollModule,
         MaterialModule,
         CommonModule,
         RouterModule.forChild(routes),

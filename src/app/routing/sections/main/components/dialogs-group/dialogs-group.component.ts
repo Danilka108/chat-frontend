@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core'
+import { Component, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core'
 import { IDialog } from '../../interface/dialog.interface'
 import { Router } from '@angular/router'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
-import { BehaviorSubject, Observable, Subject, Subscription } from 'rxjs'
+import { from, Observable, Subscription } from 'rxjs'
 import { filter, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { MainSectionHttpService } from '../../services/main-section-http.service'
@@ -38,7 +38,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         this.subscription.add(sub)
     }
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.activeReceiverID$ = this.store.pipe(select(selectActiveReceiverID))
 
         this.dialogs$ = this.store.pipe(
@@ -64,16 +64,16 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         this.onResize()
     }
 
-    itemIdentity(_: any, item: IDialog) {
+    itemIdentity(_: unknown, item: IDialog): number {
         return item.receiverID
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe()
     }
 
     @HostListener('window:resize')
-    onResize() {
+    onResize(): void {
         if (window.innerWidth <= this.smallSizeMax) {
             this.isSmallSize = true
         } else {
@@ -81,11 +81,11 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         }
     }
 
-    parseDate(d: string) {
+    parseDate(d: string): string {
         return this.dateService.parseDate(d)
     }
 
-    onClick(receiverID: number) {
-        this.router.navigate([mainSectionDialogsPath.full, receiverID])
+    onClick(receiverID: number): void {
+        this.sub = from(this.router.navigate([mainSectionDialogsPath.full, receiverID])).subscribe()
     }
 }

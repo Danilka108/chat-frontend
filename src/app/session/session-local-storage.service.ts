@@ -12,14 +12,14 @@ export class SessionLocalStorageService {
             return null
         }
 
-        return JSON.parse(data)
+        return JSON.parse(data) as unknown
     }
 
-    setUserID(userID: number) {
+    setUserID(userID: number): void {
         localStorage.setItem(localStorageUserID, JSON.stringify(userID))
     }
 
-    getUserID() {
+    getUserID(): number | null {
         const userID = this.getData(localStorageUserID)
 
         if (typeof userID !== 'number') {
@@ -29,15 +29,15 @@ export class SessionLocalStorageService {
         return userID
     }
 
-    removeUserID() {
+    removeUserID(): void {
         localStorage.setItem(localStorageUserID, '')
     }
 
-    setRefreshToken(refreshToken: string) {
+    setRefreshToken(refreshToken: string): void {
         localStorage.setItem(localStorageRefreshToken, JSON.stringify(refreshToken))
     }
 
-    getRefreshToken() {
+    getRefreshToken(): string | null {
         const refreshToken = this.getData(localStorageRefreshToken)
 
         if (typeof refreshToken !== 'string') {
@@ -47,7 +47,7 @@ export class SessionLocalStorageService {
         return refreshToken
     }
 
-    removeRefreshToken() {
+    removeRefreshToken(): void {
         localStorage.setItem(localStorageRefreshToken, '')
     }
 }

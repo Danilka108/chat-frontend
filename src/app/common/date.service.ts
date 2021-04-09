@@ -5,7 +5,7 @@ import * as moment from 'moment'
     providedIn: 'root',
 })
 export class DateService {
-    parseDate(d: string) {
+    parseDate(d: string): string {
         const now = moment()
         const date = moment(d)
 
@@ -20,7 +20,7 @@ export class DateService {
         }
     }
 
-    parseDateWords(d: string) {
+    parseDateWords(d: string): string {
         const now = moment()
         const date = moment(d)
 
@@ -33,12 +33,12 @@ export class DateService {
         }
     }
 
-    parseDateOnlyTime(d: string) {
+    parseDateOnlyTime(d: string): string {
         const date = moment(d)
         return date.format('HH:mm')
     }
 
-    compareDates(a: string, b: string) {
+    compareDates(a: string, b: string): -1 | 0 | 1 {
         const dateA = moment(a).valueOf()
         const dateB = moment(b).valueOf()
 
@@ -47,7 +47,7 @@ export class DateService {
         else return 1
     }
 
-    compareDatesASC(dateA: string, dateB: string) {
+    compareDatesASC(dateA: string, dateB: string): -1 | 0 | 1 {
         const dA = moment(dateA).valueOf()
         const dB = moment(dateB).valueOf()
 
@@ -56,14 +56,14 @@ export class DateService {
         else return -1
     }
 
-    isUnequalDays(dateA: string, dateB: string) {
+    isUnequalDays(dateA: string, dateB: string): boolean {
         const dA = moment(dateA).day()
         const dB = moment(dateB).day()
 
         return dA !== dB
     }
 
-    now() {
+    now(): string {
         return moment.utc().format()
     }
 }

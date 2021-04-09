@@ -1,9 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core'
+import { Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { AuthSectionHttpService } from '../../services/auth-section-http.service'
 import { Router } from '@angular/router'
-import { of, Subscription } from 'rxjs'
-import { catchError, map } from 'rxjs/operators'
+import { from, of, Subscription } from 'rxjs'
+import { catchError, map, switchMap } from 'rxjs/operators'
 import { authSectionResetPasswordCheckEmailPath } from 'src/app/routing/routing.constants'
 
 @Component({
@@ -12,6 +12,7 @@ import { authSectionResetPasswordCheckEmailPath } from 'src/app/routing/routing.
 })
 export class ResetPasswordComponent implements OnDestroy {
     formGroup = new FormGroup({
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         email: new FormControl(null, Validators.required),
     })
 
@@ -25,7 +26,7 @@ export class ResetPasswordComponent implements OnDestroy {
         this.onSubmit = this.onSubmit.bind(this)
     }
 
-    onSubmit() {
+    onSubmit(): void {
         if (this.formGroup.valid && !this.loading) {
             this.loading = true
 
@@ -36,14 +37,19 @@ export class ResetPasswordComponent implements OnDestroy {
                 catchError(() => of(true))
             )
 
-            this.subs = req$.subscribe(
-                () => this.router.navigateByUrl(authSectionResetPasswordCheckEmailPath.full),
-                () => (this.loading = false)
-            )
+            this.subs = req$.pipe(
+                switchMap(() => {
+                    return from(this.router.navigateByUrl(authSectionResetPasswordCheckEmailPath.full))
+                }),
+                catchError(() => {
+                    this.loading = false
+                    return of()
+                })
+            ).subscribe()
         }
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         if (this.subs) this.subs.unsubscribe()
     }
 }

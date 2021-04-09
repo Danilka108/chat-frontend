@@ -1,7 +1,8 @@
 import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Store } from '@ngrx/store'
-import { map, share, tap } from 'rxjs/operators'
+import { Observable } from 'rxjs'
+import { map, tap } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/auth.service'
 import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { AppState } from 'src/app/store/state/app.state'
@@ -34,7 +35,7 @@ export class MainSectionHttpService {
         private readonly store: Store<AppState>
     ) {}
 
-    getDialogs() {
+    getDialogs(): Observable<IDialog[]> {
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
 
         return this.authService
@@ -51,14 +52,13 @@ export class MainSectionHttpService {
                 map((dialogs) => {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
 
-                    console.log(dialogs)
                     if (!dialogs) return []
                     return dialogs
                 })
             )
     }
 
-    getMessages(receiverID: number, take: number, skip: number) {
+    getMessages(receiverID: number, take: number, skip: number): Observable<IMessage[]> {
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
 
         const params = new HttpParams().set('take', `${take}`).set('skip', `${skip}`)
@@ -79,11 +79,11 @@ export class MainSectionHttpService {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
 
                     return result === null ? [] : result
-                })
+                }),
             )
     }
 
-    sendMessage(receiverID: number, message: string) {
+    sendMessage(receiverID: number, message: string): Observable<IMessage | null> {
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
 
         return this.authService
@@ -111,12 +111,15 @@ export class MainSectionHttpService {
             )
     }
 
-    allRead(receiverID: number) {
+    messageRead(messageID: number): Observable<void | null> {
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
+
+        const params = new HttpParams().set('message-id', `${messageID}`)
 
         return this.authService
             .authRequest((accessToken: string) => {
-                return this.httpClient.get<void>(`${environment.apiUrl}/message/${receiverID}/all-read`, {
+                return this.httpClient.get<void>(`${environment.apiUrl}/message/read`, {
+                    params,
                     headers: {
                         authorization: `Bearer ${accessToken}`,
                     },
@@ -129,7 +132,7 @@ export class MainSectionHttpService {
             )
     }
 
-    getUserName(userID: number) {
+    getUserName(userID: number): Observable<string | null> {
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
 
         return this.authService.authRequest((accessToken) => {

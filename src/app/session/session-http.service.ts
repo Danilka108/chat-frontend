@@ -1,6 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { DeviceDetectorService } from 'ngx-device-detector'
+import { Observable } from 'rxjs'
 import { first, map, publish, refCount } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 
@@ -23,7 +24,7 @@ interface IRefreshTokenResponse {
 export class SessionHttpService {
     constructor(private readonly httpClient: HttpClient, private readonly deviceService: DeviceDetectorService) {}
 
-    refreshToken(body: IRefreshToken) {
+    refreshToken(body: IRefreshToken): Observable<IRefreshTokenResponse> {
         const deviceInfo = this.deviceService.getDeviceInfo()
 
         return this.httpClient

@@ -15,7 +15,7 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
 
     constructor(private readonly scrollService: ScrollService) {}
 
-    ngAfterViewInit() {
+    ngAfterViewInit(): void {
         this.sub.add(
             this.scrollService
                 .getIsViewedScrollBottom()
@@ -31,7 +31,7 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
         )
     }
 
-    onClick() {
+    onClick(): void {
         this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_CONTENT)
         setTimeout(() => {
             this.isDisabled = true
@@ -39,7 +39,7 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
         })
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.sub.unsubscribe()
     }
 }

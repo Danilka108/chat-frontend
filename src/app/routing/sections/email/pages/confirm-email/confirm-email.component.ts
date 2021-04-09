@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { map, mergeMap } from 'rxjs/operators'
@@ -45,7 +45,7 @@ export class ConfirmEmailComponent implements OnInit, OnDestroy {
             )
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         if (this.subs) this.subs.unsubscribe()
     }
 }

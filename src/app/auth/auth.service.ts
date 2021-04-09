@@ -38,6 +38,7 @@ export class AuthService {
                     return of(null)
                 }
 
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (error.status === REQUEST_INVALID_TOKEN_ERROR_STATUS) {
                     this.updatingCount += 1
                     return this.sessionService.update().pipe(switchMap(() => this.request(request)))

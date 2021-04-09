@@ -1,2 +1,10 @@
-<h3 class="name mat-h3">Danil Churickov</h3>
-<h3 class="status mat-h3" [class.online]="online">{{online ? 'online' : 'offline'}}</h3>
+<div class="info-wrapper" [class.active]="!(isLoading$ | async)">
+    <h3 class="name mat-h3">{{name$ | async}}</h3>
+    <h3 class="status mat-h3" [class.online]="(connectionStatus$ | async) === 'online'">{{connectionStatus$ | async}}</h3>
+</div>
+
+<div class="loading-wrapper" [class.active]="isLoading$ | async">
+    <p class="loading mat-h2">Loading</p>
+</div>
+
+<!-- <button class="btn" (click)="onClick()">click</button> -->

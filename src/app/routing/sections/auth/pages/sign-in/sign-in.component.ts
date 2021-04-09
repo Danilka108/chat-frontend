@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core'
+import { Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { of, Subscription } from 'rxjs'
-import { catchError, map } from 'rxjs/operators'
+import { catchError, map, switchMap } from 'rxjs/operators'
 import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants'
 import { SessionService } from 'src/app/session/session.service'
 import { AuthSectionHttpService } from '../../services/auth-section-http.service'
@@ -16,7 +16,9 @@ export class SignInComponent implements OnDestroy {
     passwordHide = true
 
     formGroup = new FormGroup({
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         email: new FormControl(null, [Validators.required]),
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         password: new FormControl(null, [Validators.required]),
         rememberMe: new FormControl(true),
     })
@@ -39,12 +41,14 @@ export class SignInComponent implements OnDestroy {
         this.onSubmit = this.onSubmit.bind(this)
     }
 
-    onSubmit() {
+    onSubmit(): void {
         if (this.formGroup.valid && !this.loading) {
             this.loading = true
 
             const req$ = this.httpService.signIn({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 email: this.formGroup.controls['email'].value,
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 password: this.formGroup.controls['password'].value,
             })
 
@@ -56,25 +60,30 @@ export class SignInComponent implements OnDestroy {
             this.httpErrorMessage$ = req$.pipe(
                 map(() => ''),
                 catchError((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     if (error?.message) {
-                        return of(error.message)
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                        return of(error.message as string)
                     }
 
-                    return of(error)
+                    return of(error as string)
                 })
             )
 
-            this.subs = req$.subscribe(
-                ({ data: { userID, accessToken, refreshToken } }) => {
+            this.subs = req$.pipe(
+                switchMap(({ data: { userID, accessToken, refreshToken } }) => {
                     this.sessionService.set(userID, accessToken, refreshToken)
-                    this.router.navigateByUrl('')
-                },
-                () => (this.loading = false)
-            )
+                    return this.router.navigateByUrl('')
+                }),
+                catchError(() => {
+                    this.loading = false
+                    return of()
+                })
+            ).subscribe()
         }
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         if (this.subs) this.subs.unsubscribe()
     }
 }

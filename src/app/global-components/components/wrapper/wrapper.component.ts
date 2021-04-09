@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
+import { Component, Input } from '@angular/core'
 import { FormGroup } from '@angular/forms'
 
 @Component({
@@ -9,6 +9,4 @@ import { FormGroup } from '@angular/forms'
 export class WrapperComponent {
     @Input() formGroup!: FormGroup
     @Input() onSubmit!: () => void
-
-    constructor() {}
 }

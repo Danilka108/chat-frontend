@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core'
+import { Component } from '@angular/core'
 @Component({
     selector: 'app-password-reseted',
     templateUrl: './password-reseted.component.html',
@@ -6,6 +6,4 @@ import { ChangeDetectionStrategy, Component } from '@angular/core'
 })
 export class PasswordResetedComponent {
     redirectLink = ''
-
-    constructor() {}
 }

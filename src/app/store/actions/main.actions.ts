@@ -12,31 +12,56 @@ export const updateRequestLoading = createAction('[Main] Update Request Loading'
 export const addDialogs = createAction('[Dialogs] Add Dialogs', props<{ dialogs: IDialog[] }>())
 
 export const markDialogMessagesAsRead = createAction(
-    '[Dialog] Mark Dialog Messages As Read',
+    '[Main] Mark Dialog Messages As Read',
     props<{ receiverID: number }>()
 )
 
+export const markDialogMessageAsRead = createAction(
+    '[Main] Mark Dialog Message As Read',
+    props<{ receiverID: number, messageID: number }>()
+)
+
 export const updateDialogNewMessagesCount = createAction(
-    '[Dialogs] Update Dialog New Messages Count',
+    '[Main] Update Dialog New Messages Count',
     props<{ receiverID: number, newMessagesCount: number }>()
 )
 
+export const decreaseDialogNewMessagesCount = createAction(
+    '[Main] Decrease Dialog New Messages Count',
+    props<{ receiverID: number }>()
+)
+
+export const increaseDialogNewMessagesCount = createAction(
+    '[Main] Increase Dialog New Messages Count',
+    props<{ receiverID: number }>()
+)
+
 export const updateDialogLastMessage = createAction(
-    '[Dialogs] Update Dialog Last Message',
+    '[Main] Update Dialog Last Message',
     props<{ receiverID: number, lastMessage: string, createdAt: string }>()
 )
 
 export const addDialogMessages = createAction(
-    '[Dialogs] Add Dialog Messages',
+    '[Main] Add Dialog Messages',
     props<{ receiverID: number, messages: IMessage[] }>()
 )
 
 export const updateDialogIsUploaded = createAction(
-    '[Dialogs] Update Dialog Is Updated',
+    '[Main] Update Dialog Is Updated',
     props<{ receiverID: number, isUploaded: boolean }>()
 )
 
 export const updateDialogConnectionStatus = createAction(
-    '[Dialogs] Update Dialog Connection Status',
+    '[Main] Update Dialog Connection Status',
     props<{ receiverID: number, connectionStatus: 'online' | 'offline' }>()
+)
+
+export const updateReconnectionLoading = createAction(
+    '[Main] Update Reconnection Loading',
+    props<{ reconnectionLoading: boolean }>()
+)
+
+export const updateDialogMessages = createAction(
+    '[Main] Update Dialog Messages',
+    props<{ receiverID: number, messages: IMessage[] }>()
 )

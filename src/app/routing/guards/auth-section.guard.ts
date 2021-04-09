@@ -1,21 +1,22 @@
 import { Injectable } from '@angular/core'
 import { CanActivate, Router } from '@angular/router'
-import { first, map } from 'rxjs/operators'
+import { from, Observable, of } from 'rxjs'
+import { first, switchMap } from 'rxjs/operators'
 import { SessionService } from 'src/app/session/session.service'
 
 @Injectable()
 export class AuthSectionGuard implements CanActivate {
     constructor(private readonly router: Router, private readonly sessionService: SessionService) {}
 
-    canActivate() {
+    canActivate(): Observable<boolean> {
         return this.sessionService.verify().pipe(
             first(),
-            map((result) => {
+            switchMap((result) => {
                 if (!result) {
-                    this.router.navigateByUrl('')
+                    return from(this.router.navigateByUrl(''))
                 }
 
-                return result
+                return of(result)
             })
         )
     }

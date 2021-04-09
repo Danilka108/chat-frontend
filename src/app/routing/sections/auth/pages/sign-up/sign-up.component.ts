@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnDestroy } from '@angular/core'
+import { Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
-import { of, Subscription } from 'rxjs'
-import { catchError, map } from 'rxjs/operators'
+import { from, of, Subscription } from 'rxjs'
+import { catchError, map, switchMap } from 'rxjs/operators'
 import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator'
 import { authSectionCompleteRegistrationPath, authSectionSignInPath } from 'src/app/routing/routing.constants'
@@ -18,11 +18,15 @@ export class SignUpComponent implements OnDestroy {
         {
             email: new FormControl(
                 null,
+                // eslint-disable-next-line @typescript-eslint/unbound-method
                 [Validators.required, Validators.pattern(/@/)],
                 [checkEmailAsyncValidator(this.authHttpService)]
             ),
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             name: new FormControl(null, [Validators.required, Validators.minLength(2)]),
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             password: new FormControl(null, [Validators.required, Validators.minLength(8)]),
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             confirmPassword: new FormControl(null, Validators.required),
         },
         {
@@ -49,14 +53,14 @@ export class SignUpComponent implements OnDestroy {
         this.onSubmit = this.onSubmit.bind(this)
     }
 
-    onSubmit() {
+    onSubmit(): void {
         if (this.formGroup.valid && !this.loading) {
             this.loading = true
 
             const req$ = this.authHttpService.signUp({
-                email: this.formGroup.controls['email'].value,
-                name: this.formGroup.controls['name'].value,
-                password: this.formGroup.controls['password'].value,
+                email: this.formGroup.controls['email'].value as string,
+                name: this.formGroup.controls['name'].value as string,
+                password: this.formGroup.controls['password'].value as string,
             })
 
             this.httpError$ = req$.pipe(
@@ -65,24 +69,29 @@ export class SignUpComponent implements OnDestroy {
             )
 
             this.httpErrorMessage$ = req$.pipe(
-                map(() => of('')),
+                map(() => ''),
                 catchError((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     if (error?.message) {
-                        return of(error.message)
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                        return of(error.message as string)
                     }
 
-                    return of(error)
+                    return of(error as string)
                 })
             )
 
-            this.subs = req$.subscribe(
-                () => this.router.navigateByUrl(this.completeLink),
-                () => (this.loading = false)
-            )
+            this.subs = req$.pipe(
+                switchMap(() => from(this.router.navigateByUrl(this.completeLink))),
+                catchError(() => {
+                    this.loading = false
+                    return of()
+                })
+            ).subscribe()
         }
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         if (this.subs) this.subs.unsubscribe()
     }
 }

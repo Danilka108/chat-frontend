@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { MatSnackBar } from '@angular/material/snack-bar'
 import { Subscription } from 'rxjs'
 import { map } from 'rxjs/operators'
@@ -18,7 +18,7 @@ export class AppComponent implements OnInit, OnDestroy {
         this.subscription.add(sub)
     }
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.sessionErrorService
             .get()
             .pipe(
@@ -31,7 +31,7 @@ export class AppComponent implements OnInit, OnDestroy {
             .subscribe()
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe()
     }
 }

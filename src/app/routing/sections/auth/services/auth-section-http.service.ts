@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { DeviceDetectorService } from 'ngx-device-detector'
-import { of } from 'rxjs'
+import { Observable, of } from 'rxjs'
 import { map, catchError, refCount, publish } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 
@@ -37,8 +37,11 @@ export class AuthSectionHttpService {
 
     private error() {
         return (error: any) => {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (error?.error?.message) {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 throw new Error(error.error.message)
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             } else if (error?.status == 0) {
                 throw new Error('Server error. Try again')
             } else {
@@ -47,7 +50,7 @@ export class AuthSectionHttpService {
         }
     }
 
-    signIn(body: ISignIn) {
+    signIn(body: ISignIn): Observable<ISignInResponse> {
         const deviceInfo = this.deviceService.getDeviceInfo()
 
         return this.httpClient
@@ -66,7 +69,7 @@ export class AuthSectionHttpService {
             )
     }
 
-    signUp(body: ISignUp) {
+    signUp(body: ISignUp): Observable<ISignUpResponse> {
         const deviceInfo = this.deviceService.getDeviceInfo()
 
         return this.httpClient
@@ -85,17 +88,20 @@ export class AuthSectionHttpService {
             )
     }
 
-    checkEmail(email: string) {
+    checkEmail(email: string): Observable<boolean> {
         return this.httpClient.post(`${environment.apiUrl}/user/check-email`, { email }).pipe(
             map(() => true),
             catchError((error) => {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (error?.status === 400) return of(false)
                 return of(true)
             })
         )
     }
 
-    resetPassword(email: string) {
-        return this.httpClient.post(`${environment.apiUrl}/user/reset-password`, { email }).pipe(publish(), refCount())
+    resetPassword(email: string): Observable<void> {
+        return this.httpClient
+            .post(`${environment.apiUrl}/user/reset-password`, { email }).pipe(publish(), refCount())
+            .pipe(map(() => undefined))
     }
 }

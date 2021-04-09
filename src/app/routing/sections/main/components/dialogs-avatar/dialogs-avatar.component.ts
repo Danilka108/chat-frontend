@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from "@angular/core";
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
     selector: 'app-main-dialogs-avatar',
@@ -17,7 +17,7 @@ export class DialogsAvatarComponent implements OnInit {
 
     color!: string
 
-    ngOnInit() {
+    ngOnInit(): void {
         const splittedString = this.name === null ? '' : this.name.split(' ')
 
         if (splittedString[0] && splittedString[0][0]) this.symbols[0] = splittedString[0][0]
@@ -27,7 +27,7 @@ export class DialogsAvatarComponent implements OnInit {
         this.color = this.nameToHslColor(this.name === null ? '' : this.name)
     }
 
-    nameToHslColor(name: string) {
+    nameToHslColor(name: string): string {
         let hash = 0
 
         for (let i = 0; i < name.length; i++) {

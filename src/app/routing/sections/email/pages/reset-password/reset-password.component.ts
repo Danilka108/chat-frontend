@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, OnDestroy, OnInit } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { ActivatedRoute, Router } from '@angular/router'
-import { of, Subscription } from 'rxjs'
-import { catchError, map } from 'rxjs/operators'
+import { from, of, Subscription } from 'rxjs'
+import { catchError, map, switchMap } from 'rxjs/operators'
 import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator'
 import { emailSectionPasswordResetedPath } from 'src/app/routing/routing.constants'
@@ -15,7 +15,9 @@ import { EmailSectionHttpService } from '../../email-section-http.service'
 export class ResetPasswordComponent implements OnInit, OnDestroy {
     formGroup = new FormGroup(
         {
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             newPassword: new FormControl(null, [Validators.required, Validators.minLength(8)]),
+            // eslint-disable-next-line @typescript-eslint/unbound-method
             confirmNewPassword: new FormControl(null, Validators.required),
         },
         { validators: matchPasswordsValidator('newPassword', 'confirmNewPassword') }
@@ -60,13 +62,13 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
             if (!v?.id || !v?.token) {
                 this.linkError = true
             } else {
-                this.params.id = v.id
-                this.params.token = v.token
+                this.params.id = v.id as string
+                this.params.token = v.token as string
             }
         })
     }
 
-    onSubmit() {
+    onSubmit(): void {
         if (this.formGroup.valid && !this.loading && !this.linkError) {
             this.loading = true
 
@@ -81,10 +83,13 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
                 catchError(() => of(true))
             )
 
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             this.httpErrorMessage$ = req$.pipe(
                 map(() => ''),
                 catchError((error) => {
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                     if (error?.message) {
+                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                         return of(error.message)
                     }
 
@@ -92,16 +97,17 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
                 })
             )
 
-            this.subsReq = req$.subscribe(
-                () => this.router.navigate([this.passResetedLink]),
-                () => {
+            this.subsReq = req$.pipe(
+                switchMap(() => from(this.router.navigate([this.passResetedLink]))),
+                catchError(() => {
                     this.loading = false
-                }
-            )
+                    return of()
+                })
+            ).subscribe()
         }
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         if (this.subsQuery) this.subsQuery.unsubscribe()
         if (this.subsReq) this.subsReq.unsubscribe()
     }

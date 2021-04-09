@@ -6,18 +6,26 @@ import {
     HostListener,
     OnDestroy,
     OnInit,
+    QueryList,
     ViewChild,
+    ViewChildren,
 } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
 import { filter, first, map, observeOn, switchMap, tap } from 'rxjs/operators'
-import { addDialogMessages, updateDialogIsUploaded } from 'src/app/store/actions/main.actions'
+import {
+    addDialogMessages,
+    updateDialogIsUploaded,
+    updateDialogMessages,
+    updateDialogNewMessagesCount
+} from 'src/app/store/actions/main.actions'
 import { selectUserID, selectUserName } from 'src/app/store/selectors/auth.selectors'
 import {
     selectActiveReceiverID,
     selectDialog,
     selectDialogIsUploaded,
     selectDialogMessages,
+    selectReconnectionLoading,
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { IMessage, IMessageWithIsLast } from '../../interface/message.interface'
@@ -34,7 +42,7 @@ import {
     SIDE_REACHED_TOP,
 } from '../../services/scroll.service'
 
-const TAKE_MESSAGES_FACTOR = 1 / 20
+const TAKE_MESSAGES_FACTOR = 1 / 10
 
 @Component({
     selector: 'app-main-dialogs-detail',
@@ -42,14 +50,22 @@ const TAKE_MESSAGES_FACTOR = 1 / 20
     styleUrls: ['./dialogs-detail.component.scss'],
 })
 export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestroy {
-    @ViewChild('wrapper') wrapper!: ElementRef<HTMLElement>
+    @ViewChild('wrapper', { read: ElementRef }) wrapper!: ElementRef<HTMLElement>
+    @ViewChildren('anchor') anchorsRef!: QueryList<ElementRef<HTMLElement>>
 
     messages = new BehaviorSubject<IMessageWithIsLast[]>([])
     messages$ = this.messages.asObservable()
 
     take = 0
-    skip = 0
-    ignoreUploadNewMesssages = false
+
+    reverseSkip = 0
+    deltaSkip = 0
+    relativeSkip = 0
+
+    isRemoveInvisibleMessages = false
+
+    ignoreUploadNewMessagesPrev = false
+    ignoreUploadNewMessagesNext = false
 
     wrapperWidth = 0
     isInitWrapperWidth = true
@@ -68,19 +84,25 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         this.subscription.add(sub)
     }
 
-    onBottomReached(
+    get absoluteSkip(): number {
+        return this.relativeSkip + this.deltaSkip
+    }
+
+    getNextMessages(
+        receiverID: number | null,
         storeMessages: IMessage[] | null,
-        outputMessages: IMessage[] | null
     ): Observable<IMessageWithIsLast[]> {
-        if (storeMessages !== null) {
+        if (receiverID === null) return of([])
+        
+        if (storeMessages !== null && this.reverseSkip < storeMessages.length) {
             let start, end: number
             const parsedMessages = this.messageService.parseMessages(storeMessages)
 
-            if (this.skip - this.take * 3 <= 0) {
+            if (this.relativeSkip - this.messages.getValue().length - this.take <= 0) {
                 start = 0
                 end = this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
             } else {
-                const bottomSkip = this.skip - (outputMessages === null ? 0 : outputMessages.length)
+                const bottomSkip = this.relativeSkip - this.messages.getValue().length
 
                 start = bottomSkip - this.take < 0 ? 0 : bottomSkip - this.take
                 end = bottomSkip + this.take > storeMessages.length ? storeMessages.length : bottomSkip + this.take
@@ -89,62 +111,51 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             const filteredMessages = parsedMessages.slice(start, end).reverse()
 
             if (filteredMessages.length !== 0) {
-                this.skip = end
+                this.reverseSkip = storeMessages.length - start
+                this.relativeSkip = end
+
+                if (this.isRemoveInvisibleMessages) {
+                    this.deltaSkip = this.deltaSkip - this.take < 0 ? 0 : this.deltaSkip - this.take
+                }
 
                 return of(filteredMessages)
             }
         }
 
-        return this.messages$.pipe(first())
+        return this.uploadNewMessages(receiverID, 'next')
     }
 
-    onScrollBottom(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
-        if (receiverID === null) return of([])
-
-        if (storeMessages !== null) {
-            const parsedMessages = this.messageService.parseMessages(storeMessages)
-
-            const end = this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
-
-            const filteredMessages = parsedMessages.slice(0, end).reverse()
-
-            this.skip = end
-
-            return of(filteredMessages)
-        }
-
-        return this.messages$.pipe(first())
-    }
-
-    onTopReached(
+    getPrevMessages(
         receiverID: number | null,
         storeMessages: IMessage[] | null,
         isUploaded: boolean | null
     ): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
 
-        if (storeMessages !== null && this.skip < storeMessages.length) {
+        if (storeMessages !== null && this.relativeSkip < storeMessages.length) {
             let start, end: number
             const parsedMessages = this.messageService.parseMessages(storeMessages)
 
-            if (this.skip === 0) {
+            if (this.absoluteSkip === 0) {
                 start = 0
-
-                end = this.skip + this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
-            } else if (this.skip + this.take > storeMessages.length) {
+                end = this.absoluteSkip + this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
+            } else if (this.absoluteSkip + this.take > storeMessages.length) {
                 start = storeMessages.length - this.take * 2 < 0 ? 0 : storeMessages.length - this.take * 2
-
                 end = storeMessages.length
             } else {
-                start = this.skip - this.take < 0 ? 0 : this.skip - this.take
-
-                end = this.skip + this.take
+                start = this.absoluteSkip - this.take < 0 ? 0 : this.absoluteSkip - this.take
+                end = this.absoluteSkip + this.take
             }
 
             const filteredMessages = parsedMessages.slice(start, end)
 
             if (filteredMessages.length !== 0) {
-                this.skip = end
+                this.reverseSkip = storeMessages.length - start
+                this.relativeSkip = end
+
+                if (this.isRemoveInvisibleMessages) {
+                    this.deltaSkip = this.deltaSkip + this.take > this.absoluteSkip ? this.absoluteSkip : this.deltaSkip + this.take
+                }
 
                 return of(filteredMessages.reverse())
             }
@@ -155,16 +166,85 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             else return of([])
         }
 
-        return this.uploadNewMessages(receiverID)
+        return this.uploadNewMessages(receiverID, 'prev')
     }
 
-    uploadNewMessages(receiverID: number): Observable<IMessageWithIsLast[]> {
-        if (this.ignoreUploadNewMesssages) return this.updateMessages(receiverID)
+    getLatestMessages(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
+        if (receiverID === null) return of([])
 
-        return this.httpService.getMessages(receiverID, this.skip === 0 ? this.take * 2 : this.take, this.skip).pipe(
+        if (storeMessages !== null) {
+            const parsedMessages = this.messageService.parseMessages(storeMessages)
+
+            const end = this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
+
+            const filteredMessages = parsedMessages.slice(0, end).reverse()
+
+            this.reverseSkip = storeMessages.length
+            this.relativeSkip = end
+
+            return of(filteredMessages)
+        }
+
+        return this.messages$.pipe(first())
+    }
+
+    updateCurrentMessages(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
+        if (receiverID === null) return of([])
+
+        if (storeMessages === null) return of([])
+
+        const parsedMessages = this.messageService.parseMessages(storeMessages)
+
+        const outputMessagesLength = this.messages.getValue().length
+
+        const filteredMessages = parsedMessages.slice(this.absoluteSkip - outputMessagesLength, this.absoluteSkip)
+
+        return of(filteredMessages.reverse())
+    }
+
+    removeInvisibleMessages(receiverID: number, storeMessages: IMessage[]): void {
+        const outputMessages = this.messages.getValue()
+
+        const filteredStoreMessages: IMessage[] = []
+
+        for (const storeMessage of storeMessages) {
+            for (const outputMessage of outputMessages) {
+                if (storeMessage.messageID === outputMessage.messageID) {
+                    filteredStoreMessages.push(storeMessage)
+                }
+            }
+        }
+
+        this.store.dispatch(updateDialogIsUploaded({ receiverID, isUploaded: false }))
+        this.store.dispatch(updateDialogMessages({ receiverID, messages: filteredStoreMessages }))
+
+        this.deltaSkip = this.absoluteSkip - filteredStoreMessages.length
+        this.reverseSkip = filteredStoreMessages.length
+        this.relativeSkip = filteredStoreMessages.length
+
+        this.ignoreUploadNewMessagesNext = false
+        this.ignoreUploadNewMessagesPrev = false
+    }
+
+    uploadNewMessages(receiverID: number, type: 'next' | 'prev'): Observable<IMessageWithIsLast[]> {
+        let take = 0
+        let skip = 0
+
+        if (type === 'next') {
+            take = this.take
+            skip = this.absoluteSkip - this.messages.getValue().length - this.take
+        } else if (type === 'prev') {
+            take = this.absoluteSkip === 0 ? this.take * 2 : this.take
+            skip = this.absoluteSkip
+        }
+
+        if (this.ignoreUploadNewMessagesPrev || this.ignoreUploadNewMessagesNext) return this.handleEvents(receiverID, type)
+
+        return this.httpService.getMessages(receiverID, take, skip).pipe(
             switchMap((newMessages) => {
                 if (newMessages.length === 0) {
-                    this.ignoreUploadNewMesssages = true
+                    if (type === 'prev') this.ignoreUploadNewMessagesPrev = true
+                    if (type === 'next') this.ignoreUploadNewMessagesNext = true
 
                     this.store.dispatch(
                         updateDialogIsUploaded({
@@ -188,24 +268,29 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                     )
                 }
 
-                return this.updateMessages(receiverID)
+                return this.handleEvents(receiverID, type)
             })
         )
     }
 
-    updateMessages(receiverID: number | null): Observable<IMessageWithIsLast[]> {
+    handleEvents(receiverID: number | null, startWith: 'prev' | 'next'): Observable<IMessageWithIsLast[]> {
         return merge(
             this.scrollService.getSideReached(),
             this.scrollService.getScrollBottom(),
             this.scrollService.getNewMessage().pipe(filter((type) => type === NEW_MESSAGE_START)),
             this.scrollService.getAllMessagesRead(),
-            of<typeof SIDE_REACHED_TOP>(SIDE_REACHED_TOP)
+            of<typeof SIDE_REACHED_TOP | typeof SIDE_REACED_BOTTOM | null>(
+                startWith === 'prev'
+                    ? SIDE_REACHED_TOP
+                    : startWith === 'next'
+                        ? SIDE_REACED_BOTTOM
+                        : null
+            )
         ).pipe(
             switchMap((event) => {
                 if (receiverID === null)
                     return forkJoin({
                         storeMessages: of(null),
-                        outputMessages: of(null),
                         isUploaded: of(null),
                         event: of(null),
                     })
@@ -219,22 +304,21 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                             return messages.concat([])
                         })
                     ),
-                    outputMessages: this.messages$.pipe(first()),
                     isUploaded: this.store.pipe(select(selectDialogIsUploaded, { receiverID }), first()),
                     event: of(event),
                 })
             }),
-            switchMap(({ storeMessages, outputMessages, isUploaded, event }) => {
+            switchMap(({ storeMessages, isUploaded, event }) => {
                 if (event === SIDE_REACHED_TOP) {
-                    return this.onTopReached(receiverID, storeMessages, isUploaded)
+                    return this.getPrevMessages(receiverID, storeMessages, isUploaded)
                 }
 
-                if (event === SIDE_REACED_BOTTOM) {
-                    return this.onBottomReached(storeMessages, outputMessages)
+                if (event === SIDE_REACED_BOTTOM && this.absoluteSkip - this.messages.getValue().length !== 0) {
+                    return this.getNextMessages(receiverID, storeMessages)
                 }
 
                 if (event === SCROLL_BOTTOM_UPDATE_CONTENT) {
-                    return this.onScrollBottom(receiverID, storeMessages).pipe(
+                    return this.getLatestMessages(receiverID, storeMessages).pipe(
                         tap(() => {
                             this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_SCROLL)
                         })
@@ -242,26 +326,23 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 }
 
                 if (event === NEW_MESSAGE_START) {
-                    if (this.skip - this.messages.getValue().length === 0) {
-                        return this.onScrollBottom(receiverID, storeMessages)
+                    if (this.absoluteSkip - this.messages.getValue().length === 0) {
+                        return this.getLatestMessages(receiverID, storeMessages)
                     } else {
-                        this.skip += 1
-                        return this.messages$.pipe(first())
+                        this.relativeSkip += 1
                     }
                 }
 
                 if (event === ALL_MESSAGES_READ) {
-                    this.skip -= this.messages.getValue().length
-
-                    return this.onTopReached(receiverID, storeMessages, isUploaded)
+                    return this.updateCurrentMessages(receiverID, storeMessages)
                 }
 
-                return of([])
+                return this.messages$.pipe(first())
             })
         )
     }
 
-    ngAfterViewChecked() {
+    ngAfterViewChecked(): void {
         const wrapperWidth = this.wrapper.nativeElement.clientWidth
 
         if (wrapperWidth > this.wrapperWidth && this.isInitWrapperWidth) {
@@ -272,17 +353,46 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         }
     }
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.take = Math.floor(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
+
+        this.sub = this.store.pipe(
+            select(selectReconnectionLoading),
+            filter(() => !this.isRemoveInvisibleMessages),
+            switchMap((reconnectionLoading) => forkJoin({
+                reconnectionLoading: of(reconnectionLoading),
+                activeReceiverID: this.store.pipe(select(selectActiveReceiverID), first()),
+            })),
+            switchMap(({ reconnectionLoading, activeReceiverID }) => forkJoin({
+                reconnectionLoading: of(reconnectionLoading),
+                activeReceiverID: of(activeReceiverID),
+                storeMessages: activeReceiverID === null
+                    ? of(null)
+                    : this.store.pipe(select(selectDialogMessages, { receiverID: activeReceiverID }), first())
+            })),
+            tap(({ reconnectionLoading, activeReceiverID, storeMessages }) => {
+                if (reconnectionLoading && activeReceiverID !== null && storeMessages ) {
+                    this.isRemoveInvisibleMessages = true
+                    this.removeInvisibleMessages(activeReceiverID, storeMessages)
+                }
+            })
+        ).subscribe()
 
         this.sub = this.store
             .pipe(
                 select(selectActiveReceiverID),
                 switchMap((receiverID) => {
-                    this.skip = 0
-                    this.ignoreUploadNewMesssages = false
+                    this.deltaSkip = 0
+                    this.reverseSkip = 0
+                    this.relativeSkip = 0
+                    this.ignoreUploadNewMessagesPrev = false
+                    this.ignoreUploadNewMessagesNext = false
                     this.isInitWrapperWidth = true
-                    return this.updateMessages(receiverID)
+                    this.isRemoveInvisibleMessages = false
+
+                    if (receiverID !== null) this.store.dispatch(updateDialogNewMessagesCount({ receiverID, newMessagesCount: 0 }))
+
+                    return this.handleEvents(receiverID, 'prev')
                 }),
                 tap((messages) => {
                     this.messages.next(messages)
@@ -292,12 +402,17 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
         this.sub = this.messages$
             .pipe(
-                tap(() => {}),
                 observeOn(asyncScheduler),
                 tap(() => {
+                    setTimeout(() => {
+                        this.scrollService.updateTopAnchor(this.anchorsRef.first)
+                        this.scrollService.updateBottomAnchor(this.anchorsRef.last)
+
+                        this.scrollService.emitDiscardUpdatingContent()
+                    })
                     this.scrollService.emitNewMessage(NEW_MESSAGE_END)
 
-                    if (this.skip > this.take * 2) {
+                    if (this.absoluteSkip > this.take * 2) {
                         this.scrollService.updateAllowScrollBottom(true)
                     } else {
                         this.scrollService.updateAllowScrollBottom(false)
@@ -308,16 +423,16 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
     }
 
     @HostListener('window:resize')
-    onWindowResize() {
+    onWindowResize(): void {
         this.take = Math.floor(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
         this.wrapperWidth = this.wrapper.nativeElement.offsetWidth
     }
 
-    getUserID() {
+    getUserID(): Observable<number | null> {
         return this.store.select(selectUserID)
     }
 
-    getSenderName(senderID: number) {
+    getSenderName(senderID: number): Observable<string> {
         return this.store.pipe(
             select(selectUserID),
             first(),
@@ -336,11 +451,11 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         )
     }
 
-    messageIdentify(_: any, item: IMessage) {
+    messageIdentify(_: unknown, item: IMessage): number {
         return item.messageID
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe()
     }
 }

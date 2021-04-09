@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core'
+import { Component } from '@angular/core'
 
 @Component({
     selector: 'app-main-no-connection',
@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core'
     styleUrls: ['./no-connection.component.scss'],
 })
 export class NoConnectionComponent {
-    refresh() {
+    refresh(): void {
         window.location.reload()
     }
 }

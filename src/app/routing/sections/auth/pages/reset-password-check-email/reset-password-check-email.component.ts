@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core'
+import { Component } from '@angular/core'
 import { authSectionSignInPath } from 'src/app/routing/routing.constants'
 
 @Component({
@@ -8,6 +8,4 @@ import { authSectionSignInPath } from 'src/app/routing/routing.constants'
 })
 export class ResetPasswordCheckEmailComponent {
     redirectLink = authSectionSignInPath.full
-
-    constructor() {}
 }

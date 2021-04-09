@@ -1,5 +1,5 @@
 import { CdkTextareaAutosize } from '@angular/cdk/text-field'
-import { AfterViewInit, ChangeDetectorRef, Component, NgZone, ViewChild } from '@angular/core'
+import { AfterViewInit, ChangeDetectorRef, Component, NgZone, OnDestroy, ViewChild } from '@angular/core'
 import { FormControl, FormGroup } from '@angular/forms'
 import { MatFormField } from '@angular/material/form-field'
 import { select, Store } from '@ngrx/store'
@@ -17,7 +17,7 @@ import { ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scro
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
 })
-export class DialogsInputComponent implements AfterViewInit {
+export class DialogsInputComponent implements AfterViewInit, OnDestroy {
     @ViewChild('textarea') matFormField!: MatFormField
     @ViewChild('autosize') autosize!: CdkTextareaAutosize
 
@@ -46,31 +46,31 @@ export class DialogsInputComponent implements AfterViewInit {
         this.subscription.add(sub)
     }
 
-    triggerResize() {
+    triggerResize(): void {
         this.sub = this.ngZone.onStable.pipe(take(1)).subscribe(() => {
             this.autosize.resizeToFitContent(true)
         })
     }
 
-    ngAfterViewInit() {
-        this.sub = (this.formGroup.get('message')!.valueChanges as Observable<string | null>).pipe(
+    ngAfterViewInit(): void {
+        this.sub = (this.formGroup.get('message')?.valueChanges as Observable<string | null>).pipe(
             tap((messageValue) => {
                 if (messageValue === null || !messageValue.length) this.isPlaceholderVisible = true
                 else this.isPlaceholderVisible = false
             })
         ).subscribe()
 
-        this.btnSize = this.matFormField._elementRef.nativeElement.offsetHeight
+        this.btnSize = (this.matFormField._elementRef.nativeElement as HTMLElement).offsetHeight
 
         this.changeDetectorRef.detectChanges()
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe()
     }
 
-    onSubmit() {
-        const message = this.formGroup.get('message')!.value as string
+    onSubmit(): void {
+        const message = this.formGroup.get('message')?.value as string
 
         if (!this.loading && message !== null) {
             this.loading = true
@@ -119,19 +119,19 @@ export class DialogsInputComponent implements AfterViewInit {
         }
     }
 
-    completeSubmit() {
+    completeSubmit(): void {
         this.loading = false
         this.formGroup.setValue({
             message: null,
         })
     }
 
-    onKeydown(event: KeyboardEvent) {
+    onKeydown(event: KeyboardEvent): void {
         if (event.key === 'Enter' && event.ctrlKey) {
-            const messageValue = this.formGroup.get('message')!.value as (string | null)
+            const messageValue = this.formGroup.get('message')?.value as (string | null)
 
             this.formGroup.setValue({
-                message: messageValue + '\n',
+                message: messageValue === null ? null : messageValue + '\n',
             })
         } else if (event.key == 'Enter') {
             event.preventDefault()
@@ -140,17 +140,12 @@ export class DialogsInputComponent implements AfterViewInit {
         }
     }
 
-    isMessageEmpty() {
+    isMessageEmpty(): boolean {
         const msg = (this.formGroup.get('message')?.value as string) || null
 
         if (msg === null || msg.length === 0) {
             return true
         }
         return false
-    }
-
-    onClick() {
-        // this.scrollService.emitScrollBottom()
-        // this.isDisabled = true
     }
 }

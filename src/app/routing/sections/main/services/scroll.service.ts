@@ -1,5 +1,5 @@
-import { Injectable } from '@angular/core'
-import { BehaviorSubject, Subject } from 'rxjs'
+import { ElementRef, Injectable } from '@angular/core'
+import { BehaviorSubject, Observable, Subject } from 'rxjs'
 
 export const SCROLL_BOTTOM_UPDATE_SCROLL = 'SCROLL_BOTTOM_UPDATE_SCROLL'
 export const SCROLL_BOTTOM_UPDATE_CONTENT = 'SCROLL_BOTTOM_UPDATE_CONTENT'
@@ -19,52 +19,90 @@ export class ScrollService {
     private readonly newMessage = new Subject<typeof NEW_MESSAGE_START | typeof NEW_MESSAGE_END>()
     private readonly allMessagesRead = new Subject<typeof ALL_MESSAGES_READ>()
     private allowScrollBottom: null | boolean = null
+    private readonly scrolled = new Subject<void>()
+    private topAnchor: ElementRef<HTMLElement> | null = null
+    private bottomAnchor: ElementRef<HTMLElement> | null = null
+    private readonly discardUpdatingContent = new Subject<void>()
 
-    emitAllMessagesRead() {
+    emitDiscardUpdatingContent(): void {
+        this.discardUpdatingContent.next()
+    }
+
+    getDiscardUpdatingContent(): Observable<void> {
+        return this.discardUpdatingContent.asObservable()
+    }
+
+    updateTopAnchor(elementRef: ElementRef<HTMLElement>): void {
+        this.topAnchor = elementRef
+    }
+
+    getTopAnchor(): ElementRef<HTMLElement> | null {
+        return this.topAnchor
+    }
+
+    updateBottomAnchor(elementRef: ElementRef<HTMLElement>): void {
+        this.bottomAnchor = elementRef
+    }
+
+    getBottomAnchor(): ElementRef<HTMLElement> | null {
+        return this.bottomAnchor
+    }
+
+    emitScrolled(): void {
+        this.scrolled.next()
+    }
+
+    getScrolled(): Observable<void> {
+        return this.scrolled.asObservable()
+    }
+
+    emitAllMessagesRead(): void {
         this.allMessagesRead.next(ALL_MESSAGES_READ)
     }
 
-    getAllMessagesRead() {
+    getAllMessagesRead(): Observable<typeof ALL_MESSAGES_READ> {
         return this.allMessagesRead.asObservable()
     }
 
-    emitNewMessage(type: typeof NEW_MESSAGE_START | typeof NEW_MESSAGE_END) {
+    emitNewMessage(type: typeof NEW_MESSAGE_START | typeof NEW_MESSAGE_END): void {
         this.newMessage.next(type)
     }
 
-    getNewMessage() {
+    getNewMessage(): Observable<typeof NEW_MESSAGE_END | typeof NEW_MESSAGE_START> {
         return this.newMessage.asObservable()
     }
 
-    updateAllowScrollBottom(allowScrollBottom: boolean) {
+    updateAllowScrollBottom(allowScrollBottom: boolean): void {
         this.allowScrollBottom = allowScrollBottom
     }
 
-    getAllowScrollBottom() {
+    getAllowScrollBottom(): boolean | null {
         return this.allowScrollBottom
     }
 
-    emitSideReached(side: typeof SIDE_REACHED_TOP | typeof SIDE_REACED_BOTTOM) {
+    emitSideReached(side: typeof SIDE_REACHED_TOP | typeof SIDE_REACED_BOTTOM): void {
         this.sideReached.next(side)
     }
 
-    getSideReached() {
+    getSideReached(): Observable<typeof SIDE_REACED_BOTTOM | typeof SIDE_REACHED_TOP> {
         return this.sideReached.asObservable()
     }
 
-    emitScrollBottom(step: typeof SCROLL_BOTTOM_UPDATE_SCROLL | typeof SCROLL_BOTTOM_UPDATE_CONTENT) {
+    emitScrollBottom(
+        step: typeof SCROLL_BOTTOM_UPDATE_SCROLL | typeof SCROLL_BOTTOM_UPDATE_CONTENT
+    ): void {
         this.scrollBottom.next(step)
     }
 
-    getScrollBottom() {
+    getScrollBottom(): Observable<typeof SCROLL_BOTTOM_UPDATE_CONTENT | typeof SCROLL_BOTTOM_UPDATE_SCROLL> {
         return this.scrollBottom.asObservable()
     }
 
-    emitIsViewedScrollBottom(isViewed: boolean) {
+    emitIsViewedScrollBottom(isViewed: boolean): void {
         this.isViewedScrollBottom.next(isViewed)
     }
 
-    getIsViewedScrollBottom() {
+    getIsViewedScrollBottom(): Observable<boolean> {
         return this.isViewedScrollBottom.asObservable()
     }
 }

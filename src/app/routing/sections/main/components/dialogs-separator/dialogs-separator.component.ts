@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core'
+import { Component, Input } from '@angular/core'
 import { DateService } from 'src/app/common/date.service'
 
 @Component({
@@ -11,7 +11,7 @@ export class DialogsSeparatorComponent {
 
     constructor(private readonly dateService: DateService) {}
 
-    getDate() {
+    getDate(): string {
         return this.dateService.parseDateWords(this.date)
     }
 }

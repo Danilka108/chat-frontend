@@ -1,12 +1,14 @@
 <app-main-dialogs-info></app-main-dialogs-info>
 <div class="wrapper">
-    <div #wrapper class="scroll-wrapper">
+    <div #wrapper infiniteScroll [scrollWindow]="true" class="scroll-wrapper">
         <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
             <app-main-dialogs-separator
                 *ngIf="message.isDiffDays"
                 [date]="message.diffDate">
             </app-main-dialogs-separator>
-            <app-main-dialogs-message
+            <span #anchor>
+                <app-main-dialogs-message
+                #messages
                 [wrapperWidth]="wrapperWidth"
                 [message]="message.message"
                 [date]="message.createdAt"
@@ -14,7 +16,9 @@
                 [isOwnMsg]="message.senderID === (getUserID() | async)"
                 [isReaded]="message.isReaded"
                 [name]="getSenderName(message.senderID) | async"
+                [messageID]="message.messageID"
             ></app-main-dialogs-message>
+            </span>
         </ng-container>
     </div>
     <app-main-dialogs-input></app-main-dialogs-input>

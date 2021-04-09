@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, combineLatest, forkJoin, Observable, of, Subscription } from 'rxjs'
+import { asyncScheduler, combineLatest, forkJoin, from, Observable, of, Subscription } from 'rxjs'
 import { filter, first, map, observeOn, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
@@ -10,15 +10,16 @@ import { updateUserName } from 'src/app/store/actions/auth.actions'
 import {
     addDialogMessages,
     addDialogs,
+    increaseDialogNewMessagesCount,
+    markDialogMessageAsRead,
     markDialogMessagesAsRead,
     updateActiveReceiverID,
+    updateDialogConnectionStatus,
     updateDialogLastMessage,
-    updateDialogNewMessagesCount,
 } from 'src/app/store/actions/main.actions'
 import { selectConnectionError, selectUserID } from 'src/app/store/selectors/auth.selectors'
 import {
-    selectActiveReceiverID,
-    selectDialogNewMessagesCount,
+    selectDialogMessages,
     selectDialogs,
     selectRequestLoading,
 } from 'src/app/store/selectors/main.selectors'
@@ -57,7 +58,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
         this.subscription.add(sub)
     }
 
-    ngOnInit() {
+    ngOnInit(): void {
         this.requestLoading$ = this.store.pipe(select(selectRequestLoading), observeOn(asyncScheduler))
 
         this.sub = this.store.pipe(
@@ -105,23 +106,24 @@ export class DialogsComponent implements OnInit, OnDestroy {
                         ),
                     ])
                 ),
-                tap((result) => {
+                switchMap((result) => {
                     const [params, dialogsID] = result
 
                     if (!params || !dialogsID.length) {
                         this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
-                        this.router.navigateByUrl(mainSectionDialogsPath.full)
-                        return
+                        return from(this.router.navigateByUrl(mainSectionDialogsPath.full))
                     }
 
                     const id = Number(params['id'])
 
                     if (isNaN(id) || !dialogsID.includes(id)) {
                         this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
-                        this.router.navigateByUrl(mainSectionDialogsPath.full)
+                        return from(this.router.navigateByUrl(mainSectionDialogsPath.full))
                     } else {
                         this.store.dispatch(updateActiveReceiverID({ activeReceiverID: id }))
                     }
+
+                    return of()
                 })
             )
             .subscribe()
@@ -141,21 +143,21 @@ export class DialogsComponent implements OnInit, OnDestroy {
                     return forkJoin({
                         receiverID: of(receiverID),
                         message: of(message),
-                        dialogNewMessagesCount: this.store.pipe(
-                            select(selectDialogNewMessagesCount, { receiverID }),
+                        dialogMessages: this.store.pipe(
+                            select(selectDialogMessages, { receiverID }),
                             first()
                         ),
                     })
                 }),
-                map(({ message, receiverID, dialogNewMessagesCount }) => {
-                    const dlgNewMessagesCount = dialogNewMessagesCount === null ? 0 : dialogNewMessagesCount
-
-                    this.store.dispatch(
-                        addDialogMessages({
-                            receiverID,
-                            messages: [message],
-                        })
-                    )
+                tap(({ message, receiverID, dialogMessages }) => {
+                    if (dialogMessages !== null) {
+                        this.store.dispatch(
+                            addDialogMessages({
+                                receiverID,
+                                messages: [message],
+                            })
+                        )   
+                    }
 
                     this.store.dispatch(
                         updateDialogLastMessage({
@@ -169,10 +171,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
 
                     if (message.senderID === receiverID) {
                         this.store.dispatch(
-                            updateDialogNewMessagesCount({
-                                receiverID,
-                                newMessagesCount: dlgNewMessagesCount + 1,
-                            })
+                            increaseDialogNewMessagesCount({ receiverID })
                         )
                     }
                 })
@@ -180,17 +179,26 @@ export class DialogsComponent implements OnInit, OnDestroy {
             .subscribe()
 
         this.sub = this.wsService
-            .fromEvent<void>(WsEvents.user.allMessagesRead)
+            .fromEvent<number>(WsEvents.user.allMessagesRead)
             .pipe(
-                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
                 tap((receiverID) => {
                     if (receiverID !== null) {
                         this.store.dispatch(markDialogMessagesAsRead({ receiverID }))
-
-                        if (!this.scrollService.getAllowScrollBottom()) {
-                            this.scrollService.emitAllMessagesRead()
-                        }
+                        this.scrollService.emitAllMessagesRead()
                     }
+                })
+            )
+            .subscribe()
+
+        this.sub = this.wsService
+            .fromEvent<{
+                receiverID: number,
+                messageID: number,
+            }>(WsEvents.user.messageRead)
+            .pipe(
+                tap(({ receiverID, messageID}) => {
+                    this.store.dispatch(markDialogMessageAsRead({ receiverID, messageID }))
+                    this.scrollService.emitAllMessagesRead()
                 })
             )
             .subscribe()
@@ -203,9 +211,21 @@ export class DialogsComponent implements OnInit, OnDestroy {
                 })
             )
             .subscribe()
+
+        this.sub = this.wsService
+            .fromEvent<{
+                receiverID: number,
+                connectionStatus: 'online' | 'offline',
+            }>(WsEvents.user.connectionStatus)
+            .pipe(
+                tap(({ connectionStatus, receiverID }) => {
+                    this.store.dispatch(updateDialogConnectionStatus({ receiverID, connectionStatus }))
+                })
+            )
+            .subscribe()
     }
 
-    ngOnDestroy() {
+    ngOnDestroy(): void {
         this.subscription.unsubscribe()
     }
 }

@@ -53,12 +53,6 @@
 
         background-color: map-get($custom-colors, main-gray);
     }
-
-    // &::ng-deep {
-    //     .mat-ripple-element {
-    //         z-index: 2000;
-    //     }
-    // }
 }
 
 .photo,
@@ -150,16 +144,16 @@
     z-index: 200;
 }
 
-.status {
-    position: absolute;
-    right: 0;
-    bottom: 0;
-    width: 0.45rem;
-    height: 0.45rem;
-    transform: translate(-10%, -10%);
-    background: map-get($custom-colors, online);
-    border-radius: 50%;
-    border: 0.18rem solid map-get($custom-colors, main);
-    box-sizing: content-box;
-    transition: 0.25s;
-}
+// .status {
+//     position: absolute;
+//     right: 0;
+//     bottom: 0;
+//     width: 0.45rem;
+//     height: 0.45rem;
+//     transform: translate(-10%, -10%);
+//     background: map-get($custom-colors, online);
+//     border-radius: 50%;
+//     border: 0.18rem solid map-get($custom-colors, main);
+//     box-sizing: content-box;
+//     transition: 0.25s;
+// }

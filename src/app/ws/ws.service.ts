@@ -10,13 +10,13 @@ import { AppState } from '../store/state/app.state'
 import { select, Store } from '@ngrx/store'
 import { selectAccessToken } from '../store/selectors/auth.selectors'
 import { WsEvents } from './ws.events'
+import { updateReconnectionLoading } from '../store/actions/main.actions'
 
 const WS_RECONNECTION_DELAY = 2500
 
 @Injectable()
 export class WsService {
     private updatingCount = 0
-    private connectionError = false
 
     private socket: Observable<SocketIOClient.Socket | null> | null = null
 
@@ -26,7 +26,7 @@ export class WsService {
         private readonly sessionService: SessionService
     ) {}
 
-    fromEvent<T>(event: string) {
+    fromEvent<T>(event: string): Observable<T> {
         if (this.socket === null) {
             this.socket = this.getSocket()
         }
@@ -90,17 +90,17 @@ export class WsService {
                 })
 
                 socket.on('connect_error', () => {
-                    this.connectionError = true
+                    this.store.dispatch(updateReconnectionLoading({ reconnectionLoading: true }))
                 })
 
                 socket.on(WsEvents.user.invalidToken, () => {
-                    this.connectionError = true
+                    this.store.dispatch(updateReconnectionLoading({ reconnectionLoading: true }))
                     socket.disconnect()
                     observer.next(null)
                 })
 
                 socket.on(WsEvents.user.connectSuccess, () => {
-                    this.connectionError = false
+                    this.store.dispatch(updateReconnectionLoading({ reconnectionLoading: false }))
                     this.updatingCount = 0
                 })
 

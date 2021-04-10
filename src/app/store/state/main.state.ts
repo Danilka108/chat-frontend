@@ -11,10 +11,6 @@ export interface MainState {
     messages: {
         receiverID: number,
         messages: IMessage[] | null,
-    }[],
-    isUploaded: {
-        receiverID: number,
-        isUploaded: boolean | null,
     }[]
 }
 
@@ -24,5 +20,4 @@ export const mainInitialState: MainState = {
     reconnectionLoading: false,
     dialogs: null,
     messages: [],
-    isUploaded: [],
 }

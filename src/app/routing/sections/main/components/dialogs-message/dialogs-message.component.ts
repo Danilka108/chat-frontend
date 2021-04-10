@@ -85,7 +85,7 @@ export class DialogsMessageComponent implements AfterViewInit, OnChanges, OnDest
                 if (receiverID !== null) {
                     this.store.dispatch(decreaseDialogNewMessagesCount({ receiverID }))
                     this.store.dispatch(markDialogMessageAsRead({ receiverID, messageID: this.messageID}))
-                    this.scrollService.emitAllMessagesRead()
+                    this.scrollService.emitMessagesRead()
                 }
             })
         ).subscribe()

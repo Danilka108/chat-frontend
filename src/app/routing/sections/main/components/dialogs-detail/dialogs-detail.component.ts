@@ -12,10 +12,9 @@ import {
 } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
-import { filter, first, map, observeOn, switchMap, tap } from 'rxjs/operators'
+import { filter, first, map, observeOn, pairwise, switchMap, tap } from 'rxjs/operators'
 import {
     addDialogMessages,
-    updateDialogIsUploaded,
     updateDialogMessages,
     updateDialogNewMessagesCount
 } from 'src/app/store/actions/main.actions'
@@ -23,7 +22,6 @@ import { selectUserID, selectUserName } from 'src/app/store/selectors/auth.selec
 import {
     selectActiveReceiverID,
     selectDialog,
-    selectDialogIsUploaded,
     selectDialogMessages,
     selectReconnectionLoading,
 } from 'src/app/store/selectors/main.selectors'
@@ -60,7 +58,10 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
     reverseSkip = 0
     deltaSkip = 0
+    updateDeltaSkipCount = 0
     relativeSkip = 0
+
+    isScrollBottom = false
 
     isRemoveInvisibleMessages = false
 
@@ -114,9 +115,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 this.reverseSkip = storeMessages.length - start
                 this.relativeSkip = end
 
-                if (this.isRemoveInvisibleMessages) {
-                    this.deltaSkip = this.deltaSkip - this.take < 0 ? 0 : this.deltaSkip - this.take
-                }
+                if (this.isRemoveInvisibleMessages) this.deltaSkip = this.deltaSkip - this.take < 0 ? 0 : this.deltaSkip - this.take 
 
                 return of(filteredMessages)
             }
@@ -127,8 +126,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
     getPrevMessages(
         receiverID: number | null,
-        storeMessages: IMessage[] | null,
-        isUploaded: boolean | null
+        storeMessages: IMessage[] | null
     ): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
 
@@ -136,15 +134,15 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             let start, end: number
             const parsedMessages = this.messageService.parseMessages(storeMessages)
 
-            if (this.absoluteSkip === 0) {
+            if (this.relativeSkip === 0) {
                 start = 0
-                end = this.absoluteSkip + this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
-            } else if (this.absoluteSkip + this.take > storeMessages.length) {
+                end = this.relativeSkip + this.take * 2 > storeMessages.length ? storeMessages.length : this.take * 2
+            } else if (this.relativeSkip + this.take > storeMessages.length) {
                 start = storeMessages.length - this.take * 2 < 0 ? 0 : storeMessages.length - this.take * 2
                 end = storeMessages.length
             } else {
-                start = this.absoluteSkip - this.take < 0 ? 0 : this.absoluteSkip - this.take
-                end = this.absoluteSkip + this.take
+                start = this.relativeSkip - this.take < 0 ? 0 : this.relativeSkip - this.take
+                end = this.relativeSkip + this.take
             }
 
             const filteredMessages = parsedMessages.slice(start, end)
@@ -153,17 +151,12 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 this.reverseSkip = storeMessages.length - start
                 this.relativeSkip = end
 
-                if (this.isRemoveInvisibleMessages) {
-                    this.deltaSkip = this.deltaSkip + this.take > this.absoluteSkip ? this.absoluteSkip : this.deltaSkip + this.take
-                }
-
                 return of(filteredMessages.reverse())
             }
         }
 
-        if (isUploaded) {
-            if (storeMessages) return this.messages$.pipe(first())
-            else return of([])
+        if (this.ignoreUploadNewMessagesPrev) {
+            return this.messages$.pipe(first())
         }
 
         return this.uploadNewMessages(receiverID, 'prev')
@@ -215,7 +208,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             }
         }
 
-        this.store.dispatch(updateDialogIsUploaded({ receiverID, isUploaded: false }))
+        this.scrollService.updatePrevDialog(receiverID)
+
         this.store.dispatch(updateDialogMessages({ receiverID, messages: filteredStoreMessages }))
 
         this.deltaSkip = this.absoluteSkip - filteredStoreMessages.length
@@ -232,34 +226,27 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
         if (type === 'next') {
             take = this.take
-            skip = this.absoluteSkip - this.messages.getValue().length - this.take
+            skip = this.absoluteSkip - this.messages.getValue().length - this.take < 0
+                ? 0
+                : this.absoluteSkip - this.messages.getValue().length - this.take
         } else if (type === 'prev') {
             take = this.absoluteSkip === 0 ? this.take * 2 : this.take
             skip = this.absoluteSkip
         }
 
-        if (this.ignoreUploadNewMessagesPrev || this.ignoreUploadNewMessagesNext) return this.handleEvents(receiverID, type)
+        if (
+            type === 'next' && this.ignoreUploadNewMessagesNext ||
+            type === 'prev' && this.ignoreUploadNewMessagesPrev
+        ) {
+            return this.handleEvents(receiverID, type)
+        }
 
         return this.httpService.getMessages(receiverID, take, skip).pipe(
             switchMap((newMessages) => {
                 if (newMessages.length === 0) {
                     if (type === 'prev') this.ignoreUploadNewMessagesPrev = true
                     if (type === 'next') this.ignoreUploadNewMessagesNext = true
-
-                    this.store.dispatch(
-                        updateDialogIsUploaded({
-                            receiverID,
-                            isUploaded: true,
-                        })
-                    )
                 } else {
-                    this.store.dispatch(
-                        updateDialogIsUploaded({
-                            receiverID,
-                            isUploaded: false,
-                        })
-                    )
-
                     this.store.dispatch(
                         addDialogMessages({
                             receiverID,
@@ -273,12 +260,48 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         )
     }
 
+    scrollBottom(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
+        if (receiverID !== null && this.isRemoveInvisibleMessages) {
+            this.setDefaultSettings()
+
+            return forkJoin({
+                newMessages: this.httpService.getMessages(receiverID, this.take * 2, 0).pipe(first()),
+                notReadedMessagesCount: this.httpService.getNotReadedMessagesCount(receiverID).pipe(first()),
+            }).pipe(
+                switchMap(({ newMessages, notReadedMessagesCount }) => {
+                    this.store.dispatch(updateDialogMessages({
+                        receiverID,
+                        messages: newMessages
+                    }))
+                    
+                    if (notReadedMessagesCount !== null) {
+                        this.store.dispatch(updateDialogNewMessagesCount({
+                            receiverID,
+                            newMessagesCount: notReadedMessagesCount,
+                        }))
+                    }
+
+                    return this.getLatestMessages(receiverID, newMessages.slice())
+                }),
+                tap(() => {
+                    this.isScrollBottom = true
+                })
+            )
+        }
+
+        return this.getLatestMessages(receiverID, storeMessages).pipe(
+            tap(() => {
+                this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_SCROLL)
+            })
+        )
+    }
+
     handleEvents(receiverID: number | null, startWith: 'prev' | 'next'): Observable<IMessageWithIsLast[]> {
         return merge(
             this.scrollService.getSideReached(),
             this.scrollService.getScrollBottom(),
             this.scrollService.getNewMessage().pipe(filter((type) => type === NEW_MESSAGE_START)),
-            this.scrollService.getAllMessagesRead(),
+            this.scrollService.getMessagesRead(),
             of<typeof SIDE_REACHED_TOP | typeof SIDE_REACED_BOTTOM | null>(
                 startWith === 'prev'
                     ? SIDE_REACHED_TOP
@@ -304,13 +327,12 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                             return messages.concat([])
                         })
                     ),
-                    isUploaded: this.store.pipe(select(selectDialogIsUploaded, { receiverID }), first()),
                     event: of(event),
                 })
             }),
-            switchMap(({ storeMessages, isUploaded, event }) => {
+            switchMap(({ storeMessages, event }) => {
                 if (event === SIDE_REACHED_TOP) {
-                    return this.getPrevMessages(receiverID, storeMessages, isUploaded)
+                    return this.getPrevMessages(receiverID, storeMessages)
                 }
 
                 if (event === SIDE_REACED_BOTTOM && this.absoluteSkip - this.messages.getValue().length !== 0) {
@@ -318,11 +340,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 }
 
                 if (event === SCROLL_BOTTOM_UPDATE_CONTENT) {
-                    return this.getLatestMessages(receiverID, storeMessages).pipe(
-                        tap(() => {
-                            this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_SCROLL)
-                        })
-                    )
+                    return this.scrollBottom(receiverID, storeMessages)
                 }
 
                 if (event === NEW_MESSAGE_START) {
@@ -340,6 +358,18 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 return this.messages$.pipe(first())
             })
         )
+    }
+
+    setDefaultSettings(): void {
+        this.deltaSkip = 0
+        this.updateDeltaSkipCount = 0
+        this.reverseSkip = 0
+        this.relativeSkip = 0
+        this.ignoreUploadNewMessagesPrev = false
+        this.ignoreUploadNewMessagesNext = false
+        this.isInitWrapperWidth = true
+        this.isRemoveInvisibleMessages = false
+        this.isScrollBottom = false
     }
 
     ngAfterViewChecked(): void {
@@ -382,13 +412,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             .pipe(
                 select(selectActiveReceiverID),
                 switchMap((receiverID) => {
-                    this.deltaSkip = 0
-                    this.reverseSkip = 0
-                    this.relativeSkip = 0
-                    this.ignoreUploadNewMessagesPrev = false
-                    this.ignoreUploadNewMessagesNext = false
-                    this.isInitWrapperWidth = true
-                    this.isRemoveInvisibleMessages = false
+                    this.scrollService.clearPrevDialog()
+                    this.setDefaultSettings()
 
                     if (receiverID !== null) this.store.dispatch(updateDialogNewMessagesCount({ receiverID, newMessagesCount: 0 }))
 
@@ -404,6 +429,11 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             .pipe(
                 observeOn(asyncScheduler),
                 tap(() => {
+                    if (this.isScrollBottom) {
+                        this.isScrollBottom = false
+                        this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_SCROLL)
+                    }
+
                     setTimeout(() => {
                         this.scrollService.updateTopAnchor(this.anchorsRef.first)
                         this.scrollService.updateBottomAnchor(this.anchorsRef.last)

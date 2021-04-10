@@ -50,17 +50,6 @@ export const selectDialogMessages = createSelector(
     }
 )
 
-export const selectDialogIsUploaded = createSelector(
-    selectMain,
-    (state: MainState, { receiverID }: { receiverID: number }) => {
-        const index = state.isUploaded.findIndex((dialog) => dialog.receiverID === receiverID)
-
-        if (index === -1) return null
-
-        return state.isUploaded[index].isUploaded
-    }
-)
-
 export const selectDialogConnectionStatus = createSelector(
     selectMain,
     (state: MainState, { receiverID }: { receiverID: number }) => {

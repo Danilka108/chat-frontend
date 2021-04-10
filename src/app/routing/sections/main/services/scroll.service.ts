@@ -1,5 +1,8 @@
 import { ElementRef, Injectable } from '@angular/core'
+import { Store } from '@ngrx/store'
 import { BehaviorSubject, Observable, Subject } from 'rxjs'
+import { updateDialogMessages } from 'src/app/store/actions/main.actions'
+import { AppState } from 'src/app/store/state/app.state'
 
 export const SCROLL_BOTTOM_UPDATE_SCROLL = 'SCROLL_BOTTOM_UPDATE_SCROLL'
 export const SCROLL_BOTTOM_UPDATE_CONTENT = 'SCROLL_BOTTOM_UPDATE_CONTENT'
@@ -17,12 +20,30 @@ export class ScrollService {
     private readonly isViewedScrollBottom = new BehaviorSubject<boolean>(false)
     private readonly sideReached = new Subject<typeof SIDE_REACHED_TOP | typeof SIDE_REACED_BOTTOM>()
     private readonly newMessage = new Subject<typeof NEW_MESSAGE_START | typeof NEW_MESSAGE_END>()
-    private readonly allMessagesRead = new Subject<typeof ALL_MESSAGES_READ>()
+    private readonly messagesRead = new Subject<typeof ALL_MESSAGES_READ>()
     private allowScrollBottom: null | boolean = null
     private readonly scrolled = new Subject<void>()
     private topAnchor: ElementRef<HTMLElement> | null = null
     private bottomAnchor: ElementRef<HTMLElement> | null = null
     private readonly discardUpdatingContent = new Subject<void>()
+    private clearPrevDialogReceiverID: number | null = null
+
+    constructor(private readonly store: Store<AppState>) {}
+
+    updatePrevDialog(receiverID: number): void {
+        this.clearPrevDialogReceiverID = receiverID
+    }
+
+    clearPrevDialog(): void {
+        if (this.clearPrevDialogReceiverID !== null) {
+            this.store.dispatch(updateDialogMessages({
+                receiverID: this.clearPrevDialogReceiverID,
+                messages: null
+            }))
+        }
+
+        this.clearPrevDialogReceiverID = null
+    }
 
     emitDiscardUpdatingContent(): void {
         this.discardUpdatingContent.next()
@@ -56,12 +77,12 @@ export class ScrollService {
         return this.scrolled.asObservable()
     }
 
-    emitAllMessagesRead(): void {
-        this.allMessagesRead.next(ALL_MESSAGES_READ)
+    emitMessagesRead(): void {
+        this.messagesRead.next(ALL_MESSAGES_READ)
     }
 
-    getAllMessagesRead(): Observable<typeof ALL_MESSAGES_READ> {
-        return this.allMessagesRead.asObservable()
+    getMessagesRead(): Observable<typeof ALL_MESSAGES_READ> {
+        return this.messagesRead.asObservable()
     }
 
     emitNewMessage(type: typeof NEW_MESSAGE_START | typeof NEW_MESSAGE_END): void {

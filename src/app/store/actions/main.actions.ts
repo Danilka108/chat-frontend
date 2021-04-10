@@ -46,11 +46,6 @@ export const addDialogMessages = createAction(
     props<{ receiverID: number, messages: IMessage[] }>()
 )
 
-export const updateDialogIsUploaded = createAction(
-    '[Main] Update Dialog Is Updated',
-    props<{ receiverID: number, isUploaded: boolean }>()
-)
-
 export const updateDialogConnectionStatus = createAction(
     '[Main] Update Dialog Connection Status',
     props<{ receiverID: number, connectionStatus: 'online' | 'offline' }>()
@@ -63,5 +58,5 @@ export const updateReconnectionLoading = createAction(
 
 export const updateDialogMessages = createAction(
     '[Main] Update Dialog Messages',
-    props<{ receiverID: number, messages: IMessage[] }>()
+    props<{ receiverID: number, messages: IMessage[] | null }>()
 )

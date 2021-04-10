@@ -9,7 +9,6 @@ import {
     markDialogMessagesAsRead,
     updateActiveReceiverID,
     updateDialogConnectionStatus,
-    updateDialogIsUploaded,
     updateDialogLastMessage,
     updateDialogMessages,
     updateDialogNewMessagesCount,
@@ -33,7 +32,6 @@ export const mainReducer = createReducer(
     on(addDialogs, (state, { dialogs }) => {
         const stateDialogs = state.dialogs === null ? [] : [...state.dialogs]
         const stateMessages = [...state.messages]
-        const stateIsUploaded = [...state.isUploaded]
 
         for (const dialog of dialogs) {
             let isPush = true
@@ -51,10 +49,6 @@ export const mainReducer = createReducer(
                     receiverID: dialog.receiverID,
                     messages: null,
                 })
-                stateIsUploaded.push({
-                    receiverID: dialog.receiverID,
-                    isUploaded: null,
-                })
             }
         }
 
@@ -62,7 +56,6 @@ export const mainReducer = createReducer(
             ...state,
             dialogs: stateDialogs,
             messages: stateMessages,
-            isUploaded: stateIsUploaded,
         }
     }),
     on(markDialogMessagesAsRead, (state, { receiverID }) => {
@@ -243,24 +236,6 @@ export const mainReducer = createReducer(
         return {
             ...state,
             messages: dialogsMessages,
-        }
-    }),
-    on(updateDialogIsUploaded, (state, { receiverID, isUploaded }) => {
-        const dialogsIsUploaded = [...state.isUploaded]
-        const dialogIndex = dialogsIsUploaded.findIndex(
-            (dialogIsUploaded) => dialogIsUploaded.receiverID === receiverID
-        )
-
-        if (dialogIndex > -1) {
-            dialogsIsUploaded[dialogIndex] = {
-                receiverID,
-                isUploaded,
-            }
-        }
-
-        return {
-            ...state,
-            isUploaded: dialogsIsUploaded,
         }
     }),
     on(updateDialogConnectionStatus, (state, { receiverID, connectionStatus }) => {

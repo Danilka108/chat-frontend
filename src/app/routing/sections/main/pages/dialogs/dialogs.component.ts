@@ -184,7 +184,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
                 tap((receiverID) => {
                     if (receiverID !== null) {
                         this.store.dispatch(markDialogMessagesAsRead({ receiverID }))
-                        this.scrollService.emitAllMessagesRead()
+                        this.scrollService.emitMessagesRead()
                     }
                 })
             )
@@ -198,7 +198,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
             .pipe(
                 tap(({ receiverID, messageID}) => {
                     this.store.dispatch(markDialogMessageAsRead({ receiverID, messageID }))
-                    this.scrollService.emitAllMessagesRead()
+                    this.scrollService.emitMessagesRead()
                 })
             )
             .subscribe()

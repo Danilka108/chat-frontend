@@ -27,6 +27,10 @@ interface IGetUserNameResponse extends IResponse {
     data: string
 }
 
+interface IGetNotReadedMessagesCount extends IResponse {
+    data: number
+}
+
 @Injectable()
 export class MainSectionHttpService {
     constructor(
@@ -130,6 +134,22 @@ export class MainSectionHttpService {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
                 })
             )
+    }
+
+    getNotReadedMessagesCount(receiverID: number): Observable<number | null> {
+        this.store.dispatch(updateRequestLoading({ requestLoading: true }))
+
+        return this.authService.authRequest((accessToken) => {
+            return this.httpClient.get(`${environment.apiUrl}/message/${receiverID}/not-readed`, {
+                headers: {
+                    authorization: `Bearer ${accessToken}`
+                }
+            }).pipe(map((result) => (result as IGetNotReadedMessagesCount).data))
+        }).pipe(
+            tap(() => {
+                this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+            })
+        )
     }
 
     getUserName(userID: number): Observable<string | null> {

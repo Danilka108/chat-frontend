@@ -1,9 +1,9 @@
 import { ScrollDispatcher } from '@angular/cdk/scrolling'
 import { AfterViewChecked, Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { asyncScheduler, BehaviorSubject, combineLatest, of, Subscription } from 'rxjs'
-import { debounceTime, filter, observeOn, switchMap, tap } from 'rxjs/operators'
-import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
+import { asyncScheduler, BehaviorSubject, combineLatest, forkJoin, of, Subscription } from 'rxjs'
+import { debounceTime, filter, first, observeOn, switchMap, tap } from 'rxjs/operators'
+import { selectActiveReceiverID, selectReconnectionLoading } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import {
     NEW_MESSAGE_END,
@@ -107,6 +107,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
             .getScrollBottom()
             .pipe(
                 filter((step) => step === SCROLL_BOTTOM_UPDATE_SCROLL),
+                switchMap(() => this.store.pipe(select(selectReconnectionLoading), first())),
+                filter((reconnectionLoading) => !reconnectionLoading),
                 observeOn(asyncScheduler),
                 tap(() => {
                     this.isDisableEvents = true
@@ -209,10 +211,15 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                 switchMap((activeReceiverID) =>
                     combineLatest([of(activeReceiverID), this.scrollDispatcher.scrolled(200)])
                 ),
+                switchMap(([activeReceiverID, scrollable]) => forkJoin({
+                    activeReceiverID: of(activeReceiverID),
+                    scrollable: of(scrollable),
+                    reconnectionLoading: this.store.pipe(select(selectReconnectionLoading)).pipe(first())
+                })),
                 debounceTime(200),
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                filter(([_, scrollable]) => !scrollable),
-                tap(([activeReceiverID]) => this.ngZone.run(() => {
+                filter(({ scrollable }) => !scrollable),
+                tap(({ activeReceiverID, reconnectionLoading }) => this.ngZone.run(() => {
                     if (activeReceiverID === null) return
 
                     if (!this.ignoreScroll) {
@@ -222,7 +229,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                     if (
                         this.topReachedDistance !== null &&
                         viewport.scrollTop < this.topReachedDistance &&
-                        !this.isTopUpdatingContent && !this.isDisableEvents
+                        !this.isTopUpdatingContent && !this.isDisableEvents &&
+                        !reconnectionLoading
                     ) {
                         this.isTopUpdatingContent = true
                         this.isBottomUpdatingContent = false
@@ -233,7 +241,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                     if (
                         this.bottomReachedDistance !== null &&
                         viewport.scrollTop > this.bottomReachedDistance &&
-                        !this.isBottomUpdatingContent && !this.isDisableEvents
+                        !this.isBottomUpdatingContent && !this.isDisableEvents &&
+                        !reconnectionLoading
                     ) {
                         this.isBottomUpdatingContent = true
                         this.isTopUpdatingContent = false

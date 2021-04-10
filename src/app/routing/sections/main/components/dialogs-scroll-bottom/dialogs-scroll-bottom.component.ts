@@ -1,6 +1,9 @@
 import { AfterViewInit, Component, OnDestroy } from '@angular/core'
-import { Subscription } from 'rxjs'
-import { tap } from 'rxjs/operators'
+import { select, Store } from '@ngrx/store'
+import { asyncScheduler, Subject, Subscription } from 'rxjs'
+import { first, observeOn, switchMap, tap } from 'rxjs/operators'
+import { selectReconnectionLoading } from 'src/app/store/selectors/main.selectors'
+import { AppState } from 'src/app/store/state/app.state'
 import { ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scroll.service'
 
 @Component({
@@ -9,37 +12,54 @@ import { ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scro
     styleUrls: ['./dialogs-scroll-bottom.component.scss'],
 })
 export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
-    isViewed = true
+    isViewed = false
     isDisabled = false
-    sub = new Subscription()
+    subscription = new Subscription()
 
-    constructor(private readonly scrollService: ScrollService) {}
+    set sub(sub: Subscription) {
+        this.subscription.add(sub)
+    }
+
+    click = new Subject<void>()
+    click$ = this.click.asObservable()
+
+    constructor(
+        private readonly scrollService: ScrollService,
+        private readonly store: Store<AppState>,
+    ) {}
 
     ngAfterViewInit(): void {
-        this.sub.add(
-            this.scrollService
-                .getIsViewedScrollBottom()
-                .pipe(
-                    tap((isViewed) =>
-                        setTimeout(() => {
-                            this.isViewed = isViewed
-                            this.isDisabled = !isViewed
-                        })
-                    )
+        this.sub = this.scrollService
+            .getIsViewedScrollBottom()
+            .pipe(
+                tap((isViewed) =>
+                    setTimeout(() => {
+                        this.isViewed = isViewed
+                        this.isDisabled = !isViewed
+                    })
                 )
-                .subscribe()
-        )
+            )
+            .subscribe()
+
+        this.sub = this.click$.pipe(
+            switchMap(() => this.store.pipe(select(selectReconnectionLoading), first())),
+            observeOn(asyncScheduler),
+            tap((reconnectionLoading) => {
+                if (!reconnectionLoading) {
+                    this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_CONTENT)
+                    this.isDisabled = true
+                    this.isViewed = false
+                }
+            })
+        ).subscribe()
     }
 
     onClick(): void {
-        this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_CONTENT)
-        setTimeout(() => {
-            this.isDisabled = true
-            this.isViewed = false
-        })
+        this.click.next()
     }
 
     ngOnDestroy(): void {
-        this.sub.unsubscribe()
+        this.subscription.unsubscribe()
     }
 }
+

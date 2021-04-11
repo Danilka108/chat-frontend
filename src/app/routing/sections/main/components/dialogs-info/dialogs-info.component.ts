@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, Input, OnDestroy, OnInit } from '@angular/core';
 import { select, Store } from '@ngrx/store';
 import { Observable, of, Subscription } from 'rxjs';
 import { map, startWith, switchMap } from 'rxjs/operators';
@@ -16,6 +16,8 @@ import { AppState } from 'src/app/store/state/app.state';
     styleUrls: ['./dialogs-info.component.scss'],
 })
 export class DialogsInfoComponent implements OnInit, OnDestroy {
+    @Input() isOnlyLoading = false
+
     name$!: Observable<string>
     connectionStatus$: Observable<'online' | 'offline'> = of('offline')
 

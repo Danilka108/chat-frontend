@@ -15,7 +15,7 @@ export class EmailSectionHttpService {
             if (error?.error?.message) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 throw new Error(error.error.message)
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             } else if (error?.status == 0) {
                 throw new Error('Server error. Try again')
             } else {
@@ -27,9 +27,7 @@ export class EmailSectionHttpService {
     confirmEmail(id: string, token: string): Observable<void> {
         const params = new HttpParams().set('id', id).set('token', token)
 
-        return this.httpClient.get(`${environment.apiUrl}/email/confirm-email`, { params }).pipe(
-            map(() => undefined)
-        )
+        return this.httpClient.get(`${environment.apiUrl}/email/confirm-email`, { params }).pipe(map(() => undefined))
     }
 
     resetPassword(id: string, token: string, newPassword: string): Observable<void> {
@@ -43,6 +41,11 @@ export class EmailSectionHttpService {
                 },
                 { params }
             )
-            .pipe(publish(), refCount(), catchError(this.error()), map(() => undefined))
+            .pipe(
+                publish(),
+                refCount(),
+                catchError(this.error()),
+                map(() => undefined)
+            )
     }
 }

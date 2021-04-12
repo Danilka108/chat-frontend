@@ -12,11 +12,11 @@ import {
 } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
-import { filter, first, map, observeOn, pairwise, switchMap, tap } from 'rxjs/operators'
+import { filter, first, map, observeOn, switchMap, tap } from 'rxjs/operators'
 import {
     addDialogMessages,
     updateDialogMessages,
-    updateDialogNewMessagesCount
+    updateDialogNewMessagesCount,
 } from 'src/app/store/actions/main.actions'
 import { selectUserID, selectUserName } from 'src/app/store/selectors/auth.selectors'
 import {
@@ -89,12 +89,9 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         return this.relativeSkip + this.deltaSkip
     }
 
-    getNextMessages(
-        receiverID: number | null,
-        storeMessages: IMessage[] | null,
-    ): Observable<IMessageWithIsLast[]> {
+    getNextMessages(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
-        
+
         if (storeMessages !== null && this.reverseSkip < storeMessages.length) {
             let start, end: number
             const parsedMessages = this.messageService.parseMessages(storeMessages)
@@ -115,7 +112,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 this.reverseSkip = storeMessages.length - start
                 this.relativeSkip = end
 
-                if (this.isRemoveInvisibleMessages) this.deltaSkip = this.deltaSkip - this.take < 0 ? 0 : this.deltaSkip - this.take 
+                if (this.isRemoveInvisibleMessages)
+                    this.deltaSkip = this.deltaSkip - this.take < 0 ? 0 : this.deltaSkip - this.take
 
                 return of(filteredMessages)
             }
@@ -124,10 +122,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         return this.uploadNewMessages(receiverID, 'next')
     }
 
-    getPrevMessages(
-        receiverID: number | null,
-        storeMessages: IMessage[] | null
-    ): Observable<IMessageWithIsLast[]> {
+    getPrevMessages(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
 
         if (storeMessages !== null && this.relativeSkip < storeMessages.length) {
@@ -181,7 +176,10 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
         return this.messages$.pipe(first())
     }
 
-    updateCurrentMessages(receiverID: number | null, storeMessages: IMessage[] | null): Observable<IMessageWithIsLast[]> {
+    updateCurrentMessages(
+        receiverID: number | null,
+        storeMessages: IMessage[] | null
+    ): Observable<IMessageWithIsLast[]> {
         if (receiverID === null) return of([])
 
         if (storeMessages === null) return of([])
@@ -226,17 +224,18 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
         if (type === 'next') {
             take = this.take
-            skip = this.absoluteSkip - this.messages.getValue().length - this.take < 0
-                ? 0
-                : this.absoluteSkip - this.messages.getValue().length - this.take
+            skip =
+                this.absoluteSkip - this.messages.getValue().length - this.take < 0
+                    ? 0
+                    : this.absoluteSkip - this.messages.getValue().length - this.take
         } else if (type === 'prev') {
             take = this.absoluteSkip === 0 ? this.take * 2 : this.take
             skip = this.absoluteSkip
         }
 
         if (
-            type === 'next' && this.ignoreUploadNewMessagesNext ||
-            type === 'prev' && this.ignoreUploadNewMessagesPrev
+            (type === 'next' && this.ignoreUploadNewMessagesNext) ||
+            (type === 'prev' && this.ignoreUploadNewMessagesPrev)
         ) {
             return this.handleEvents(receiverID, type)
         }
@@ -269,16 +268,20 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 notReadedMessagesCount: this.httpService.getNotReadedMessagesCount(receiverID).pipe(first()),
             }).pipe(
                 switchMap(({ newMessages, notReadedMessagesCount }) => {
-                    this.store.dispatch(updateDialogMessages({
-                        receiverID,
-                        messages: newMessages
-                    }))
-                    
-                    if (notReadedMessagesCount !== null) {
-                        this.store.dispatch(updateDialogNewMessagesCount({
+                    this.store.dispatch(
+                        updateDialogMessages({
                             receiverID,
-                            newMessagesCount: notReadedMessagesCount,
-                        }))
+                            messages: newMessages,
+                        })
+                    )
+
+                    if (notReadedMessagesCount !== null) {
+                        this.store.dispatch(
+                            updateDialogNewMessagesCount({
+                                receiverID,
+                                newMessagesCount: notReadedMessagesCount,
+                            })
+                        )
                     }
 
                     return this.getLatestMessages(receiverID, newMessages.slice())
@@ -303,11 +306,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             this.scrollService.getNewMessage().pipe(filter((type) => type === NEW_MESSAGE_START)),
             this.scrollService.getMessagesRead(),
             of<typeof SIDE_REACHED_TOP | typeof SIDE_REACED_BOTTOM | null>(
-                startWith === 'prev'
-                    ? SIDE_REACHED_TOP
-                    : startWith === 'next'
-                        ? SIDE_REACED_BOTTOM
-                        : null
+                startWith === 'prev' ? SIDE_REACHED_TOP : startWith === 'next' ? SIDE_REACED_BOTTOM : null
             )
         ).pipe(
             switchMap((event) => {
@@ -386,27 +385,37 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
     ngOnInit(): void {
         this.take = Math.floor(document.documentElement.clientHeight * TAKE_MESSAGES_FACTOR)
 
-        this.sub = this.store.pipe(
-            select(selectReconnectionLoading),
-            filter(() => !this.isRemoveInvisibleMessages),
-            switchMap((reconnectionLoading) => forkJoin({
-                reconnectionLoading: of(reconnectionLoading),
-                activeReceiverID: this.store.pipe(select(selectActiveReceiverID), first()),
-            })),
-            switchMap(({ reconnectionLoading, activeReceiverID }) => forkJoin({
-                reconnectionLoading: of(reconnectionLoading),
-                activeReceiverID: of(activeReceiverID),
-                storeMessages: activeReceiverID === null
-                    ? of(null)
-                    : this.store.pipe(select(selectDialogMessages, { receiverID: activeReceiverID }), first())
-            })),
-            tap(({ reconnectionLoading, activeReceiverID, storeMessages }) => {
-                if (reconnectionLoading && activeReceiverID !== null && storeMessages ) {
-                    this.isRemoveInvisibleMessages = true
-                    this.removeInvisibleMessages(activeReceiverID, storeMessages)
-                }
-            })
-        ).subscribe()
+        this.sub = this.store
+            .pipe(
+                select(selectReconnectionLoading),
+                filter(() => !this.isRemoveInvisibleMessages),
+                switchMap((reconnectionLoading) =>
+                    forkJoin({
+                        reconnectionLoading: of(reconnectionLoading),
+                        activeReceiverID: this.store.pipe(select(selectActiveReceiverID), first()),
+                    })
+                ),
+                switchMap(({ reconnectionLoading, activeReceiverID }) =>
+                    forkJoin({
+                        reconnectionLoading: of(reconnectionLoading),
+                        activeReceiverID: of(activeReceiverID),
+                        storeMessages:
+                            activeReceiverID === null
+                                ? of(null)
+                                : this.store.pipe(
+                                      select(selectDialogMessages, { receiverID: activeReceiverID }),
+                                      first()
+                                  ),
+                    })
+                ),
+                tap(({ reconnectionLoading, activeReceiverID, storeMessages }) => {
+                    if (reconnectionLoading && activeReceiverID !== null && storeMessages) {
+                        this.isRemoveInvisibleMessages = true
+                        this.removeInvisibleMessages(activeReceiverID, storeMessages)
+                    }
+                })
+            )
+            .subscribe()
 
         this.sub = this.store
             .pipe(
@@ -415,7 +424,8 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                     this.scrollService.clearPrevDialog()
                     this.setDefaultSettings()
 
-                    if (receiverID !== null) this.store.dispatch(updateDialogNewMessagesCount({ receiverID, newMessagesCount: 0 }))
+                    if (receiverID !== null)
+                        this.store.dispatch(updateDialogNewMessagesCount({ receiverID, newMessagesCount: 0 }))
 
                     return this.handleEvents(receiverID, 'prev')
                 }),
@@ -467,15 +477,12 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
             select(selectUserID),
             first(),
             switchMap((userID) => {
-                if (userID === senderID) return this.store.pipe(
-                    select(selectUserName),
-                    first()
-                )
+                if (userID === senderID) return this.store.pipe(select(selectUserName), first())
 
                 return this.store.pipe(
                     select(selectDialog, { receiverID: senderID }),
                     first(),
-                    map((dialog) => dialog === null ? '' : dialog.receiverName)
+                    map((dialog) => (dialog === null ? '' : dialog.receiverName))
                 )
             })
         )

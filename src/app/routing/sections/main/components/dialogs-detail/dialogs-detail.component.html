@@ -1,6 +1,6 @@
 <app-main-dialogs-info></app-main-dialogs-info>
 <div class="wrapper">
-    <div #wrapper infiniteScroll [scrollWindow]="true" class="scroll-wrapper">
+    <div #wrapper class="scroll-wrapper">
         <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
             <app-main-dialogs-separator
                 *ngIf="message.isDiffDays"

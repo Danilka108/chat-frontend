@@ -53,12 +53,14 @@ export class DialogsInputComponent implements AfterViewInit, OnDestroy {
     }
 
     ngAfterViewInit(): void {
-        this.sub = (this.formGroup.get('message')?.valueChanges as Observable<string | null>).pipe(
-            tap((messageValue) => {
-                if (messageValue === null || !messageValue.length) this.isPlaceholderVisible = true
-                else this.isPlaceholderVisible = false
-            })
-        ).subscribe()
+        this.sub = (this.formGroup.get('message')?.valueChanges as Observable<string | null>)
+            .pipe(
+                tap((messageValue) => {
+                    if (messageValue === null || !messageValue.length) this.isPlaceholderVisible = true
+                    else this.isPlaceholderVisible = false
+                })
+            )
+            .subscribe()
 
         this.btnSize = (this.matFormField._elementRef.nativeElement as HTMLElement).offsetHeight
 
@@ -128,7 +130,7 @@ export class DialogsInputComponent implements AfterViewInit, OnDestroy {
 
     onKeydown(event: KeyboardEvent): void {
         if (event.key === 'Enter' && event.ctrlKey) {
-            const messageValue = this.formGroup.get('message')?.value as (string | null)
+            const messageValue = this.formGroup.get('message')?.value as string | null
 
             this.formGroup.setValue({
                 message: messageValue === null ? null : messageValue + '\n',

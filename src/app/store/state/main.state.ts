@@ -4,13 +4,13 @@ import { IMessage } from 'src/app/routing/sections/main/interface/message.interf
 export const mainKey = 'main'
 
 export interface MainState {
-    activeReceiverID: number | null,
-    requestLoading: boolean,
-    reconnectionLoading: boolean,
-    dialogs: IDialog[] | null,
+    activeReceiverID: number | null
+    requestLoading: boolean
+    reconnectionLoading: boolean
+    dialogs: IDialog[] | null
     messages: {
-        receiverID: number,
-        messages: IMessage[] | null,
+        receiverID: number
+        messages: IMessage[] | null
     }[]
 }
 

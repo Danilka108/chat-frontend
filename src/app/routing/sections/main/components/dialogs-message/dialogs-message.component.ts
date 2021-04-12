@@ -8,7 +8,7 @@ import {
     OnChanges,
     OnDestroy,
     SimpleChanges,
-    ViewChild
+    ViewChild,
 } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { BehaviorSubject, of, Subscription } from 'rxjs'
@@ -56,7 +56,7 @@ export class DialogsMessageComponent implements AfterViewInit, OnChanges, OnDest
         private readonly httpService: MainSectionHttpService,
         readonly elementRef: ElementRef
     ) {}
-    
+
     ngOnChanges(changes: SimpleChanges): void {
         if (changes?.isReaded && changes.isReaded.previousValue !== changes.isReaded.currentValue) {
             this.updateScrollListener.next()
@@ -66,29 +66,31 @@ export class DialogsMessageComponent implements AfterViewInit, OnChanges, OnDest
     ngAfterViewInit(): void {
         const messageWrapper = this.messageWrapper.nativeElement
 
-        this.sub = this.updateScrollListener$.pipe(
-            switchMap(() => !this.isOwnMsg && !this.isReaded ? this.scrollService.getScrolled() : of(null)),
-            switchMap((result) => {
-                if (result === null) return of(null)
+        this.sub = this.updateScrollListener$
+            .pipe(
+                switchMap(() => (!this.isOwnMsg && !this.isReaded ? this.scrollService.getScrolled() : of(null))),
+                switchMap((result) => {
+                    if (result === null) return of(null)
 
-                const messageWrapperYPos = messageWrapper.getBoundingClientRect().y
+                    const messageWrapperYPos = messageWrapper.getBoundingClientRect().y
 
-                if (messageWrapperYPos <= window.innerHeight) {
-                    return this.httpService.messageRead(this.messageID)
-                }
+                    if (messageWrapperYPos <= window.innerHeight) {
+                        return this.httpService.messageRead(this.messageID)
+                    }
 
-                return of(null)
-            }),
-            filter((result) => result !== null),
-            switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
-            tap((receiverID) => {
-                if (receiverID !== null) {
-                    this.store.dispatch(decreaseDialogNewMessagesCount({ receiverID }))
-                    this.store.dispatch(markDialogMessageAsRead({ receiverID, messageID: this.messageID}))
-                    this.scrollService.emitMessagesRead()
-                }
-            })
-        ).subscribe()
+                    return of(null)
+                }),
+                filter((result) => result !== null),
+                switchMap(() => this.store.pipe(select(selectActiveReceiverID), first())),
+                tap((receiverID) => {
+                    if (receiverID !== null) {
+                        this.store.dispatch(decreaseDialogNewMessagesCount({ receiverID }))
+                        this.store.dispatch(markDialogMessageAsRead({ receiverID, messageID: this.messageID }))
+                        this.scrollService.emitMessagesRead()
+                    }
+                })
+            )
+            .subscribe()
     }
 
     parseDate(date: string): string {

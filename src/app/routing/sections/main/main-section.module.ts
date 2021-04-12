@@ -14,7 +14,6 @@ import { DialogsMessageComponent } from './components/dialogs-message/dialogs-me
 import { GlobalComponentsModule } from 'src/app/global-components/global-components.module'
 import { DialogsInputComponent } from './components/dialogs-input/dialogs-input.component'
 import { DialogsSeparatorComponent } from './components/dialogs-separator/dialogs-separator.component'
-import { NgScrollbarModule } from 'ngx-scrollbar'
 import { MessageService } from './services/message.service'
 import { FormsModule, ReactiveFormsModule } from '@angular/forms'
 import { DialogsScrollComponent } from './components/dialogs-scroll/dialogs-scroll.component'
@@ -23,7 +22,6 @@ import { ScrollService } from './services/scroll.service'
 import { WsModule } from 'src/app/ws/ws.module'
 import { DialogsDetailNotSelectedComponent } from './components/dialogs-detail-not-selected/dialogs-detail-not-selected.component'
 import { ScrollingModule } from '@angular/cdk/scrolling'
-import { InfiniteScrollModule } from 'ngx-infinite-scroll'
 import { DialogsInfoComponent } from './components/dialogs-info/dialogs-info.component'
 import { DialogsAvatarComponent } from './components/dialogs-avatar/dialogs-avatar.component'
 
@@ -44,18 +42,15 @@ import { DialogsAvatarComponent } from './components/dialogs-avatar/dialogs-avat
         DialogsAvatarComponent,
     ],
     imports: [
-        InfiniteScrollModule,
         MaterialModule,
         CommonModule,
         RouterModule.forChild(routes),
         AuthModule,
         GlobalComponentsModule,
-        NgScrollbarModule,
         ReactiveFormsModule,
         FormsModule,
         WsModule,
         ScrollingModule,
-        InfiniteScrollModule,
     ],
     providers: [MainSectionHttpService, MessageService, ScrollService],
 })

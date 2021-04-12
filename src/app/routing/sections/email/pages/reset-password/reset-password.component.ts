@@ -97,13 +97,15 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
                 })
             )
 
-            this.subsReq = req$.pipe(
-                switchMap(() => from(this.router.navigate([this.passResetedLink]))),
-                catchError(() => {
-                    this.loading = false
-                    return of()
-                })
-            ).subscribe()
+            this.subsReq = req$
+                .pipe(
+                    switchMap(() => from(this.router.navigate([this.passResetedLink]))),
+                    catchError(() => {
+                        this.loading = false
+                        return of()
+                    })
+                )
+                .subscribe()
         }
     }
 

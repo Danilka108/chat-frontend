@@ -63,9 +63,6 @@ export const selectDialogConnectionStatus = createSelector(
     }
 )
 
-export const selectReconnectionLoading = createSelector(
-    selectMain,
-    (state) => {
-        return state.reconnectionLoading
-    }
-)
+export const selectReconnectionLoading = createSelector(selectMain, (state) => {
+    return state.reconnectionLoading
+})

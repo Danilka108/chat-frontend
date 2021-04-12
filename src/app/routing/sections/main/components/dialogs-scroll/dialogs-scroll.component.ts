@@ -94,7 +94,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
             .pipe(
                 tap((type) => {
                     if (type === NEW_MESSAGE_END) {
-                        this.isDisableEvents = false    
+                        this.isDisableEvents = false
                         return
                     }
 
@@ -116,7 +116,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
                     viewport.scrollTo({
                         top: viewport.scrollHeight - viewport.clientHeight,
-                        behavior: 'smooth'
+                        behavior: 'smooth',
                     })
                 })
             )
@@ -127,7 +127,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                 select(selectActiveReceiverID),
                 switchMap(() => this.height$),
                 tap((height) => {
-                    if (!this.isTopUpdatingContent && !this.isBottomUpdatingContent || this.isDisableEvents) {
+                    if ((!this.isTopUpdatingContent && !this.isBottomUpdatingContent) || this.isDisableEvents) {
                         this.topReachedDistance =
                             (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR
                         this.bottomReachedDistance =
@@ -168,9 +168,9 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
                     if (
                         this.bottomReachedDistance !== null &&
-                        this.bottomReachedDistance < 
-                            (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR))
-                     {
+                        this.bottomReachedDistance <
+                            (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
+                    ) {
                         this.bottomReachedDistance =
                             (viewport.scrollHeight - viewport.clientHeight) * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
                     }
@@ -181,29 +181,41 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
             )
             .subscribe()
 
-        this.sub = this.scrollService.getDiscardUpdatingContent().pipe(
-            tap(() => {
-                this.isTopUpdatingContent = false
-                this.isBottomUpdatingContent = false
-            })
-        ).subscribe()
+        this.sub = this.scrollService
+            .getDiscardUpdatingContent()
+            .pipe(
+                tap(() => {
+                    this.isTopUpdatingContent = false
+                    this.isBottomUpdatingContent = false
+                })
+            )
+            .subscribe()
 
-        this.sub = this.scrollDispatcher.scrolled().pipe(
-            filter((scrollable) => !scrollable),
-            tap(() => this.ngZone.run(() => {
-                const topAnchor = this.scrollService.getTopAnchor()
+        this.sub = this.scrollDispatcher
+            .scrolled()
+            .pipe(
+                filter((scrollable) => !scrollable),
+                tap(() =>
+                    this.ngZone.run(() => {
+                        const topAnchor = this.scrollService.getTopAnchor()
 
-                if (topAnchor && !this.ignoreScroll) {
-                    this.topAnchorScroll.next(viewport.scrollTop - (topAnchor.nativeElement.getBoundingClientRect().y + pageYOffset))
-                }
+                        if (topAnchor && !this.ignoreScroll) {
+                            this.topAnchorScroll.next(
+                                viewport.scrollTop - (topAnchor.nativeElement.getBoundingClientRect().y + pageYOffset)
+                            )
+                        }
 
-                const bottomAnchor = this.scrollService.getBottomAnchor()
-                
-                if (bottomAnchor && !this.ignoreScroll) {
-                    this.bottomAnchorScroll.next(bottomAnchor.nativeElement.getBoundingClientRect().y + pageYOffset - viewport.scrollTop)
-                }
-            })),
-        ).subscribe()
+                        const bottomAnchor = this.scrollService.getBottomAnchor()
+
+                        if (bottomAnchor && !this.ignoreScroll) {
+                            this.bottomAnchorScroll.next(
+                                bottomAnchor.nativeElement.getBoundingClientRect().y + pageYOffset - viewport.scrollTop
+                            )
+                        }
+                    })
+                )
+            )
+            .subscribe()
 
         this.sub = this.store
             .pipe(
@@ -211,58 +223,63 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                 switchMap((activeReceiverID) =>
                     combineLatest([of(activeReceiverID), this.scrollDispatcher.scrolled(200)])
                 ),
-                switchMap(([activeReceiverID, scrollable]) => forkJoin({
-                    activeReceiverID: of(activeReceiverID),
-                    scrollable: of(scrollable),
-                    reconnectionLoading: this.store.pipe(select(selectReconnectionLoading)).pipe(first())
-                })),
+                switchMap(([activeReceiverID, scrollable]) =>
+                    forkJoin({
+                        activeReceiverID: of(activeReceiverID),
+                        scrollable: of(scrollable),
+                        reconnectionLoading: this.store.pipe(select(selectReconnectionLoading)).pipe(first()),
+                    })
+                ),
                 debounceTime(200),
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
                 filter(({ scrollable }) => !scrollable),
-                tap(({ activeReceiverID, reconnectionLoading }) => this.ngZone.run(() => {
-                    if (activeReceiverID === null) return
+                tap(({ activeReceiverID, reconnectionLoading }) =>
+                    this.ngZone.run(() => {
+                        if (activeReceiverID === null) return
 
-                    if (!this.ignoreScroll) {
-                        this.scrollService.emitScrolled()
-                    }
+                        if (!this.ignoreScroll) {
+                            this.scrollService.emitScrolled()
+                        }
 
-                    if (
-                        this.topReachedDistance !== null &&
-                        viewport.scrollTop < this.topReachedDistance &&
-                        !this.isTopUpdatingContent && !this.isDisableEvents &&
-                        !reconnectionLoading
-                    ) {
-                        this.isTopUpdatingContent = true
-                        this.isBottomUpdatingContent = false
+                        if (
+                            this.topReachedDistance !== null &&
+                            viewport.scrollTop < this.topReachedDistance &&
+                            !this.isTopUpdatingContent &&
+                            !this.isDisableEvents &&
+                            !reconnectionLoading
+                        ) {
+                            this.isTopUpdatingContent = true
+                            this.isBottomUpdatingContent = false
 
-                        this.scrollService.emitSideReached(SIDE_REACHED_TOP)
-                    }
+                            this.scrollService.emitSideReached(SIDE_REACHED_TOP)
+                        }
 
-                    if (
-                        this.bottomReachedDistance !== null &&
-                        viewport.scrollTop > this.bottomReachedDistance &&
-                        !this.isBottomUpdatingContent && !this.isDisableEvents &&
-                        !reconnectionLoading
-                    ) {
-                        this.isBottomUpdatingContent = true
-                        this.isTopUpdatingContent = false
+                        if (
+                            this.bottomReachedDistance !== null &&
+                            viewport.scrollTop > this.bottomReachedDistance &&
+                            !this.isBottomUpdatingContent &&
+                            !this.isDisableEvents &&
+                            !reconnectionLoading
+                        ) {
+                            this.isBottomUpdatingContent = true
+                            this.isTopUpdatingContent = false
 
-                        this.scrollService.emitSideReached(SIDE_REACED_BOTTOM)
-                    }
+                            this.scrollService.emitSideReached(SIDE_REACED_BOTTOM)
+                        }
 
-                    const allowScrollBottom = this.scrollService.getAllowScrollBottom()
+                        const allowScrollBottom = this.scrollService.getAllowScrollBottom()
 
-                    if (
-                        this.isDisableUserScroll ||
-                        (allowScrollBottom === false &&
-                            viewport.scrollTop >=
-                                viewport.scrollHeight - viewport.clientHeight * 2)
-                    ) {
-                        this.scrollService.emitIsViewedScrollBottom(false)
-                    } else {
-                        this.scrollService.emitIsViewedScrollBottom(true)
-                    }
-                }))
+                        if (
+                            this.isDisableUserScroll ||
+                            (allowScrollBottom === false &&
+                                viewport.scrollTop >= viewport.scrollHeight - viewport.clientHeight * 2)
+                        ) {
+                            this.scrollService.emitIsViewedScrollBottom(false)
+                        } else {
+                            this.scrollService.emitIsViewedScrollBottom(true)
+                        }
+                    })
+                )
             )
             .subscribe()
     }
@@ -284,10 +301,12 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
             if (this.isTopUpdatingContent && !this.isDisableEvents) {
                 const topAnchorScroll = this.topAnchorScroll.getValue()
                 const topAnchor = this.scrollService.getTopAnchor()
-    
+
                 if (topAnchor !== null) {
                     viewport.scrollTop =
-                        topAnchor.nativeElement.getBoundingClientRect().y + pageYOffset + (topAnchorScroll === null ? 0 : topAnchorScroll)
+                        topAnchor.nativeElement.getBoundingClientRect().y +
+                        pageYOffset +
+                        (topAnchorScroll === null ? 0 : topAnchorScroll)
                 }
             }
 
@@ -297,7 +316,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
                 if (bottomAnchor !== null) {
                     viewport.scrollTop =
-                        bottomAnchor.nativeElement.getBoundingClientRect().y + pageYOffset -
+                        bottomAnchor.nativeElement.getBoundingClientRect().y +
+                        pageYOffset -
                         (bottomAnchorScroll === null ? 0 : bottomAnchorScroll)
                 }
             }

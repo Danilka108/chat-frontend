@@ -9,6 +9,7 @@
     background-color: map-get($custom-colors, main);
     border-bottom: 1px solid map-get($custom-colors, main-gray);
     height: 3.5rem;
+    padding: 0.7rem 0;
     overflow: hidden;
 
     &:before {
@@ -30,7 +31,6 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    padding: 0.7rem 0;
     height: 100%;
     top: 0;
     left: 0;

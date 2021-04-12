@@ -81,13 +81,15 @@ export class SignUpComponent implements OnDestroy {
                 })
             )
 
-            this.subs = req$.pipe(
-                switchMap(() => from(this.router.navigateByUrl(this.completeLink))),
-                catchError(() => {
-                    this.loading = false
-                    return of()
-                })
-            ).subscribe()
+            this.subs = req$
+                .pipe(
+                    switchMap(() => from(this.router.navigateByUrl(this.completeLink))),
+                    catchError(() => {
+                        this.loading = false
+                        return of()
+                    })
+                )
+                .subscribe()
         }
     }
 

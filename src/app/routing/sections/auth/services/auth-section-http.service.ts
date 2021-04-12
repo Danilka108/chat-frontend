@@ -41,7 +41,7 @@ export class AuthSectionHttpService {
             if (error?.error?.message) {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 throw new Error(error.error.message)
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             } else if (error?.status == 0) {
                 throw new Error('Server error. Try again')
             } else {
@@ -101,7 +101,8 @@ export class AuthSectionHttpService {
 
     resetPassword(email: string): Observable<void> {
         return this.httpClient
-            .post(`${environment.apiUrl}/user/reset-password`, { email }).pipe(publish(), refCount())
+            .post(`${environment.apiUrl}/user/reset-password`, { email })
+            .pipe(publish(), refCount())
             .pipe(map(() => undefined))
     }
 }

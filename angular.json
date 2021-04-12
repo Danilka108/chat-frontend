@@ -36,9 +36,7 @@
             ],
             "scripts": [],
             "allowedCommonJsDependencies": [
-              "socket.io-client",
-              "deepcopy",
-              "fast-deep-equal"
+              "socket.io-client"
             ]
           },
           "configurations": {

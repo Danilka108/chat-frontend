@@ -18,12 +18,12 @@ export const markDialogMessagesAsRead = createAction(
 
 export const markDialogMessageAsRead = createAction(
     '[Main] Mark Dialog Message As Read',
-    props<{ receiverID: number, messageID: number }>()
+    props<{ receiverID: number; messageID: number }>()
 )
 
 export const updateDialogNewMessagesCount = createAction(
     '[Main] Update Dialog New Messages Count',
-    props<{ receiverID: number, newMessagesCount: number }>()
+    props<{ receiverID: number; newMessagesCount: number }>()
 )
 
 export const decreaseDialogNewMessagesCount = createAction(
@@ -38,17 +38,17 @@ export const increaseDialogNewMessagesCount = createAction(
 
 export const updateDialogLastMessage = createAction(
     '[Main] Update Dialog Last Message',
-    props<{ receiverID: number, lastMessage: string, createdAt: string }>()
+    props<{ receiverID: number; lastMessage: string; createdAt: string }>()
 )
 
 export const addDialogMessages = createAction(
     '[Main] Add Dialog Messages',
-    props<{ receiverID: number, messages: IMessage[] }>()
+    props<{ receiverID: number; messages: IMessage[] }>()
 )
 
 export const updateDialogConnectionStatus = createAction(
     '[Main] Update Dialog Connection Status',
-    props<{ receiverID: number, connectionStatus: 'online' | 'offline' }>()
+    props<{ receiverID: number; connectionStatus: 'online' | 'offline' }>()
 )
 
 export const updateReconnectionLoading = createAction(
@@ -58,5 +58,5 @@ export const updateReconnectionLoading = createAction(
 
 export const updateDialogMessages = createAction(
     '[Main] Update Dialog Messages',
-    props<{ receiverID: number, messages: IMessage[] | null }>()
+    props<{ receiverID: number; messages: IMessage[] | null }>()
 )

@@ -37,15 +37,17 @@ export class ResetPasswordComponent implements OnDestroy {
                 catchError(() => of(true))
             )
 
-            this.subs = req$.pipe(
-                switchMap(() => {
-                    return from(this.router.navigateByUrl(authSectionResetPasswordCheckEmailPath.full))
-                }),
-                catchError(() => {
-                    this.loading = false
-                    return of()
-                })
-            ).subscribe()
+            this.subs = req$
+                .pipe(
+                    switchMap(() => {
+                        return from(this.router.navigateByUrl(authSectionResetPasswordCheckEmailPath.full))
+                    }),
+                    catchError(() => {
+                        this.loading = false
+                        return of()
+                    })
+                )
+                .subscribe()
         }
     }
 

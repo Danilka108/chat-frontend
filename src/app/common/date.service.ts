@@ -1,55 +1,82 @@
 import { Injectable } from '@angular/core'
-import * as moment from 'moment'
+
+const monthNames = [
+    'January',
+    'February',
+    'March',
+    'April',
+    'May',
+    'June',
+    'July',
+    'August',
+    'September',
+    'October',
+    'November',
+    'December',
+]
 
 @Injectable({
     providedIn: 'root',
 })
 export class DateService {
     parseDate(d: string): string {
-        const now = moment()
-        const date = moment(d)
+        const now = Date.now()
+        const date = new Date(d)
 
-        const diff = now.diff(date, 'days')
+        const diff = Math.abs(now - date.getTime()) / (1000 * 60 * 60 * 24)
+
+        const hours = ('0' + date.getHours().toString()).slice(-2)
+        const minutes = ('0' + date.getMinutes().toString()).slice(-2)
+        const day = ('0' + date.getDate().toString()).slice(-2)
+        const month = ('0' + date.getMonth().toString()).slice(-2)
+        const year = date.getFullYear().toString().slice(-2)
 
         if (diff < 1) {
-            return date.format('HH:mm')
+            return `${hours}:${minutes}`
         } else if (diff <= 30) {
-            return date.format('DD.MM')
+            return `${day}.${month}`
         } else {
-            return date.format('DD.MM.YY')
+            return `${day}.${month}.${year}`
         }
     }
 
     parseDateWords(d: string): string {
-        const now = moment()
-        const date = moment(d)
+        const now = Date.now()
+        const date = new Date(d)
 
-        const diff = now.diff(date, 'days')
+        const diff = Math.abs(now - date.getTime()) / (1000 * 60 * 60 * 24)
+
+        const day = ('0' + date.getDate().toString()).slice(-2)
+        const month = monthNames[date.getMonth()]
 
         if (diff <= 30) {
-            return date.format('MMMM DD')
+            return `${month} ${day}`
         } else {
-            return date.format('MMMM DD, YYYY')
+            return `${month} ${day}, ${date.getFullYear()}`
         }
     }
 
     parseDateOnlyTime(d: string): string {
-        const date = moment(d)
-        return date.format('HH:mm')
+        const date = new Date(d)
+
+        const hours = ('0' + date.getHours().toString()).slice(-2)
+        const minutes = ('0' + date.getMinutes().toString()).slice(-2)
+
+        return `${hours}:${minutes}`
     }
 
     compareDates(a: string, b: string): -1 | 0 | 1 {
-        const dateA = moment(a).valueOf()
-        const dateB = moment(b).valueOf()
+        const dA = new Date(a).getTime()
+        const dB = new Date(b).getTime()
 
-        if (dateA > dateB) return -1
-        else if (dateA === dateB) return 0
+        if (dA > dB) return -1
+        else if (dA === dB) return 0
         else return 1
     }
 
-    compareDatesASC(dateA: string, dateB: string): -1 | 0 | 1 {
-        const dA = moment(dateA).valueOf()
-        const dB = moment(dateB).valueOf()
+    compareDatesASC(a: string, b: string): -1 | 0 | 1 {
+        const dA = new Date(a).getTime()
+        const dB = new Date(b).getTime()
 
         if (dA > dB) return 1
         else if (dA === dB) return 0
@@ -57,13 +84,13 @@ export class DateService {
     }
 
     isUnequalDays(dateA: string, dateB: string): boolean {
-        const dA = moment(dateA).day()
-        const dB = moment(dateB).day()
+        const dA = Math.ceil(new Date(dateA).getTime() / (1000 * 60 * 60 * 24))
+        const dB = Math.ceil(new Date(dateB).getTime() / (1000 * 60 * 60 * 24))
 
         return dA !== dB
     }
 
     now(): string {
-        return moment.utc().format()
+        return new Date().toISOString().slice(0, -5) + 'Z'
     }
 }

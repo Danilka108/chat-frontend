@@ -70,16 +70,18 @@ export class SignInComponent implements OnDestroy {
                 })
             )
 
-            this.subs = req$.pipe(
-                switchMap(({ data: { userID, accessToken, refreshToken } }) => {
-                    this.sessionService.set(userID, accessToken, refreshToken)
-                    return this.router.navigateByUrl('')
-                }),
-                catchError(() => {
-                    this.loading = false
-                    return of()
-                })
-            ).subscribe()
+            this.subs = req$
+                .pipe(
+                    switchMap(({ data: { userID, accessToken, refreshToken } }) => {
+                        this.sessionService.set(userID, accessToken, refreshToken)
+                        return this.router.navigateByUrl('')
+                    }),
+                    catchError(() => {
+                        this.loading = false
+                        return of()
+                    })
+                )
+                .subscribe()
         }
     }
 

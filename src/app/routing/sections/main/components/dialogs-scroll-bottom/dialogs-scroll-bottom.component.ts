@@ -23,10 +23,7 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
     click = new Subject<void>()
     click$ = this.click.asObservable()
 
-    constructor(
-        private readonly scrollService: ScrollService,
-        private readonly store: Store<AppState>,
-    ) {}
+    constructor(private readonly scrollService: ScrollService, private readonly store: Store<AppState>) {}
 
     ngAfterViewInit(): void {
         this.sub = this.scrollService
@@ -41,17 +38,19 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
             )
             .subscribe()
 
-        this.sub = this.click$.pipe(
-            switchMap(() => this.store.pipe(select(selectReconnectionLoading), first())),
-            observeOn(asyncScheduler),
-            tap((reconnectionLoading) => {
-                if (!reconnectionLoading) {
-                    this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_CONTENT)
-                    this.isDisabled = true
-                    this.isViewed = false
-                }
-            })
-        ).subscribe()
+        this.sub = this.click$
+            .pipe(
+                switchMap(() => this.store.pipe(select(selectReconnectionLoading), first())),
+                observeOn(asyncScheduler),
+                tap((reconnectionLoading) => {
+                    if (!reconnectionLoading) {
+                        this.scrollService.emitScrollBottom(SCROLL_BOTTOM_UPDATE_CONTENT)
+                        this.isDisabled = true
+                        this.isViewed = false
+                    }
+                })
+            )
+            .subscribe()
     }
 
     onClick(): void {
@@ -62,4 +61,3 @@ export class DialogsScrollBottomComponent implements AfterViewInit, OnDestroy {
         this.subscription.unsubscribe()
     }
 }
-

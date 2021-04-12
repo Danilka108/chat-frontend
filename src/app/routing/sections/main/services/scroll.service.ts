@@ -36,10 +36,12 @@ export class ScrollService {
 
     clearPrevDialog(): void {
         if (this.clearPrevDialogReceiverID !== null) {
-            this.store.dispatch(updateDialogMessages({
-                receiverID: this.clearPrevDialogReceiverID,
-                messages: null
-            }))
+            this.store.dispatch(
+                updateDialogMessages({
+                    receiverID: this.clearPrevDialogReceiverID,
+                    messages: null,
+                })
+            )
         }
 
         this.clearPrevDialogReceiverID = null
@@ -109,9 +111,7 @@ export class ScrollService {
         return this.sideReached.asObservable()
     }
 
-    emitScrollBottom(
-        step: typeof SCROLL_BOTTOM_UPDATE_SCROLL | typeof SCROLL_BOTTOM_UPDATE_CONTENT
-    ): void {
+    emitScrollBottom(step: typeof SCROLL_BOTTOM_UPDATE_SCROLL | typeof SCROLL_BOTTOM_UPDATE_CONTENT): void {
         this.scrollBottom.next(step)
     }
 

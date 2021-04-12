@@ -83,7 +83,7 @@ export class MainSectionHttpService {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))
 
                     return result === null ? [] : result
-                }),
+                })
             )
     }
 
@@ -139,32 +139,40 @@ export class MainSectionHttpService {
     getNotReadedMessagesCount(receiverID: number): Observable<number | null> {
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
 
-        return this.authService.authRequest((accessToken) => {
-            return this.httpClient.get(`${environment.apiUrl}/message/${receiverID}/not-readed`, {
-                headers: {
-                    authorization: `Bearer ${accessToken}`
-                }
-            }).pipe(map((result) => (result as IGetNotReadedMessagesCount).data))
-        }).pipe(
-            tap(() => {
-                this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+        return this.authService
+            .authRequest((accessToken) => {
+                return this.httpClient
+                    .get(`${environment.apiUrl}/message/${receiverID}/not-readed`, {
+                        headers: {
+                            authorization: `Bearer ${accessToken}`,
+                        },
+                    })
+                    .pipe(map((result) => (result as IGetNotReadedMessagesCount).data))
             })
-        )
+            .pipe(
+                tap(() => {
+                    this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+                })
+            )
     }
 
     getUserName(userID: number): Observable<string | null> {
         this.store.dispatch(updateRequestLoading({ requestLoading: true }))
 
-        return this.authService.authRequest((accessToken) => {
-            return this.httpClient.get(`${environment.apiUrl}/user/${userID}/name`, {
-                headers: {
-                    authorization: `Bearer ${accessToken}`,
-                }
-            }).pipe(map((result) => (result as IGetUserNameResponse).data))
-        }).pipe(
-            tap(() => {
-                this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+        return this.authService
+            .authRequest((accessToken) => {
+                return this.httpClient
+                    .get(`${environment.apiUrl}/user/${userID}/name`, {
+                        headers: {
+                            authorization: `Bearer ${accessToken}`,
+                        },
+                    })
+                    .pipe(map((result) => (result as IGetUserNameResponse).data))
             })
-        )
+            .pipe(
+                tap(() => {
+                    this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+                })
+            )
     }
 }

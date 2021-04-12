@@ -72,7 +72,7 @@ export const mainReducer = createReducer(
                 if (message.receiverID === receiverID) {
                     newDialogMessages[i] = {
                         ...dialogMessages[i],
-                        isReaded: true
+                        isReaded: true,
                     }
                 }
             }
@@ -91,7 +91,7 @@ export const mainReducer = createReducer(
     on(markDialogMessageAsRead, (state, { receiverID, messageID }) => {
         const dialogsMessages = [...state.messages]
 
-        const dialogIndex = state.messages.findIndex((dialog) => dialog.receiverID === receiverID )
+        const dialogIndex = state.messages.findIndex((dialog) => dialog.receiverID === receiverID)
 
         if (dialogIndex > -1) {
             const dialogMessages = dialogsMessages[dialogIndex].messages
@@ -103,7 +103,7 @@ export const mainReducer = createReducer(
                     if (dialogMessageID === messageID) {
                         newDialogMessages[i] = {
                             ...newDialogMessages[i],
-                            isReaded: true
+                            isReaded: true,
                         }
                         break
                     }
@@ -111,13 +111,13 @@ export const mainReducer = createReducer(
 
                 dialogsMessages[dialogIndex] = {
                     ...dialogsMessages[dialogIndex],
-                    messages: newDialogMessages
+                    messages: newDialogMessages,
                 }
             }
 
             return {
                 ...state,
-                messages: dialogsMessages 
+                messages: dialogsMessages,
             }
         }
 
@@ -168,7 +168,8 @@ export const mainReducer = createReducer(
         const dialogIndex = state.dialogs.findIndex((dialog) => dialog.receiverID === receiverID)
 
         if (dialogIndex > -1) {
-            const newMessagesCount = dialogs[dialogIndex].newMessagesCount - 1 < 0 ? 0 : dialogs[dialogIndex].newMessagesCount - 1
+            const newMessagesCount =
+                dialogs[dialogIndex].newMessagesCount - 1 < 0 ? 0 : dialogs[dialogIndex].newMessagesCount - 1
 
             dialogs[dialogIndex] = {
                 ...dialogs[dialogIndex],
@@ -253,7 +254,7 @@ export const mainReducer = createReducer(
 
         return {
             ...state,
-            dialogs
+            dialogs,
         }
     }),
     on(updateReconnectionLoading, (state, { reconnectionLoading }) => {

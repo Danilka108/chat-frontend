@@ -1,4 +1,5 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { RippleAnimationConfig } from '@angular/material/core'
 
 @Component({
     selector: 'app-main-dialogs-item',
@@ -17,6 +18,11 @@ export class DialogsItemComponent {
     @Input() notReadedMessagesCount!: number
     @Input() receiverID!: number
     @Input() connectionStatus!: 'offline' | 'online'
+
+    RippleConfig: RippleAnimationConfig = {
+        enterDuration: 700,
+        exitDuration: 1000,
+    }
 
     onClick(): void {
         this.click.emit()

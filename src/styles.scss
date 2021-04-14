@@ -10,13 +10,8 @@
 }
 
 body {
-    overflow-x: hidden;
-    overflow-y: scroll;
     margin: 0;
-
-    &::-webkit-scrollbar {
-        width: 1.3vmin !important;
-    }
+    overflow: hidden;
 }
 
 .scrollbar {

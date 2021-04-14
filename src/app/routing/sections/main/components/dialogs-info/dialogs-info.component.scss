@@ -3,14 +3,14 @@
 :host {
     display: block;
     width: 100%;
-    position: sticky;
-    top: 0;
+    position: relative;
     z-index: 2000;
     background-color: map-get($custom-colors, main);
     border-bottom: 1px solid map-get($custom-colors, main-gray);
     height: 3.5rem;
     padding: 0.7rem 0;
     overflow: hidden;
+    flex-shrink: 0;
 
     &:before {
         display: block;

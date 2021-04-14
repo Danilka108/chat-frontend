@@ -3,8 +3,6 @@
 :host {
     display: block;
     width: 23%;
-    position: sticky;
-    top: 0;
     height: 100vh;
     background-color: map-get($custom-colors, main);
     z-index: 6000;

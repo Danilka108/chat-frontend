@@ -1,4 +1,4 @@
-<button matRipple matRippleColor="rgba(0, 0, 0, 0.08)" [class.active]="active" class="button" (click)="onClick()">
+<button matRipple [matRippleAnimation]="RippleConfig" matRippleColor="rgba(0, 0, 0, 0.08)" [class.active]="active" class="button" (click)="onClick()">
     <div class="photo">
         <app-main-dialogs-avatar [name]="receiver" [size]="1.5" class="avatar"></app-main-dialogs-avatar>
         <!-- <div class="status" *ngIf="connectionStatus === 'online'"></div> -->

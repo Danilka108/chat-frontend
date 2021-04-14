@@ -2,11 +2,11 @@
 
 :host {
     position: absolute;
-    top: 0;
+    bottom: 0;
     right: 0;
     padding: 1rem;
-    transform: translateY(-100%);
     z-index: 6000;
+    margin-right: 0.5vmax;
 }
 
 button {

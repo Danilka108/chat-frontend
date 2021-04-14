@@ -1,5 +1,14 @@
 import { ScrollDispatcher } from '@angular/cdk/scrolling'
-import { AfterViewChecked, Component, HostListener, NgZone, OnDestroy, OnInit } from '@angular/core'
+import {
+    AfterViewChecked,
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostListener,
+    NgZone,
+    OnDestroy,
+    ViewChild,
+} from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { asyncScheduler, BehaviorSubject, combineLatest, forkJoin, of, Subscription } from 'rxjs'
 import { debounceTime, filter, first, observeOn, switchMap, tap } from 'rxjs/operators'
@@ -21,7 +30,9 @@ const SCROLLBAR_DISTANCE_DELTA = 10
     templateUrl: './dialogs-scroll.component.html',
     styleUrls: ['./dialogs-scroll.component.scss'],
 })
-export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestroy {
+export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, OnDestroy {
+    @ViewChild('viewport') viewportRef!: ElementRef<HTMLElement>
+
     height = new BehaviorSubject(0)
     height$ = this.height.asObservable()
 
@@ -69,8 +80,8 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
         }
     }
 
-    ngOnInit(): void {
-        const viewport = document.documentElement
+    ngAfterViewInit(): void {
+        const viewport = this.viewportRef.nativeElement
 
         this.sub = this.store
             .pipe(
@@ -194,22 +205,21 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
         this.sub = this.scrollDispatcher
             .scrolled()
             .pipe(
-                filter((scrollable) => !scrollable),
+                // filter((scrollable) => !!scrollable),
                 tap(() =>
                     this.ngZone.run(() => {
                         const topAnchor = this.scrollService.getTopAnchor()
 
                         if (topAnchor && !this.ignoreScroll) {
-                            this.topAnchorScroll.next(
-                                viewport.scrollTop - (topAnchor.nativeElement.getBoundingClientRect().y + pageYOffset)
-                            )
+                            this.topAnchorScroll.next(viewport.scrollTop - topAnchor.nativeElement.offsetTop)
                         }
 
                         const bottomAnchor = this.scrollService.getBottomAnchor()
 
                         if (bottomAnchor && !this.ignoreScroll) {
                             this.bottomAnchorScroll.next(
-                                bottomAnchor.nativeElement.getBoundingClientRect().y + pageYOffset - viewport.scrollTop
+                                // bottomAnchor.nativeElement.getBoundingClientRect().y + pageYOffset - viewport.scrollTop
+                                bottomAnchor.nativeElement.offsetTop - viewport.scrollTop
                             )
                         }
                     })
@@ -232,7 +242,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
                 ),
                 debounceTime(200),
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                filter(({ scrollable }) => !scrollable),
+                // filter(({ scrollable }) => !!scrollable),
                 tap(({ activeReceiverID, reconnectionLoading }) =>
                     this.ngZone.run(() => {
                         if (activeReceiverID === null) return
@@ -285,7 +295,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
     }
 
     ngAfterViewChecked(): void {
-        const viewport = document.documentElement
+        const viewport = this.viewportRef.nativeElement
 
         if (
             this.isDisableUserScroll &&
@@ -304,9 +314,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
                 if (topAnchor !== null) {
                     viewport.scrollTop =
-                        topAnchor.nativeElement.getBoundingClientRect().y +
-                        pageYOffset +
-                        (topAnchorScroll === null ? 0 : topAnchorScroll)
+                        topAnchor.nativeElement.offsetTop + (topAnchorScroll === null ? 0 : topAnchorScroll)
                 }
             }
 
@@ -316,9 +324,7 @@ export class DialogsScrollComponent implements OnInit, AfterViewChecked, OnDestr
 
                 if (bottomAnchor !== null) {
                     viewport.scrollTop =
-                        bottomAnchor.nativeElement.getBoundingClientRect().y +
-                        pageYOffset -
-                        (bottomAnchorScroll === null ? 0 : bottomAnchorScroll)
+                        bottomAnchor.nativeElement.offsetTop - (bottomAnchorScroll === null ? 0 : bottomAnchorScroll)
                 }
             }
 

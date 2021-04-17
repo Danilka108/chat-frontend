@@ -11,7 +11,7 @@ import { AppState } from 'src/app/store/state/app.state'
 import { selectActiveReceiverID, selectDialogs } from 'src/app/store/selectors/main.selectors'
 import { addDialogs } from 'src/app/store/actions/main.actions'
 
-const SMALL_SIZE_MAX_WIDTH = 800
+export const SMALL_SIZE_MAX_WIDTH = 800
 
 @Component({
     selector: 'app-main-dialogs-group',
@@ -24,8 +24,6 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
     subscription = new Subscription()
 
     @HostBinding('class.small') isSmallSize = false
-    @HostBinding('class.scrollbar') isScrollable = true
-    smallSizeMax = SMALL_SIZE_MAX_WIDTH
 
     constructor(
         private readonly store: Store<AppState>,
@@ -74,7 +72,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
 
     @HostListener('window:resize')
     onResize(): void {
-        if (window.innerWidth <= this.smallSizeMax) {
+        if (window.innerWidth <= SMALL_SIZE_MAX_WIDTH) {
             this.isSmallSize = true
         } else {
             this.isSmallSize = false

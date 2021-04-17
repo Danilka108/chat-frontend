@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { Observable } from 'rxjs'
-import { map, tap } from 'rxjs/operators'
+import { first, map, share, tap } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/auth.service'
 import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { AppState } from 'src/app/store/state/app.state'
@@ -29,6 +29,10 @@ interface IGetUserNameResponse extends IResponse {
 
 interface IGetNotReadedMessagesCount extends IResponse {
     data: number
+}
+
+interface IGetIsExistUser extends IResponse {
+    data: boolean
 }
 
 @Injectable()
@@ -76,7 +80,12 @@ export class MainSectionHttpService {
                         },
                         params,
                     })
-                    .pipe(map((result) => (result as IGetMessagesResponse).data))
+                    .pipe(
+                        share(),
+                        map((result) => {
+                            return (result as IGetMessagesResponse).data
+                        })
+                    )
             )
             .pipe(
                 map((result) => {
@@ -168,6 +177,29 @@ export class MainSectionHttpService {
                         },
                     })
                     .pipe(map((result) => (result as IGetUserNameResponse).data))
+            })
+            .pipe(
+                tap(() => {
+                    this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+                })
+            )
+    }
+
+    getIsExistUser(userID: number): Observable<boolean | null> {
+        this.store.dispatch(updateRequestLoading({ requestLoading: true }))
+
+        const params = new HttpParams().set('user-id', `${userID}`)
+
+        return this.authService
+            .authRequest((accessToken) => {
+                return this.httpClient
+                    .get(`${environment.apiUrl}/user/is-exist`, {
+                        params,
+                        headers: {
+                            authorization: `Bearer ${accessToken}`,
+                        },
+                    })
+                    .pipe(map((result) => (result as IGetIsExistUser).data))
             })
             .pipe(
                 tap(() => {

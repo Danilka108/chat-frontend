@@ -64,8 +64,8 @@ export const mainReducer = createReducer(
         const dialogsMessages = [...state.messages]
         const dialogIndex = state.messages.findIndex((dialog) => dialog.receiverID === receiverID)
 
-        const dialogMessages = dialogsMessages[dialogIndex].messages
-        if (dialogIndex > -1 && dialogMessages !== null) {
+        const dialogMessages = dialogsMessages[dialogIndex]?.messages
+        if (dialogIndex > -1 && dialogMessages) {
             const newDialogMessages = dialogMessages.slice()
 
             for (const [i, message] of dialogMessages.entries()) {

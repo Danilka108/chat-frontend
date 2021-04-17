@@ -1,12 +1,10 @@
-<div class="wrapper">
-    <app-main-dialogs-item *ngFor="let dialog of (dialogs$ | async); trackBy: itemIdentity"
-        [message]="dialog.lastMessage"
-        [date]="parseDate(dialog.createdAt)"
-        [active]="(activeReceiverID$ | async) === dialog.receiverID"
-        [receiver]="dialog.receiverName"
-        (click)="onClick(dialog.receiverID)"
-        [isSmallSize]="isSmallSize"
-        [notReadedMessagesCount]="dialog.newMessagesCount"
-        [connectionStatus]="dialog.connectionStatus"
-    ></app-main-dialogs-item>
-</div>
+<app-main-dialogs-item *ngFor="let dialog of (dialogs$ | async); trackBy: itemIdentity"
+    [message]="dialog.lastMessage"
+    [date]="parseDate(dialog.createdAt)"
+    [active]="(activeReceiverID$ | async) === dialog.receiverID"
+    [receiver]="dialog.receiverName"
+    (click)="onClick(dialog.receiverID)"
+    [isSmallSize]="isSmallSize"
+    [notReadedMessagesCount]="dialog.newMessagesCount"
+    [connectionStatus]="dialog.connectionStatus"
+></app-main-dialogs-item>

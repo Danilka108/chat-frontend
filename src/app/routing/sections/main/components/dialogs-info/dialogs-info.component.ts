@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
-import { Observable, of, Subscription } from 'rxjs'
-import { map, startWith, switchMap } from 'rxjs/operators'
+import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs'
+import { first, map, startWith, switchMap, tap } from 'rxjs/operators'
 import {
     selectActiveReceiverID,
     selectDialog,
@@ -9,6 +9,7 @@ import {
     selectReconnectionLoading,
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
+import { MainSectionHttpService } from '../../services/main-section-http.service'
 
 @Component({
     selector: 'app-main-dialogs-info',
@@ -18,8 +19,9 @@ import { AppState } from 'src/app/store/state/app.state'
 export class DialogsInfoComponent implements OnInit, OnDestroy {
     @Input() isOnlyLoading = false
 
-    name$!: Observable<string>
-    connectionStatus$: Observable<'online' | 'offline'> = of('offline')
+    name = new BehaviorSubject<string>('')
+    name$ = this.name.asObservable()
+    connectionStatus$: Observable<'online' | 'offline' | null> = of(null)
 
     isLoading$!: Observable<boolean>
 
@@ -29,31 +31,47 @@ export class DialogsInfoComponent implements OnInit, OnDestroy {
         this.subscription.add(sub)
     }
 
-    constructor(private readonly store: Store<AppState>) {}
+    constructor(private readonly store: Store<AppState>, private readonly httpService: MainSectionHttpService) {}
 
     ngOnInit(): void {
         this.isLoading$ = this.store.pipe(select(selectReconnectionLoading), startWith(false))
 
-        this.name$ = this.store.pipe(
-            select(selectActiveReceiverID),
-            switchMap((receiverID) =>
-                receiverID === null ? of(null) : this.store.pipe(select(selectDialog, { receiverID }))
-            ),
-            map((dialog) => {
-                if (dialog === null) return ''
-                return dialog.receiverName
-            })
-        )
+        this.sub = this.store
+            .pipe(
+                select(selectActiveReceiverID),
+                tap(() => {
+                    this.name.next('')
+                }),
+                switchMap((receiverID) =>
+                    forkJoin({
+                        receiverID: of(receiverID),
+                        dialog:
+                            receiverID === null
+                                ? of(null)
+                                : this.store.pipe(select(selectDialog, { receiverID }), first()),
+                    })
+                ),
+                switchMap(({ dialog, receiverID }) => {
+                    if (dialog === null && receiverID !== null) {
+                        return this.httpService.getUserName(receiverID)
+                    }
+
+                    return dialog === null ? of(null) : of(dialog.receiverName)
+                }),
+                map((userName) => {
+                    return userName === null ? '' : userName
+                }),
+                tap((userName) => {
+                    this.name.next(userName)
+                })
+            )
+            .subscribe()
 
         this.connectionStatus$ = this.store.pipe(
             select(selectActiveReceiverID),
             switchMap((receiverID) =>
                 receiverID === null ? of(null) : this.store.pipe(select(selectDialogConnectionStatus, { receiverID }))
-            ),
-            map((status) => {
-                if (status === 'online') return 'online'
-                else return 'offline'
-            })
+            )
         )
     }
 

@@ -99,7 +99,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
                         of(params),
                         this.store.pipe(
                             select(selectDialogs),
-                            skipWhile((dialogs) => dialogs === null || dialogs.length === 0),
+                            first(),
                             map((dialogs) => (dialogs === null ? [] : dialogs.map((dialog) => dialog.receiverID)))
                         ),
                     ])
@@ -107,20 +107,36 @@ export class DialogsComponent implements OnInit, OnDestroy {
                 switchMap((result) => {
                     const [params, dialogsID] = result
 
-                    if (!params || !dialogsID.length) {
-                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
-                        return from(this.router.navigateByUrl(mainSectionDialogsPath.full))
-                    }
+                    if (params === null) return of(null)
 
                     const id = Number(params['id'])
 
-                    if (isNaN(id) || !dialogsID.includes(id)) {
-                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
-                        return from(this.router.navigateByUrl(mainSectionDialogsPath.full))
-                    } else {
-                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: id }))
+                    if (isNaN(id)) return of(null)
+
+                    if (!dialogsID.includes(id)) {
+                        return forkJoin({
+                            id: of(id),
+                            isExistUser: this.httpService.getIsExistUser(id).pipe(first()),
+                        })
                     }
 
+                    return forkJoin({
+                        id: of(id),
+                        isExistUser: of(true),
+                    })
+                }),
+                switchMap((result) => {
+                    if (result === null) {
+                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
+                        return from(this.router.navigateByUrl(mainSectionDialogsPath.full))
+                    }
+
+                    if (!result.isExistUser) {
+                        this.store.dispatch(updateActiveReceiverID({ activeReceiverID: null }))
+                        return from(this.router.navigateByUrl(mainSectionDialogsPath.full))
+                    }
+
+                    this.store.dispatch(updateActiveReceiverID({ activeReceiverID: result.id }))
                     return of()
                 })
             )
@@ -164,7 +180,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
 
                     this.scrollService.emitNewMessage(NEW_MESSAGE_START)
 
-                    if (message.senderID === receiverID) {
+                    if (message.senderID === receiverID && message.senderID !== message.receiverID) {
                         this.store.dispatch(increaseDialogNewMessagesCount({ receiverID }))
                     }
                 })

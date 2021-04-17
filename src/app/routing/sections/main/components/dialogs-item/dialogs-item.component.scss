@@ -88,6 +88,7 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    transition: 0.25s;
 }
 
 .top {
@@ -105,6 +106,7 @@
 .time {
     color: map-get($custom-colors, dark-gray);
     line-height: 1;
+    transition: 0.25s;
 }
 
 .receiver,
@@ -119,6 +121,7 @@
 
 .receiver {
     margin-right: 0.5rem;
+    transition: 0.25s;
 }
 
 .last-message {
@@ -128,6 +131,7 @@
     margin: 0 !important;
     min-width: 0;
     height: 1.2rem;
+    transition: 0.25s;
 }
 
 .badge {
@@ -143,17 +147,3 @@
     color: map-get($custom-colors, main);
     z-index: 200;
 }
-
-// .status {
-//     position: absolute;
-//     right: 0;
-//     bottom: 0;
-//     width: 0.45rem;
-//     height: 0.45rem;
-//     transform: translate(-10%, -10%);
-//     background: map-get($custom-colors, online);
-//     border-radius: 50%;
-//     border: 0.18rem solid map-get($custom-colors, main);
-//     box-sizing: content-box;
-//     transition: 0.25s;
-// }

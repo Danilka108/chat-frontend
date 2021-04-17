@@ -96,6 +96,7 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                     this.topAnchorScroll.next(null)
                     this.bottomAnchorScroll.next(null)
                     this.scrollService.emitIsViewedScrollBottom(false)
+                    this.height.next(this.height.getValue())
                 })
             )
             .subscribe()
@@ -138,6 +139,7 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                 select(selectActiveReceiverID),
                 switchMap(() => this.height$),
                 tap((height) => {
+                    console.log('height change')
                     if ((!this.isTopUpdatingContent && !this.isBottomUpdatingContent) || this.isDisableEvents) {
                         this.topReachedDistance =
                             (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR

@@ -24,6 +24,7 @@ import { DialogsDetailNotSelectedComponent } from './components/dialogs-detail-n
 import { ScrollingModule } from '@angular/cdk/scrolling'
 import { DialogsInfoComponent } from './components/dialogs-info/dialogs-info.component'
 import { DialogsAvatarComponent } from './components/dialogs-avatar/dialogs-avatar.component'
+import { DialogsSidebarComponent } from './components/dialogs-sidebar/dialogs-sidebar.component'
 
 @NgModule({
     declarations: [
@@ -40,6 +41,7 @@ import { DialogsAvatarComponent } from './components/dialogs-avatar/dialogs-avat
         DialogsDetailNotSelectedComponent,
         DialogsInfoComponent,
         DialogsAvatarComponent,
+        DialogsSidebarComponent,
     ],
     imports: [
         MaterialModule,

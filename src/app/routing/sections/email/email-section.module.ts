@@ -2,7 +2,7 @@ import { NgModule } from '@angular/core'
 import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { routes } from './email-section.routes'
-import { EmailSectionHttpService } from './email-section-http.service'
+import { EmailHttpService } from './email-http.service'
 import { HttpClientModule } from '@angular/common/http'
 import { ConfirmEmailComponent } from './pages/confirm-email/confirm-email.component'
 import { PasswordResetedComponent } from './pages/password-reseted/password-reseted.component'
@@ -22,6 +22,6 @@ import { GlobalComponentsModule } from 'src/app/global-components/global-compone
         GlobalComponentsModule,
         RouterModule.forChild(routes),
     ],
-    providers: [EmailSectionHttpService],
+    providers: [EmailHttpService],
 })
 export class EmailSectionModule {}

@@ -7,7 +7,7 @@ import { AppState } from 'src/app/store/state/app.state'
 import { ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scroll.service'
 
 @Component({
-    selector: 'app-main-dialogs-scroll-bottom',
+    selector: 'app-dialogs-scroll-bottom',
     templateUrl: './dialogs-scroll-bottom.component.html',
     styleUrls: ['./dialogs-scroll-bottom.component.scss'],
 })

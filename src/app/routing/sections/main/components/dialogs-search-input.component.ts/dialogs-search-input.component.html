@@ -1,0 +1,9 @@
+<label class="input-wrapper">
+    <mat-icon class="icon">search</mat-icon>
+    <div class="input-placeholder" [class.not-active]="inputValue.length">
+        <input (input)="onInput()" class="input" [(ngModel)]="inputValue" type="text">
+    </div>
+    <button (click)="clearValue()" *ngIf="inputValue.length" matRipple [matRippleCentered]="true" class="clear-btn" aria-label="clear search input">
+        <mat-icon>close</mat-icon>
+    </button>
+</label>

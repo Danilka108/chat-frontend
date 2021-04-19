@@ -6,11 +6,11 @@ import { catchError, map, switchMap } from 'rxjs/operators'
 import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator'
 import { authSectionCompleteRegistrationPath, authSectionSignInPath } from 'src/app/routing/routing.constants'
-import { AuthSectionHttpService } from '../../services/auth-section-http.service'
+import { AuthHttpService } from '../../services/auth-http.service'
 import { checkEmailAsyncValidator } from '../../validators/check-email-async.validator'
 
 @Component({
-    selector: 'app-auth-sign-up',
+    selector: 'app-sign-up',
     templateUrl: './sign-up.component.html',
 })
 export class SignUpComponent implements OnDestroy {
@@ -49,7 +49,7 @@ export class SignUpComponent implements OnDestroy {
 
     subs!: Subscription
 
-    constructor(private readonly authHttpService: AuthSectionHttpService, private readonly router: Router) {
+    constructor(private readonly authHttpService: AuthHttpService, private readonly router: Router) {
         this.onSubmit = this.onSubmit.bind(this)
     }
 

@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
-import { AuthSectionHttpService } from '../../services/auth-section-http.service'
+import { AuthHttpService } from '../../services/auth-http.service'
 import { Router } from '@angular/router'
 import { from, of, Subscription } from 'rxjs'
 import { catchError, map, switchMap } from 'rxjs/operators'
@@ -22,7 +22,7 @@ export class ResetPasswordComponent implements OnDestroy {
 
     subs!: Subscription
 
-    constructor(private readonly httpService: AuthSectionHttpService, private readonly router: Router) {
+    constructor(private readonly httpService: AuthHttpService, private readonly router: Router) {
         this.onSubmit = this.onSubmit.bind(this)
     }
 

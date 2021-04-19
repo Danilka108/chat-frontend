@@ -5,7 +5,7 @@ import { catchError, map, publish, refCount } from 'rxjs/operators'
 import { environment } from 'src/environments/environment'
 
 @Injectable()
-export class EmailSectionHttpService {
+export class EmailHttpService {
     constructor(private readonly httpClient: HttpClient) {}
 
     private error() {

@@ -2,7 +2,7 @@ import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { RippleAnimationConfig } from '@angular/material/core'
 
 @Component({
-    selector: 'app-main-dialogs-item',
+    selector: 'app-dialogs-item',
     templateUrl: './dialogs-item.component.html',
     styleUrls: ['./dialogs-item.component.scss'],
 })

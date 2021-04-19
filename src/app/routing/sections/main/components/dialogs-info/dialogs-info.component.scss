@@ -8,7 +8,6 @@
     background-color: map-get($custom-colors, main);
     border-bottom: 1px solid map-get($custom-colors, main-gray);
     height: 3.5rem;
-    padding: 0.7rem 0;
     overflow: hidden;
     flex-shrink: 0;
 
@@ -31,7 +30,7 @@
     justify-content: center;
     align-items: center;
     width: 100%;
-    height: 100%;
+    height: 3.5rem;
     top: 0;
     left: 0;
     transition: 0.2s;
@@ -49,7 +48,6 @@
 
 .status {
     color: map-get($custom-colors, dark-gray);
-    transition: 250ms;
     position: relative;
 
     &:after {
@@ -63,7 +61,6 @@
         border-radius: 50%;
         width: 0.5rem;
         height: 0.5rem;
-        transition: 250ms;
     }
 
     &:not(.online):after {
@@ -74,8 +71,9 @@
         height: 0;
         opacity: 0;
 
-        &:after {
-            opacity: 0;
+        &::after {
+            width: 0;
+            height: 0;
         }
     }
 }
@@ -93,7 +91,7 @@
     width: 100%;
     justify-content: flex-start;
     align-items: center;
-    height: 100%;
+    height: 3.5rem;
     transition: 0.2s;
     z-index: 1999;
 

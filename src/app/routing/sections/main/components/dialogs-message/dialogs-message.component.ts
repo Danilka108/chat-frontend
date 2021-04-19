@@ -17,11 +17,11 @@ import { DateService } from 'src/app/common/date.service'
 import { decreaseDialogNewMessagesCount, markDialogMessageAsRead } from 'src/app/store/actions/main.actions'
 import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
-import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { MainHttpService } from '../../services/main-http.service'
 import { ScrollService } from '../../services/scroll.service'
 
 @Component({
-    selector: 'app-main-dialogs-message',
+    selector: 'app-dialogs-message',
     templateUrl: './dialogs-message.component.html',
     styleUrls: ['./dialogs-message.component.scss'],
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -53,7 +53,7 @@ export class DialogsMessageComponent implements AfterViewInit, OnChanges, OnDest
         private readonly dateService: DateService,
         private readonly scrollService: ScrollService,
         private readonly store: Store<AppState>,
-        private readonly httpService: MainSectionHttpService,
+        private readonly httpService: MainHttpService,
         readonly elementRef: ElementRef
     ) {}
 

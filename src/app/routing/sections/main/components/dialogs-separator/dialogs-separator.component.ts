@@ -2,7 +2,7 @@ import { Component, Input } from '@angular/core'
 import { DateService } from 'src/app/common/date.service'
 
 @Component({
-    selector: 'app-main-dialogs-separator',
+    selector: 'app-dialogs-separator',
     templateUrl: './dialogs-separator.component.html',
     styleUrls: ['./dialogs-separator.component.scss'],
 })

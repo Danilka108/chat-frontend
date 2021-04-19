@@ -2,7 +2,7 @@ import { HttpClient, HttpParams } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { Store } from '@ngrx/store'
 import { Observable } from 'rxjs'
-import { first, map, share, tap } from 'rxjs/operators'
+import { map, tap } from 'rxjs/operators'
 import { AuthService } from 'src/app/auth/auth.service'
 import { updateRequestLoading } from 'src/app/store/actions/main.actions'
 import { AppState } from 'src/app/store/state/app.state'
@@ -10,6 +10,7 @@ import { environment } from 'src/environments/environment'
 import { IDialog } from '../interface/dialog.interface'
 import { IMessage } from '../interface/message.interface'
 import { IResponse } from '../interface/response.interface'
+import { ISearchUser } from '../interface/search-user.interface'
 
 interface IGetDialogsResponse extends IResponse {
     data: IDialog[]
@@ -35,8 +36,12 @@ interface IGetIsExistUser extends IResponse {
     data: boolean
 }
 
+interface IPostSearchUsers extends IResponse {
+    data: ISearchUser[]
+}
+
 @Injectable()
-export class MainSectionHttpService {
+export class MainHttpService {
     constructor(
         private readonly authService: AuthService,
         private readonly httpClient: HttpClient,
@@ -81,7 +86,6 @@ export class MainSectionHttpService {
                         params,
                     })
                     .pipe(
-                        share(),
                         map((result) => {
                             return (result as IGetMessagesResponse).data
                         })
@@ -201,6 +205,32 @@ export class MainSectionHttpService {
                     })
                     .pipe(map((result) => (result as IGetIsExistUser).data))
             })
+            .pipe(
+                tap(() => {
+                    this.store.dispatch(updateRequestLoading({ requestLoading: false }))
+                })
+            )
+    }
+
+    searchUsers(searchString: string): Observable<ISearchUser[] | null> {
+        this.store.dispatch(updateRequestLoading({ requestLoading: true }))
+
+        return this.authService
+            .authRequest((accessToken) =>
+                this.httpClient
+                    .post<IPostSearchUsers>(
+                        `${environment.apiUrl}/user/search`,
+                        {
+                            name: searchString,
+                        },
+                        {
+                            headers: {
+                                authorization: `Bearer ${accessToken}`,
+                            },
+                        }
+                    )
+                    .pipe(map((result) => result.data))
+            )
             .pipe(
                 tap(() => {
                     this.store.dispatch(updateRequestLoading({ requestLoading: false }))

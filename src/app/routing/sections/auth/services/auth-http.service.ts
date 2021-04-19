@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { HttpClient } from '@angular/common/http'
 import { Injectable } from '@angular/core'
 import { DeviceDetectorService } from 'ngx-device-detector'
@@ -32,16 +33,13 @@ interface ISignUpResponse {
 }
 
 @Injectable()
-export class AuthSectionHttpService {
+export class AuthHttpService {
     constructor(private readonly httpClient: HttpClient, private readonly deviceService: DeviceDetectorService) {}
 
     private error() {
         return (error: any) => {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             if (error?.error?.message) {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 throw new Error(error.error.message)
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
             } else if (error?.status == 0) {
                 throw new Error('Server error. Try again')
             } else {
@@ -92,7 +90,6 @@ export class AuthSectionHttpService {
         return this.httpClient.post(`${environment.apiUrl}/user/check-email`, { email }).pipe(
             map(() => true),
             catchError((error) => {
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (error?.status === 400) return of(false)
                 return of(true)
             })

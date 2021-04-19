@@ -26,7 +26,7 @@ const SCROLLBAR_UPDATE_DISTANCE_FACTOR = 0.3
 const SCROLLBAR_DISTANCE_DELTA = 10
 
 @Component({
-    selector: 'app-main-dialogs-scroll',
+    selector: 'app-dialogs-scroll',
     templateUrl: './dialogs-scroll.component.html',
     styleUrls: ['./dialogs-scroll.component.scss'],
 })
@@ -126,8 +126,10 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                     this.isDisableEvents = true
                     this.isDisableUserScroll = true
 
+                    // viewport.scrollTop = viewport.scrollHeight * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
+
                     viewport.scrollTo({
-                        top: viewport.scrollHeight - viewport.clientHeight,
+                        top: viewport.scrollHeight,
                         behavior: 'smooth',
                     })
                 })
@@ -139,7 +141,6 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                 select(selectActiveReceiverID),
                 switchMap(() => this.height$),
                 tap((height) => {
-                    console.log('height change')
                     if ((!this.isTopUpdatingContent && !this.isBottomUpdatingContent) || this.isDisableEvents) {
                         this.topReachedDistance =
                             (viewport.scrollHeight - viewport.clientHeight) * SCROLLBAR_UPDATE_DISTANCE_FACTOR

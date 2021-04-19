@@ -9,11 +9,11 @@ import { DateService } from 'src/app/common/date.service'
 import { addDialogMessages, updateDialogLastMessage } from 'src/app/store/actions/main.actions'
 import { selectActiveReceiverID } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
-import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { MainHttpService } from '../../services/main-http.service'
 import { ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scroll.service'
 
 @Component({
-    selector: 'app-main-dialogs-input',
+    selector: 'app-dialogs-input',
     templateUrl: './dialogs-input.component.html',
     styleUrls: ['./dialogs-input.component.scss'],
 })
@@ -35,7 +35,7 @@ export class DialogsInputComponent implements AfterViewInit, OnDestroy {
 
     constructor(
         private readonly ngZone: NgZone,
-        private readonly httpService: MainSectionHttpService,
+        private readonly httpService: MainHttpService,
         private readonly dateService: DateService,
         private readonly scrollService: ScrollService,
         private readonly store: Store<AppState>,

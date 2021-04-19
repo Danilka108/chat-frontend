@@ -1,15 +1,15 @@
-<app-main-dialogs-info></app-main-dialogs-info>
+<app-dialogs-info></app-dialogs-info>
 <div class="wrapper">
-    <app-main-dialogs-scroll-bottom></app-main-dialogs-scroll-bottom>
-    <app-main-dialogs-scroll>
+    <app-dialogs-scroll-bottom></app-dialogs-scroll-bottom>
+    <app-dialogs-scroll>
         <div #wrapper class="scroll-wrapper">
             <ng-container *ngFor="let message of (messages$ | async); trackBy: messageIdentify">
-                <app-main-dialogs-separator
+                <app-dialogs-separator
                     *ngIf="message.isDiffDays"
                     [date]="message.diffDate">
-                </app-main-dialogs-separator>
+                </app-dialogs-separator>
                 <span #anchor>
-                    <app-main-dialogs-message
+                    <app-dialogs-message
                     #messages
                     [wrapperWidth]="wrapperWidth"
                     [message]="message.message"
@@ -19,10 +19,10 @@
                     [isReaded]="message.isReaded"
                     [name]="getSenderName(message.senderID) | async"
                     [messageID]="message.messageID"
-                ></app-main-dialogs-message>
+                ></app-dialogs-message>
                 </span>
             </ng-container>
         </div>
-    </app-main-dialogs-scroll>
+    </app-dialogs-scroll>
 </div>
-<app-main-dialogs-input></app-main-dialogs-input>
+<app-dialogs-input></app-dialogs-input>

@@ -1,7 +1,7 @@
 import { Component, Input, OnInit } from '@angular/core'
 
 @Component({
-    selector: 'app-main-dialogs-avatar',
+    selector: 'app-dialogs-avatar',
     templateUrl: './dialogs-avatar.component.html',
     styleUrls: ['./dialogs-avatar.component.scss'],
 })

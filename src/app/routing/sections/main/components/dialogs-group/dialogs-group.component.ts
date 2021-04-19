@@ -5,7 +5,7 @@ import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import { from, Observable, Subscription } from 'rxjs'
 import { filter, map, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
-import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { MainHttpService } from '../../services/main-http.service'
 import { select, Store } from '@ngrx/store'
 import { AppState } from 'src/app/store/state/app.state'
 import { selectActiveReceiverID, selectDialogs } from 'src/app/store/selectors/main.selectors'
@@ -14,7 +14,7 @@ import { addDialogs } from 'src/app/store/actions/main.actions'
 export const SMALL_SIZE_MAX_WIDTH = 800
 
 @Component({
-    selector: 'app-main-dialogs-group',
+    selector: 'app-dialogs-group',
     templateUrl: './dialogs-group.component.html',
     styleUrls: ['./dialogs-group.component.scss'],
 })
@@ -29,7 +29,7 @@ export class DialogsGroupComponent implements OnInit, OnDestroy {
         private readonly store: Store<AppState>,
         private readonly router: Router,
         private readonly dateService: DateService,
-        private readonly httpService: MainSectionHttpService
+        private readonly httpService: MainHttpService
     ) {}
 
     set sub(sub: Subscription) {

@@ -2,7 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { ActivatedRoute } from '@angular/router'
 import { Subscription } from 'rxjs'
 import { map, mergeMap } from 'rxjs/operators'
-import { EmailSectionHttpService } from '../../email-section-http.service'
+import { EmailHttpService } from '../../email-http.service'
 
 @Component({
     selector: 'app-confirm-email',
@@ -17,10 +17,7 @@ export class ConfirmEmailComponent implements OnInit, OnDestroy {
 
     subs!: Subscription
 
-    constructor(
-        private readonly httpService: EmailSectionHttpService,
-        private readonly activatedRoute: ActivatedRoute
-    ) {}
+    constructor(private readonly httpService: EmailHttpService, private readonly activatedRoute: ActivatedRoute) {}
 
     ngOnInit(): void {
         this.subs = this.activatedRoute.queryParams

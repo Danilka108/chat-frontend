@@ -3,5 +3,5 @@
     <div class="time mat-caption">{{parseDate(date)}}</div>
     <div class="is-read" *ngIf="isOwnMsg"><mat-icon>{{isReaded ? 'done_all' : 'done'}}</mat-icon></div>
     <div class="last"></div>
-    <app-main-dialogs-avatar class="avatar" [size]="1" [name]="name === null ? '' : name"></app-main-dialogs-avatar>
+    <app-dialogs-avatar class="avatar" [size]="1" [name]="name === null ? '' : name"></app-dialogs-avatar>
 </div>

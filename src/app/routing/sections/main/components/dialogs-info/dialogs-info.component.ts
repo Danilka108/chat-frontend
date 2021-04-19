@@ -1,7 +1,7 @@
 import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { BehaviorSubject, forkJoin, Observable, of, Subscription } from 'rxjs'
-import { first, map, startWith, switchMap, tap } from 'rxjs/operators'
+import { first, map, switchMap, tap } from 'rxjs/operators'
 import {
     selectActiveReceiverID,
     selectDialog,
@@ -9,10 +9,10 @@ import {
     selectReconnectionLoading,
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
-import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { MainHttpService } from '../../services/main-http.service'
 
 @Component({
-    selector: 'app-main-dialogs-info',
+    selector: 'app-dialogs-info',
     templateUrl: './dialogs-info.component.html',
     styleUrls: ['./dialogs-info.component.scss'],
 })
@@ -31,10 +31,10 @@ export class DialogsInfoComponent implements OnInit, OnDestroy {
         this.subscription.add(sub)
     }
 
-    constructor(private readonly store: Store<AppState>, private readonly httpService: MainSectionHttpService) {}
+    constructor(private readonly store: Store<AppState>, private readonly httpService: MainHttpService) {}
 
     ngOnInit(): void {
-        this.isLoading$ = this.store.pipe(select(selectReconnectionLoading), startWith(false))
+        this.isLoading$ = this.store.pipe(select(selectReconnectionLoading))
 
         this.sub = this.store
             .pipe(

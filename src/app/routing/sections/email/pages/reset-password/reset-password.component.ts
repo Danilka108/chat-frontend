@@ -6,7 +6,7 @@ import { catchError, map, switchMap } from 'rxjs/operators'
 import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator'
 import { emailSectionPasswordResetedPath } from 'src/app/routing/routing.constants'
-import { EmailSectionHttpService } from '../../email-section-http.service'
+import { EmailHttpService } from '../../email-http.service'
 @Component({
     selector: 'app-reset-password',
     templateUrl: './reset-password.component.html',
@@ -51,7 +51,7 @@ export class ResetPasswordComponent implements OnInit, OnDestroy {
 
     constructor(
         private readonly activatedRoute: ActivatedRoute,
-        private readonly httpService: EmailSectionHttpService,
+        private readonly httpService: EmailHttpService,
         private readonly router: Router
     ) {
         this.onSubmit = this.onSubmit.bind(this)

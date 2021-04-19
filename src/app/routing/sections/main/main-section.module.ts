@@ -3,7 +3,7 @@ import { CommonModule } from '@angular/common'
 import { RouterModule } from '@angular/router'
 import { routes } from './main-section.routes'
 import { AuthModule } from 'src/app/auth/auth.module'
-import { MainSectionHttpService } from './services/main-section-http.service'
+import { MainHttpService } from './services/main-http.service'
 import { DialogsItemComponent } from './components/dialogs-item/dialogs-item.component'
 import { DialogsComponent } from './pages/dialogs/dialogs.component'
 import { MaterialModule } from 'src/app/material/material.module'
@@ -25,6 +25,10 @@ import { ScrollingModule } from '@angular/cdk/scrolling'
 import { DialogsInfoComponent } from './components/dialogs-info/dialogs-info.component'
 import { DialogsAvatarComponent } from './components/dialogs-avatar/dialogs-avatar.component'
 import { DialogsSidebarComponent } from './components/dialogs-sidebar/dialogs-sidebar.component'
+import { DialogsSearchInputComponent } from './components/dialogs-search-input.component.ts/dialogs-search-input.component'
+import { DialogsSearchComponent } from './components/dialogs-search/dialogs-search.component'
+import { DialogsSearchItemComponent } from './components/dialogs-search-item/dialogs-search-item.component'
+import { SearchService } from './services/search.service'
 
 @NgModule({
     declarations: [
@@ -42,6 +46,9 @@ import { DialogsSidebarComponent } from './components/dialogs-sidebar/dialogs-si
         DialogsInfoComponent,
         DialogsAvatarComponent,
         DialogsSidebarComponent,
+        DialogsSearchInputComponent,
+        DialogsSearchComponent,
+        DialogsSearchItemComponent,
     ],
     imports: [
         MaterialModule,
@@ -54,6 +61,6 @@ import { DialogsSidebarComponent } from './components/dialogs-sidebar/dialogs-si
         WsModule,
         ScrollingModule,
     ],
-    providers: [MainSectionHttpService, MessageService, ScrollService],
+    providers: [MainHttpService, MessageService, ScrollService, SearchService],
 })
 export class MainSectionModule {}

@@ -4,17 +4,88 @@
     display: block;
     width: 23%;
     height: 100vh;
-    background-color: map-get($custom-colors, main);
     z-index: 6000;
     border-right: 1px solid map-get($custom-colors, main-gray);
 
     &.small {
         width: 5.6rem;
     }
+
+    overflow: hidden;
+}
+
+.wrapper {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+
+    &.search-active {
+        .search {
+            animation: emergenceAnim 200ms forwards;
+            // opacity: 1;
+            // transform: translate(-50%, -50%) scale(1);
+            // z-index: 2000;
+        }
+
+        .group {
+            animation: emergenceBackAnim 200ms forwards;
+            // opacity: 0;
+            // transform: translate(-50%, -50%) scale(1.1);
+            // z-index: 1000;
+        }
+    }
+
+    &.group-active {
+        .search {
+            animation: emergenceBackAnim 200ms forwards;
+            // opacity: 0;
+            // transform: translate(-50%, -50%) scale(1.1);
+            // z-index: 1000;
+        }
+
+        .group {
+            animation: emergenceAnim 200ms forwards;
+            // opacity: 1;
+            // transform: translate(-50%, -50%) scale(1);
+            // z-index: 2000;
+        }
+    }
 }
 
 .scroll-wrapper {
+    position: absolute;
+    top: 50%;
+    left: 50%;
     width: 100%;
     height: 100%;
+    transform: translate(-50%, -50%);
     overflow-y: overlay;
+    background-color: map-get($custom-colors, main);
+}
+
+@keyframes emergenceAnim {
+    0% {
+        opacity: 0;
+        transform: translate(-50%, -50%) scale(1.15, 1.15);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1, 1);
+        z-index: 3000;
+    }
+}
+
+@keyframes emergenceBackAnim {
+    0% {
+        opacity: 1;
+        transform: translate(-50%, -50%);
+        z-index: 2000;
+    }
+
+    100% {
+        opacity: 0;
+        transform: translate(-50%, -50%);
+    }
 }

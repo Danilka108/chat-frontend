@@ -5,10 +5,10 @@ import { of, Subscription } from 'rxjs'
 import { catchError, map, switchMap } from 'rxjs/operators'
 import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants'
 import { SessionService } from 'src/app/session/session.service'
-import { AuthSectionHttpService } from '../../services/auth-section-http.service'
+import { AuthHttpService } from '../../services/auth-http.service'
 
 @Component({
-    selector: 'app-auth-sing-in',
+    selector: 'app-sing-in',
     templateUrl: './sign-in.component.html',
     styleUrls: ['./sign-in.component.scss'],
 })
@@ -34,7 +34,7 @@ export class SignInComponent implements OnDestroy {
     subs!: Subscription
 
     constructor(
-        private readonly httpService: AuthSectionHttpService,
+        private readonly httpService: AuthHttpService,
         private readonly router: Router,
         private readonly sessionService: SessionService
     ) {

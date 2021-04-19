@@ -1,3 +1,9 @@
-<div class="scroll-wrapper scrollbar">
-    <app-main-dialogs-group></app-main-dialogs-group>
+<app-dialogs-search-input></app-dialogs-search-input>
+<div class="wrapper" [class.search-active]="isSearchActive$ | async" [class.group-active]="!(isSearchActive$ | async)">
+    <div class="scroll-wrapper scrollbar search">
+        <app-dialogs-search></app-dialogs-search>
+    </div>
+    <div class="scroll-wrapper scrollbar group">
+        <app-dialogs-group></app-dialogs-group>
+    </div>
 </div>

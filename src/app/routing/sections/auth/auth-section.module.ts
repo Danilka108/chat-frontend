@@ -12,7 +12,7 @@ import { CompleteRegistrationComponent } from './pages/complete-registration/com
 import { ResetPasswordComponent } from './pages/reset-password/reset-password.component'
 import { ResetPasswordCheckEmailComponent } from './pages/reset-password-check-email/reset-password-check-email.component'
 import { HttpClientModule } from '@angular/common/http'
-import { AuthSectionHttpService } from './services/auth-section-http.service'
+import { AuthHttpService } from './services/auth-http.service'
 import { SessionModule } from 'src/app/session/session.module'
 
 @NgModule({
@@ -34,6 +34,6 @@ import { SessionModule } from 'src/app/session/session.module'
         HttpClientModule,
         CommonModule,
     ],
-    providers: [AuthSectionHttpService],
+    providers: [AuthHttpService],
 })
 export class AuthSectionModule {}

@@ -27,7 +27,7 @@ import {
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { IMessage, IMessageWithIsLast } from '../../interface/message.interface'
-import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { MainHttpService } from '../../services/main-http.service'
 import { MessageService } from '../../services/message.service'
 import {
     ALL_MESSAGES_READ,
@@ -40,10 +40,10 @@ import {
     SIDE_REACHED_TOP,
 } from '../../services/scroll.service'
 
-const TAKE_MESSAGES_FACTOR = 1 / 10
+const TAKE_MESSAGES_FACTOR = 1 / 13
 
 @Component({
-    selector: 'app-main-dialogs-detail',
+    selector: 'app-dialogs-detail',
     templateUrl: './dialogs-detail.component.html',
     styleUrls: ['./dialogs-detail.component.scss'],
 })
@@ -75,7 +75,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
 
     constructor(
         private readonly store: Store<AppState>,
-        private readonly httpService: MainSectionHttpService,
+        private readonly httpService: MainHttpService,
         private readonly messageService: MessageService,
         private readonly scrollService: ScrollService,
         private readonly changeDetectorRef: ChangeDetectorRef
@@ -423,6 +423,7 @@ export class DialogsDetailComponent implements OnInit, AfterViewChecked, OnDestr
                 switchMap((receiverID) => {
                     this.scrollService.clearPrevDialog()
                     this.setDefaultSettings()
+                    this.messages.next([])
 
                     if (receiverID !== null)
                         this.store.dispatch(updateDialogNewMessagesCount({ receiverID, newMessagesCount: 0 }))

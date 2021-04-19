@@ -25,7 +25,7 @@ import { WsService } from 'src/app/ws/ws.service'
 import { NoConnectionComponent } from '../../components/no-connection/no-connection.component'
 import { IDialog } from '../../interface/dialog.interface'
 import { IMessage } from '../../interface/message.interface'
-import { MainSectionHttpService } from '../../services/main-section-http.service'
+import { MainHttpService } from '../../services/main-http.service'
 import { NEW_MESSAGE_START, ScrollService } from '../../services/scroll.service'
 
 @Component({
@@ -47,7 +47,7 @@ export class DialogsComponent implements OnInit, OnDestroy {
         private readonly wsService: WsService,
         private readonly dateService: DateService,
         private readonly scrollService: ScrollService,
-        private readonly httpService: MainSectionHttpService
+        private readonly httpService: MainHttpService
     ) {}
 
     set sub(sub: Subscription) {

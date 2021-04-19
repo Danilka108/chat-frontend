@@ -6,6 +6,15 @@ import { ISearchUser } from '../interface/search-user.interface'
 export class SearchService {
     private readonly searchData = new Subject<ISearchUser[]>()
     private readonly isView = new Subject<boolean>()
+    private readonly clear = new Subject<void>()
+
+    emitClear(): void {
+        this.clear.next()
+    }
+
+    getClear(): Observable<void> {
+        return this.clear.asObservable()
+    }
 
     emitSearchData(data: ISearchUser[]): void {
         this.searchData.next(data)

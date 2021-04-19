@@ -1,12 +1,15 @@
 import { Injectable } from '@angular/core'
+import { SessionTypeService } from '../common/session-type.service'
 
 const localStorageUserID = 'LOCAL_STORAGE_AUTH_USER_ID'
 const localStorageRefreshToken = 'LOCAL_STORAGE_AUTH_REFRESH_TOKEN'
 
 @Injectable()
 export class SessionLocalStorageService {
+    constructor(private readonly sessionTypeService: SessionTypeService) {}
+
     private getData(name: string) {
-        const data = localStorage.getItem(name)
+        const data = this.sessionTypeService.getStorage().getItem(name)
 
         if (!data) {
             return null
@@ -16,7 +19,7 @@ export class SessionLocalStorageService {
     }
 
     setUserID(userID: number): void {
-        localStorage.setItem(localStorageUserID, JSON.stringify(userID))
+        this.sessionTypeService.getStorage().setItem(localStorageUserID, JSON.stringify(userID))
     }
 
     getUserID(): number | null {
@@ -30,11 +33,11 @@ export class SessionLocalStorageService {
     }
 
     removeUserID(): void {
-        localStorage.setItem(localStorageUserID, '')
+        this.sessionTypeService.getStorage().setItem(localStorageUserID, '')
     }
 
     setRefreshToken(refreshToken: string): void {
-        localStorage.setItem(localStorageRefreshToken, JSON.stringify(refreshToken))
+        this.sessionTypeService.getStorage().setItem(localStorageRefreshToken, JSON.stringify(refreshToken))
     }
 
     getRefreshToken(): string | null {
@@ -48,6 +51,6 @@ export class SessionLocalStorageService {
     }
 
     removeRefreshToken(): void {
-        localStorage.setItem(localStorageRefreshToken, '')
+        this.sessionTypeService.getStorage().setItem(localStorageRefreshToken, '')
     }
 }

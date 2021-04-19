@@ -1,5 +1,6 @@
 import { Component, EventEmitter, Input, Output } from '@angular/core'
 import { RippleAnimationConfig } from '@angular/material/core'
+import { SearchService } from '../../services/search.service'
 
 @Component({
     selector: 'app-dialogs-search-item',
@@ -18,7 +19,10 @@ export class DialogsSearchItemComponent {
         exitDuration: 1000,
     }
 
+    constructor(private readonly searchService: SearchService) {}
+
     onClick(): void {
+        this.searchService.emitClear()
         this.redirect.emit(this.userID)
     }
 }

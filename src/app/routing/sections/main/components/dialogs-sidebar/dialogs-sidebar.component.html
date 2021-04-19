@@ -1,5 +1,8 @@
-<app-dialogs-search-input></app-dialogs-search-input>
-<div class="wrapper" [class.search-active]="isSearchActive$ | async" [class.group-active]="!(isSearchActive$ | async)">
+<div class="top">
+    <app-dialogs-menu></app-dialogs-menu>
+    <app-dialogs-search-input></app-dialogs-search-input>
+</div>
+<div class="wrapper" [class.search-active]="(isSearchActive$ | async) === true" [class.group-active]="(isSearchActive$ | async) === false">
     <div class="scroll-wrapper scrollbar search">
         <app-dialogs-search></app-dialogs-search>
     </div>

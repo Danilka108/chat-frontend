@@ -107,6 +107,7 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                 tap((type) => {
                     if (type === NEW_MESSAGE_END) {
                         this.isDisableEvents = false
+                        this.scrollService.emitScrolled()
                         return
                     }
 
@@ -126,7 +127,12 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                     this.isDisableEvents = true
                     this.isDisableUserScroll = true
 
-                    // viewport.scrollTop = viewport.scrollHeight * (1 - SCROLLBAR_UPDATE_DISTANCE_FACTOR)
+                    if (
+                        viewport.scrollTop <
+                        viewport.scrollHeight - viewport.offsetHeight * (1 + SCROLLBAR_UPDATE_DISTANCE_FACTOR)
+                    )
+                        viewport.scrollTop =
+                            viewport.scrollHeight - viewport.offsetHeight * (1 + SCROLLBAR_UPDATE_DISTANCE_FACTOR)
 
                     viewport.scrollTo({
                         top: viewport.scrollHeight,
@@ -208,7 +214,6 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
         this.sub = this.scrollDispatcher
             .scrolled()
             .pipe(
-                // filter((scrollable) => !!scrollable),
                 tap(() =>
                     this.ngZone.run(() => {
                         const topAnchor = this.scrollService.getTopAnchor()
@@ -245,7 +250,6 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                 ),
                 debounceTime(200),
                 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-                // filter(({ scrollable }) => !!scrollable),
                 tap(({ activeReceiverID, reconnectionLoading }) =>
                     this.ngZone.run(() => {
                         if (activeReceiverID === null) return

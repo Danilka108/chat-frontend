@@ -1,7 +1,8 @@
+/* eslint-disable @typescript-eslint/no-floating-promises */
 import { Injectable } from '@angular/core'
 import { Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
-import { forkJoin, of } from 'rxjs'
+import { forkJoin, Observable, of } from 'rxjs'
 import { catchError, first, map, switchMap, tap } from 'rxjs/operators'
 import { updateAccessToken, updateUserID } from '../store/actions/auth.actions'
 import { selectAccessToken, selectUserID } from '../store/selectors/auth.selectors'
@@ -20,7 +21,7 @@ export class SessionService {
         private readonly sessionErrorService: SessionErrorService
     ) {}
 
-    update() {
+    update(): Observable<boolean> {
         const localStorageUserID = this.localStorageService.getUserID()
         const localStorageRefreshToken = this.localStorageService.getRefreshToken()
 
@@ -49,14 +50,14 @@ export class SessionService {
         }
     }
 
-    remove() {
-        this.sessionErrorService.emit()
+    remove(throwSessionError = true): void {
+        if (throwSessionError) this.sessionErrorService.emit()
         this.localStorageService.removeRefreshToken()
         this.localStorageService.removeUserID()
         this.router.navigateByUrl('')
     }
 
-    set(userID: number, accessToken: string, refreshToken: string) {
+    set(userID: number, accessToken: string, refreshToken: string): void {
         this.localStorageService.setRefreshToken(refreshToken)
         this.localStorageService.setUserID(userID)
 
@@ -64,7 +65,7 @@ export class SessionService {
         this.store.dispatch(updateUserID({ userID }))
     }
 
-    verify() {
+    verify(): Observable<boolean> {
         return forkJoin({
             accessToken: this.store.pipe(select(selectAccessToken), first()),
             userID: this.store.pipe(select(selectUserID), first()),

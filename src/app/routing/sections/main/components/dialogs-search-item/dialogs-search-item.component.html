@@ -1,4 +1,6 @@
-<button (click)="onClick()" matRipple [matRippleAnimation]="RippleConfig" matRippleColor="rgba(0, 0, 0, 0.08)">
-    <app-dialogs-avatar [name]="name" [size]="1.5" class="avatar"></app-dialogs-avatar>
+<button (click)="onClick()" matRipple [matRippleAnimation]="RippleConfig" matRippleColor="rgba(0, 0, 0, 0.04)">
+    <div class="photo">
+        <app-dialogs-avatar [name]="name" [size]="1.5" class="avatar"></app-dialogs-avatar>
+    </div>
     <p class="name" *ngIf="!isSmallSize">{{name}}</p>
 </button>

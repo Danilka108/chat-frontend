@@ -25,6 +25,16 @@ export class DialogsSearchInputComponent implements OnInit, OnDestroy {
     constructor(private readonly httpService: MainHttpService, private readonly searchService: SearchService) {}
 
     ngOnInit(): void {
+        this.sub = this.searchService
+            .getClear()
+            .pipe(
+                tap(() => {
+                    this.inputValue = ''
+                    this.input.next()
+                })
+            )
+            .subscribe()
+
         this.sub = this.input$
             .pipe(
                 filter(() => {
@@ -34,7 +44,7 @@ export class DialogsSearchInputComponent implements OnInit, OnDestroy {
                 debounceTime(300),
                 switchMap(() => this.httpService.searchUsers(this.inputValue)),
                 tap((users) => {
-                    if (users !== null) {
+                    if (users !== null && this.inputValue.length !== 0) {
                         this.searchService.emitSearchData(users)
                         this.searchService.emitIsView(true)
                     } else this.searchService.emitIsView(false)

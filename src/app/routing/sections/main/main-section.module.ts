@@ -29,6 +29,8 @@ import { DialogsSearchInputComponent } from './components/dialogs-search-input.c
 import { DialogsSearchComponent } from './components/dialogs-search/dialogs-search.component'
 import { DialogsSearchItemComponent } from './components/dialogs-search-item/dialogs-search-item.component'
 import { SearchService } from './services/search.service'
+import { DialogsMenuComponent } from './components/dialogs-menu/dialogs-menu.component'
+import { SessionModule } from 'src/app/session/session.module'
 
 @NgModule({
     declarations: [
@@ -49,6 +51,7 @@ import { SearchService } from './services/search.service'
         DialogsSearchInputComponent,
         DialogsSearchComponent,
         DialogsSearchItemComponent,
+        DialogsMenuComponent,
     ],
     imports: [
         MaterialModule,
@@ -60,6 +63,7 @@ import { SearchService } from './services/search.service'
         FormsModule,
         WsModule,
         ScrollingModule,
+        SessionModule,
     ],
     providers: [MainHttpService, MessageService, ScrollService, SearchService],
 })

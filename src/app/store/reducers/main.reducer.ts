@@ -31,7 +31,6 @@ export const mainReducer = createReducer(
     }),
     on(addDialogs, (state, { dialogs }) => {
         const stateDialogs = state.dialogs === null ? [] : [...state.dialogs]
-        const stateMessages = [...state.messages]
 
         for (const dialog of dialogs) {
             let isPush = true
@@ -45,17 +44,12 @@ export const mainReducer = createReducer(
 
             if (isPush) {
                 stateDialogs.push(dialog)
-                stateMessages.push({
-                    receiverID: dialog.receiverID,
-                    messages: null,
-                })
             }
         }
 
         return {
             ...state,
             dialogs: stateDialogs,
-            messages: stateMessages,
         }
     }),
     on(markDialogMessagesAsRead, (state, { receiverID }) => {
@@ -273,6 +267,11 @@ export const mainReducer = createReducer(
                 receiverID,
                 messages,
             }
+        } else {
+            dialogsMessages.push({
+                receiverID,
+                messages,
+            })
         }
 
         return {

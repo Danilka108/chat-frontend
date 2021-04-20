@@ -3,7 +3,7 @@ import { MatDialog, MatDialogRef } from '@angular/material/dialog'
 import { ActivatedRoute, NavigationEnd, Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
 import { asyncScheduler, combineLatest, forkJoin, from, Observable, of, Subscription } from 'rxjs'
-import { filter, first, map, observeOn, skipWhile, startWith, switchMap, tap } from 'rxjs/operators'
+import { filter, first, map, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
 import { updateUserName } from 'src/app/store/actions/auth.actions'
@@ -16,9 +16,15 @@ import {
     updateActiveReceiverID,
     updateDialogConnectionStatus,
     updateDialogLastMessage,
+    updateDialogMessages,
 } from 'src/app/store/actions/main.actions'
 import { selectConnectionError, selectUserID } from 'src/app/store/selectors/auth.selectors'
-import { selectDialogMessages, selectDialogs, selectRequestLoading } from 'src/app/store/selectors/main.selectors'
+import {
+    selectActiveReceiverID,
+    selectDialogMessages,
+    selectDialogs,
+    selectRequestLoading,
+} from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
 import { WsEvents } from 'src/app/ws/ws.events'
 import { WsService } from 'src/app/ws/ws.service'
@@ -26,7 +32,7 @@ import { NoConnectionComponent } from '../../components/no-connection/no-connect
 import { IDialog } from '../../interface/dialog.interface'
 import { IMessage } from '../../interface/message.interface'
 import { MainHttpService } from '../../services/main-http.service'
-import { NEW_MESSAGE_START, ScrollService } from '../../services/scroll.service'
+import { NEW_MESSAGE_START, ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scroll.service'
 
 @Component({
     selector: 'app-dialogs',
@@ -215,8 +221,18 @@ export class DialogsComponent implements OnInit, OnDestroy {
         this.sub = this.wsService
             .fromEvent<IDialog>(WsEvents.user.newDialog)
             .pipe(
-                tap((newDialog) => {
+                switchMap((newDialog) =>
+                    forkJoin({
+                        newDialog: of(newDialog),
+                        activeReceiverID: this.store.pipe(select(selectActiveReceiverID), first()),
+                    })
+                ),
+                tap(({ newDialog, activeReceiverID }) => {
                     this.store.dispatch(addDialogs({ dialogs: [newDialog] }))
+
+                    if (newDialog.receiverID === activeReceiverID) {
+                        this.store.dispatch(updateDialogMessages({ receiverID: activeReceiverID, messages: [] }))
+                    }
                 })
             )
             .subscribe()

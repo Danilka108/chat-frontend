@@ -1,5 +1,3 @@
-@import '../../../../../styles/vars.scss';
-
 :host {
     display: flex;
     align-items: center;
@@ -12,7 +10,7 @@
 .input-wrapper {
     width: 90%;
     padding: 0.2rem;
-    border: 1px solid map-get($custom-colors, main-gray);
+    border: 1px solid var(--app-main-gray);
     border-radius: 0.25rem;
     display: flex;
     align-items: center;
@@ -20,22 +18,22 @@
     transition: 100ms;
 
     &:hover {
-        border: 1.5px solid map-get($custom-colors, dark-main-middle-gray);
+        border: 1.5px solid var(--app-middle-dark-main-gray);
     }
 
     &:focus-within {
         .icon {
-            color: map-get($basic-colors, primary);
+            color: var(--app-primary);
         }
 
-        border: 1.5px solid map-get($basic-colors, primary);
+        border: 1.5px solid var(--app-primary);
     }
 }
 
 .icon {
     transition: color 200ms;
     user-select: none;
-    color: map-get($custom-colors, dark-main-middle-gray);
+    color: var(--app-middle-dark-main-gray);
 }
 
 .input {
@@ -71,7 +69,7 @@
         width: 100%;
         height: 100%;
         line-height: 1;
-        color: map-get($custom-colors, dark-main-middle-gray);
+        color: var(--app-middle-dark-main-gray);
 
         transform: translateY(-50%) translateX(10%);
         opacity: 0;

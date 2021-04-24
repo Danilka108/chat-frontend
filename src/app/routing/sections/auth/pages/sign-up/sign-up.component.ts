@@ -1,8 +1,11 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-non-null-assertion */
+/* eslint-disable @typescript-eslint/unbound-method */
 import { Component, OnDestroy } from '@angular/core'
 import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
-import { from, of, Subscription } from 'rxjs'
-import { catchError, map, switchMap } from 'rxjs/operators'
+import { of, Subscription } from 'rxjs'
+import { catchError, switchMap } from 'rxjs/operators'
 import { MatchPasswords } from 'src/app/common/matchers/match-passwords.matcher'
 import { matchPasswordsValidator } from 'src/app/common/validators/match-passwords.validator'
 import { authSectionCompleteRegistrationPath, authSectionSignInPath } from 'src/app/routing/routing.constants'
@@ -12,21 +15,18 @@ import { checkEmailAsyncValidator } from '../../validators/check-email-async.val
 @Component({
     selector: 'app-sign-up',
     templateUrl: './sign-up.component.html',
+    styleUrls: ['./sign-up.component.scss'],
 })
 export class SignUpComponent implements OnDestroy {
     formGroup = new FormGroup(
         {
             email: new FormControl(
                 null,
-                // eslint-disable-next-line @typescript-eslint/unbound-method
                 [Validators.required, Validators.pattern(/@/)],
                 [checkEmailAsyncValidator(this.authHttpService)]
             ),
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             name: new FormControl(null, [Validators.required, Validators.minLength(2)]),
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             password: new FormControl(null, [Validators.required, Validators.minLength(8)]),
-            // eslint-disable-next-line @typescript-eslint/unbound-method
             confirmPassword: new FormControl(null, Validators.required),
         },
         {
@@ -39,52 +39,56 @@ export class SignUpComponent implements OnDestroy {
     passwordHide = true
     confirmPasswordHide = true
 
-    httpError$ = of(false)
-    httpErrorMessage$ = of('')
+    httpError = false
+    httpErrorMessage = ''
 
     loading = false
 
     redirectLink = authSectionSignInPath.full
     completeLink = authSectionCompleteRegistrationPath.full
 
-    subs!: Subscription
+    subscription = new Subscription()
 
     constructor(private readonly authHttpService: AuthHttpService, private readonly router: Router) {
         this.onSubmit = this.onSubmit.bind(this)
     }
 
+    set sub(sub: Subscription) {
+        this.subscription.add(sub)
+    }
+
     onSubmit(): void {
-        if (this.formGroup.valid && !this.loading) {
+        const emailValue = this.formGroup.get('email')!.value as string | null
+        const passwordValue = this.formGroup.get('password')!.value as string | null
+        const nameValue = this.formGroup.get('name')!.value as string | null
+
+        if (
+            this.formGroup.valid &&
+            !this.loading &&
+            emailValue !== null &&
+            passwordValue !== null &&
+            nameValue !== null
+        ) {
             this.loading = true
 
-            const req$ = this.authHttpService.signUp({
-                email: this.formGroup.controls['email'].value as string,
-                name: this.formGroup.controls['name'].value as string,
-                password: this.formGroup.controls['password'].value as string,
-            })
-
-            this.httpError$ = req$.pipe(
-                map(() => false),
-                catchError(() => of(true))
-            )
-
-            this.httpErrorMessage$ = req$.pipe(
-                map(() => ''),
-                catchError((error) => {
-                    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                    if (error?.message) {
-                        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-                        return of(error.message as string)
-                    }
-
-                    return of(error as string)
+            this.sub = this.authHttpService
+                .signUp({
+                    email: emailValue,
+                    name: nameValue,
+                    password: passwordValue,
                 })
-            )
-
-            this.subs = req$
                 .pipe(
-                    switchMap(() => from(this.router.navigateByUrl(this.completeLink))),
-                    catchError(() => {
+                    switchMap(() => {
+                        this.httpErrorMessage = ''
+                        return of(this.router.navigateByUrl(this.completeLink))
+                    }),
+                    catchError((error) => {
+                        if (error?.message) {
+                            this.httpErrorMessage = error.message as string
+                        } else {
+                            this.httpErrorMessage = error as string
+                        }
+
                         this.loading = false
                         return of()
                     })
@@ -94,6 +98,6 @@ export class SignUpComponent implements OnDestroy {
     }
 
     ngOnDestroy(): void {
-        if (this.subs) this.subs.unsubscribe()
+        this.subscription.unsubscribe()
     }
 }

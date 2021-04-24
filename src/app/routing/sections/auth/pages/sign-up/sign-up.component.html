@@ -65,7 +65,7 @@
         </button>
     </mat-form-field>
 
-    <app-error *ngIf="httpError$ | async">{{httpErrorMessage$ | async}}</app-error>
+    <app-error *ngIf="httpErrorMessage.length">{{httpErrorMessage}}</app-error>
     
     <button
         type="submit"

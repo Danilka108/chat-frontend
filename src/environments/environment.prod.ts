@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    url: 'http://localhost:8080',
-    apiUrl: 'http://localhost:8080/api',
+    url: 'http://venerdichat.ru',
+    apiUrl: 'http://venerdichat.ru/api',
 }

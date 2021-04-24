@@ -10,6 +10,8 @@
 }
 
 body {
+    background-color: var(--app-background);
+
     margin: 0;
     overflow: hidden;
 }
@@ -24,10 +26,10 @@ body {
     }
     
     &::-webkit-scrollbar-thumb {
-        background-color: map-get($custom-colors, dark-main-middle-gray);
+        background-color: var(--app-middle-dark-main-gray);
     
         &:hover {
-            background-color: map-get($custom-colors, dark-gray);
+            background-color: var(--app-dark-gray);
         }
     }
 }

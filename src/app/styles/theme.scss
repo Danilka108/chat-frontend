@@ -1,6 +1,52 @@
-@import './vars';
 @import '~@angular/material/theming';
+
+$typography: mat-typography-config(
+    $font-family: 'Roboto, Helvetica Neue',
+    $display-4: mat-typography-level(7rem, 7rem, 300, $letter-spacing: -0.05em),
+    $display-3: mat-typography-level(3.5rem, 3.5rem, 400, $letter-spacing: -0.02em),
+    $display-2: mat-typography-level(2.81rem, 3rem, 400, $letter-spacing: -0.005em),
+    $display-1: mat-typography-level(2.13rem, 2.5rem, 400),
+    $headline: mat-typography-level(1.5rem, 2rem, 400),
+    $title: mat-typography-level(1.25rem, 2rem, 500),
+    $subheading-2: mat-typography-level(1rem, 1.75rem, 400),
+    $subheading-1: mat-typography-level(0.93rem, 1.5rem, 400),
+    $body-2: mat-typography-level(0.86rem, 1.5rem, 500),
+    $body-1: mat-typography-level(0.86rem, 1.25rem, 400),
+    $caption: mat-typography-level(0.75rem, 1.25rem, 400),
+    $button: mat-typography-level(0.86rem, 0.86rem, 500),
+    $input: mat-typography-level(inherit, 1.125, 400)
+);
 
 @include mat-core($typography);
 
+$primary: mat-palette($mat-deep-purple, 500);
+$accent: mat-palette($mat-pink, A200);
+$warn: mat-palette($mat-red);
+$theme: mat-light-theme($primary, $accent, $warn);
+
+$light-foreground-palette: map-get($theme, foreground);
+$light-background-palette: map-get($theme, background);
+
 @include angular-material-theme($theme);
+
+:root{
+    --app-primary: #{mat-color($primary)};
+    --app-accent: #{mat-color($accent)};
+    --app-warn: #{mat-color($warn)};
+
+    --app-light-gray: #{mat-color($mat-grey, 200)};
+    --app-main-gray: #{mat-color($mat-grey, 300)};
+    --app-middle-dark-main-gray: #{mat-color($mat-grey, 500)};
+    --app-dark-gray: #{mat-color($mat-grey, 600)};
+    --app-online: #{mat-color($mat-green, 500)};
+    --app-background: #{map-get($light-background-palette, background)};
+    --app-text: #{map-get($light-foreground-palette, text)};
+}
+
+// $dark-primary: mat-palette($mat-green);
+// $dark-accent: mat-palette($mat-pink, A200);
+// $dark-warn: mat-palette($mat-red);
+// $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
+
+// $dark-foreground-palette: map-get($dark-theme, foreground);
+// $dark-background-palette: map-get($dark-theme, background);

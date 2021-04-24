@@ -276,7 +276,7 @@ export const mainReducer = createReducer(
         } else {
             dialogsMessages.push({
                 receiverID,
-                messages
+                messages,
             })
         }
 

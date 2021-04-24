@@ -1,4 +1,4 @@
-<app-loading *ngIf="loading"></app-loading>
+<!-- <app-loading *ngIf="loading"></app-loading> -->
 
 <app-wrapper [formGroup]="formGroup" [onSubmit]="onSubmit">
     <app-header>
@@ -28,8 +28,8 @@
         </button>
     </mat-form-field>
 
-    <app-error *ngIf="httpError$ | async">
-        {{httpErrorMessage$ | async}}
+    <app-error *ngIf="httpErrorMessage.length">
+        {{httpErrorMessage}}
     </app-error>
 
     <div class="group">

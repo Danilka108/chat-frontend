@@ -1,5 +1,3 @@
-@import '../../../../../styles/vars.scss';
-
 :host {
     width: 100%;
     user-select: none;
@@ -20,25 +18,25 @@
     position: relative;
 
     &.active {
-        background-color: map-get($basic-colors, primary);
+        background-color: var(--app-primary);
 
         .status {
-            border-color: map-get($basic-colors, primary);
+            border-color: var(--app-primary);
         }
         
         .receiver {
             transition: 0.25s;
-            color: map-get($custom-colors, main);
+            color: var(--app-background);
         }
 
         .last-message {
             transition: 0.25s;
-            color: map-get($custom-colors, main-gray);
+            color: var(--app-main-gray);
         }
 
         .time {
             transition: 0.25s;
-            color: map-get($custom-colors, light-gray);
+            color: var(--app-light-gray);
         }
     }
 
@@ -49,10 +47,10 @@
     &:not(.active):hover,
     &:not(.active):focus {
         .status {
-            border-color: map-get($custom-colors, main-gray);
+            border-color: var(--app-main-gray);
         }
 
-        background-color: map-get($custom-colors, main-gray);
+        background-color: var(--app-main-gray);
     }
 }
 
@@ -105,7 +103,7 @@
 }
 
 .time {
-    color: map-get($custom-colors, dark-gray);
+    color: var(--app-dark-gray);
     line-height: 1;
     transition: 0.25s;
 }
@@ -126,7 +124,7 @@
 }
 
 .last-message {
-    color: map-get($custom-colors, dark-gray);
+    color: var(--app-dark-gray);
     display: flex;
     align-items: center;
     margin: 0 !important;
@@ -136,7 +134,7 @@
 }
 
 .badge {
-    background-color: map-get($basic-colors, accent);
+    background-color: var(--app-accent);
     padding: 0 0.3rem;
     border-radius: 0.6rem;
     font-weight: 600;
@@ -145,6 +143,6 @@
     min-width: 1.2rem;
     line-height: 1.2rem;
     margin-left: 0.25rem;
-    color: map-get($custom-colors, main);
+    color: var(--app-background);
     z-index: 200;
 }

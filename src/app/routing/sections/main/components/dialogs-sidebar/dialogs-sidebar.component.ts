@@ -1,5 +1,6 @@
 import { Component, HostBinding, HostListener, OnInit } from '@angular/core'
 import { Observable } from 'rxjs'
+import { startWith } from 'rxjs/operators'
 import { SearchService } from '../../services/search.service'
 import { SMALL_SIZE_MAX_WIDTH } from '../dialogs-group/dialogs-group.component'
 
@@ -18,7 +19,7 @@ export class DialogsSidebarComponent implements OnInit {
     ngOnInit(): void {
         this.onResize()
 
-        this.isSearchActive$ = this.searchService.getIsView()
+        this.isSearchActive$ = this.searchService.getIsView().pipe(startWith(false))
     }
 
     @HostListener('window:resize')

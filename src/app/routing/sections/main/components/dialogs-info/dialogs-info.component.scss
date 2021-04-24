@@ -1,12 +1,10 @@
-@import '../../../../../styles/vars.scss';
-
 :host {
     display: block;
     width: 100%;
     position: relative;
     z-index: 2000;
-    background-color: map-get($custom-colors, main);
-    border-bottom: 1px solid map-get($custom-colors, main-gray);
+    background-color: var(--app-background);
+    border-bottom: 1px solid var(--app-main-gray);
     height: 3.5rem;
     overflow: hidden;
     flex-shrink: 0;
@@ -19,7 +17,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-image: linear-gradient(map-get($custom-colors, main) 0%, map-get($custom-colors, main) 5%, transparent 20%, transparent 80%, map-get($custom-colors, main) 95%, map-get($custom-colors, main) 100%);
+        background-image: linear-gradient(var(--app-background) 0%, var(--app-background) 5%, transparent 20%, transparent 80%, var(--app-background) 95%, var(--app-background) 100%);
         z-index: 2000;
     }
 }
@@ -47,7 +45,7 @@
 }
 
 .status {
-    color: map-get($custom-colors, dark-gray);
+    color: var(--app-dark-gray);
     position: relative;
 
     &:after {
@@ -57,14 +55,14 @@
         top: calc(50% + 0.05rem);
         left: -0.3rem;
         transform: translate(-100%, -50%);
-        background: map-get($custom-colors, online);
+        background: var(--app-online);
         border-radius: 50%;
         width: 0.5rem;
         height: 0.5rem;
     }
 
     &:not(.online):after {
-        background-color: map-get($custom-colors, main-gray);
+        background-color: var(--app-main-gray);
     }
 
     &.not-active {
@@ -119,25 +117,25 @@
 
 @keyframes dots {
     0%, 20% {
-      color: map-get($custom-colors, main);
+      color: var(--app-background);
       text-shadow:
-        .25em 0 0, map-get($custom-colors, main),
-        .5em 0 0 map-get($custom-colors, main);
+        .25em 0 0, var(--app-background),
+        .5em 0 0 var(--app-background);
     }
     40% {
-      color: map-get($custom-colors, secondary);
+      color: var(--app-text);
       text-shadow:
-        .25em 0 0 map-get($custom-colors, main),
-        .5em 0 0 map-get($custom-colors, main);
+        .25em 0 0 var(--app-background),
+        .5em 0 0 var(--app-background);
     }
     60% {
       text-shadow:
-        .25em 0 0 map-get($custom-colors, secondary),
-        .5em 0 0 map-get($custom-colors, main);
+        .25em 0 0 var(--app-text),
+        .5em 0 0 var(--app-background);
     }
     80%, 100% {
       text-shadow:
-        .25em 0 0 map-get($custom-colors, secondary),
-        .5em 0 0 map-get($custom-colors, secondary);
+        .25em 0 0 var(--app-text),
+        .5em 0 0 var(--app-text);
     }
 }

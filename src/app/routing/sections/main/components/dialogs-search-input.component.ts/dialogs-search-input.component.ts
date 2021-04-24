@@ -1,7 +1,10 @@
 /* eslint-disable @typescript-eslint/no-non-null-assertion */
 import { Component, OnDestroy, OnInit } from '@angular/core'
-import { Subject, Subscription } from 'rxjs'
+import { Store } from '@ngrx/store'
+import { Observable, Subject, Subscription } from 'rxjs'
 import { debounceTime, filter, switchMap, tap } from 'rxjs/operators'
+import { selectIsDarkTheme } from 'src/app/store/selectors/main.selectors'
+import { AppState } from 'src/app/store/state/app.state'
 import { MainHttpService } from '../../services/main-http.service'
 import { SearchService } from '../../services/search.service'
 
@@ -18,13 +21,21 @@ export class DialogsSearchInputComponent implements OnInit, OnDestroy {
 
     subscription = new Subscription()
 
+    isDarkTheme$!: Observable<boolean>
+
     set sub(sub: Subscription) {
         this.subscription.add(sub)
     }
 
-    constructor(private readonly httpService: MainHttpService, private readonly searchService: SearchService) {}
+    constructor(
+        private readonly store: Store<AppState>,
+        private readonly httpService: MainHttpService,
+        private readonly searchService: SearchService
+    ) {}
 
     ngOnInit(): void {
+        this.isDarkTheme$ = this.store.select(selectIsDarkTheme)
+
         this.sub = this.searchService
             .getClear()
             .pipe(

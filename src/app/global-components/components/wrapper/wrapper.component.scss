@@ -4,14 +4,18 @@
     align-items: center;
     height: 100vh;
     width: 100%;
+    background-color: var(--app-auth-wrapper-out-color);
 }
 
 form {
-    border: 0.1rem solid var(--app-light-gray);
+    background-color: var(--app-auth-wrapper-in-color);
+    border: 0.1rem solid var(--app-auth-wrapper-border-color);
     border-radius: 0.5em;
     width: 100%;
     max-width: 24rem;
     display: flex;
     flex-direction: column;
     padding: 3rem 2rem;
+
+    color: var(--app-pre-additional-color);
 }

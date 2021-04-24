@@ -1,1 +1,1 @@
-<span class="mat-caption">{{getDate()}}</span>
+<span class="mat-caption" [class.dark-theme]="isDarkTheme$ | async">{{getDate()}}</span>

@@ -23,6 +23,7 @@ import {
     selectActiveReceiverID,
     selectDialogMessages,
     selectDialogs,
+    selectIsDarkTheme,
     selectRequestLoading,
 } from 'src/app/store/selectors/main.selectors'
 import { AppState } from 'src/app/store/state/app.state'
@@ -32,7 +33,7 @@ import { NoConnectionComponent } from '../../components/no-connection/no-connect
 import { IDialog } from '../../interface/dialog.interface'
 import { IMessage } from '../../interface/message.interface'
 import { MainHttpService } from '../../services/main-http.service'
-import { NEW_MESSAGE_START, ScrollService, SCROLL_BOTTOM_UPDATE_CONTENT } from '../../services/scroll.service'
+import { NEW_MESSAGE_START, ScrollService } from '../../services/scroll.service'
 
 @Component({
     selector: 'app-dialogs',
@@ -62,6 +63,19 @@ export class DialogsComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this.requestLoading$ = this.store.pipe(select(selectRequestLoading), observeOn(asyncScheduler))
+
+        this.sub = this.store
+            .pipe(
+                select(selectIsDarkTheme),
+                tap((isDarkTheme) => {
+                    if (isDarkTheme) {
+                        document.body.classList.add('dark-theme')
+                    } else {
+                        document.body.classList.remove('dark-theme')
+                    }
+                })
+            )
+            .subscribe()
 
         this.sub = this.store
             .pipe(

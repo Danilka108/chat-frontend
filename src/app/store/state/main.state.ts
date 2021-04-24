@@ -12,6 +12,7 @@ export interface MainState {
         receiverID: number
         messages: IMessage[] | null
     }[]
+    isDarkTheme: boolean
 }
 
 export const mainInitialState: MainState = {
@@ -20,4 +21,5 @@ export const mainInitialState: MainState = {
     reconnectionLoading: false,
     dialogs: null,
     messages: [],
+    isDarkTheme: false,
 }

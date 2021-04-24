@@ -22,8 +22,8 @@ $typography: mat-typography-config(
 $primary: mat-palette($mat-deep-purple, 500);
 $accent: mat-palette($mat-pink, A200);
 $warn: mat-palette($mat-red);
-$theme: mat-light-theme($primary, $accent, $warn);
 
+$theme: mat-light-theme($primary, $accent, $warn);
 $light-foreground-palette: map-get($theme, foreground);
 $light-background-palette: map-get($theme, background);
 
@@ -34,19 +34,57 @@ $light-background-palette: map-get($theme, background);
     --app-accent: #{mat-color($accent)};
     --app-warn: #{mat-color($warn)};
 
-    --app-light-gray: #{mat-color($mat-grey, 200)};
-    --app-main-gray: #{mat-color($mat-grey, 300)};
-    --app-middle-dark-main-gray: #{mat-color($mat-grey, 500)};
-    --app-dark-gray: #{mat-color($mat-grey, 600)};
+    --app-scrollbar-thumb-color: #{mat-color($mat-grey, 500)};
+    --app-scrollbar-thumb-hover-color:  #{mat-color($mat-grey, 600)};
+    --app-detail-background-color: #{mat-color($mat-grey, 200)};
     --app-online: #{mat-color($mat-green, 500)};
-    --app-background: #{map-get($light-background-palette, background)};
-    --app-text: #{map-get($light-foreground-palette, text)};
+
+    --app-main-color: #{map-get($light-background-palette, background)};
+    --app-pre-pre-main-color: #{mat-color($mat-grey, 100)};
+    --app-pre-main-color: #{mat-color($mat-grey, 200)};
+    --app-middle-main-additional-color: #{mat-color($mat-grey, 300)};
+    --app-pre-pre-additional-color: #{mat-color($mat-grey, 500)};
+    --app-pre-additional-color: #{mat-color($mat-grey, 600)};
+    --app-additional-color: #{map-get($light-foreground-palette, text)};
+
+    --app-dialogs-border-color: #{mat-color($mat-grey, 300)};
+    --app-auth-wrapper-border-color:  #{mat-color($mat-grey, 300)};
+
+    --app-auth-wrapper-out-color: #{map-get($light-background-palette, background)};
+    --app-auth-wrapper-in-color: #{map-get($light-background-palette, background)};
 }
 
-// $dark-primary: mat-palette($mat-green);
-// $dark-accent: mat-palette($mat-pink, A200);
-// $dark-warn: mat-palette($mat-red);
-// $dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
+$dark-primary: mat-palette($mat-deep-purple, A200);
+$dark-accent: mat-palette($mat-pink, 800);
+$dark-warn: mat-palette($mat-red);
 
-// $dark-foreground-palette: map-get($dark-theme, foreground);
-// $dark-background-palette: map-get($dark-theme, background);
+$dark-theme: mat-dark-theme($dark-primary, $dark-accent, $dark-warn);
+$dark-foreground-palette: map-get($dark-theme, foreground);
+$dark-background-palette: map-get($dark-theme, background);
+
+.dark-theme {
+    @include angular-material-theme($dark-theme);
+    
+    --app-primary: #{mat-color($dark-primary)};
+    --app-accent: #{mat-color($dark-accent)};
+    --app-warn: #{mat-color($dark-warn)};
+
+    --app-main-color: #{map-get($dark-background-palette, background)};
+    --app-pre-pre-main-color: #{mat-color($mat-grey, 800)};
+    --app-pre-main-color: #{mat-color($mat-grey, 600)};
+    --app-middle-main-additional-color: #{mat-color($mat-grey, 500)};
+    --app-pre-pre-additional-color: #{mat-color($mat-grey, 100)};
+    --app-pre-additional-color: #{mat-color($mat-grey, 200)};
+    --app-additional-color: #{map-get($dark-foreground-palette, text)};
+
+    --app-scrollbar-thumb-color: #{mat-color($mat-grey, 700)};
+    --app-scrollbar-thumb-hover-color:  #{mat-color($mat-grey, 800)};
+    --app-detail-background-color: #{darken(map-get($dark-background-palette, background), 8%)};
+    --app-online: #{mat-color($mat-green, 500)};
+
+    --app-dialogs-border-color: #{darken(map-get($dark-background-palette, background), 8%)};
+    --app-auth-wrapper-border-color:  #{mat-color($mat-grey, 800)};
+
+    --app-auth-wrapper-out-color: #{darken(map-get($dark-background-palette, background), 6%)};
+    --app-auth-wrapper-in-color: #{darken(map-get($dark-background-palette, background), 4%)};
+}

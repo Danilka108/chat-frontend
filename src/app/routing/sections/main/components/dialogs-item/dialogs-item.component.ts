@@ -1,12 +1,16 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
 import { RippleAnimationConfig } from '@angular/material/core'
+import { Store } from '@ngrx/store'
+import { Observable } from 'rxjs'
+import { selectIsDarkTheme } from 'src/app/store/selectors/main.selectors'
+import { AppState } from 'src/app/store/state/app.state'
 
 @Component({
     selector: 'app-dialogs-item',
     templateUrl: './dialogs-item.component.html',
     styleUrls: ['./dialogs-item.component.scss'],
 })
-export class DialogsItemComponent {
+export class DialogsItemComponent implements OnInit {
     // eslint-disable-next-line @angular-eslint/no-output-native
     @Output() click = new EventEmitter<undefined>()
 
@@ -19,9 +23,17 @@ export class DialogsItemComponent {
     @Input() receiverID!: number
     @Input() connectionStatus!: 'offline' | 'online'
 
+    isDarkTheme$!: Observable<boolean>
+
     RippleConfig: RippleAnimationConfig = {
         enterDuration: 700,
         exitDuration: 1000,
+    }
+
+    constructor(private readonly store: Store<AppState>) {}
+
+    ngOnInit(): void {
+        this.isDarkTheme$ = this.store.select(selectIsDarkTheme)
     }
 
     onClick(): void {

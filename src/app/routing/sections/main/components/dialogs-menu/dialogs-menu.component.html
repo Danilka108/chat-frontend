@@ -1,9 +1,12 @@
 <button mat-icon-button [matMenuTriggerFor]="menu">
-    <mat-icon>menu</mat-icon>
+    <mat-icon class="menu-icon">menu</mat-icon>
 </button>
 <mat-menu #menu="matMenu">
     <button class="item-btn" mat-menu-item (click)="logout()">
         <mat-icon class="item-icon">logout</mat-icon>
         <span class="item-name">Logout</span>
+    </button>
+    <button mat-menu-item class="item-btn" (click)="$event.stopPropagation()">
+        <mat-slide-toggle #slideToggle (click)="toggleDarkMode()">Dark mode</mat-slide-toggle>
     </button>
 </mat-menu>

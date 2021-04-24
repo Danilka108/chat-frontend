@@ -1,5 +1,9 @@
-import { Component, EventEmitter, Input, Output } from '@angular/core'
+import { Component, EventEmitter, Input, OnInit, Output } from '@angular/core'
 import { RippleAnimationConfig } from '@angular/material/core'
+import { Store } from '@ngrx/store'
+import { Observable } from 'rxjs'
+import { selectIsDarkTheme } from 'src/app/store/selectors/main.selectors'
+import { AppState } from 'src/app/store/state/app.state'
 import { SearchService } from '../../services/search.service'
 
 @Component({
@@ -7,7 +11,7 @@ import { SearchService } from '../../services/search.service'
     templateUrl: './dialogs-search-item.component.html',
     styleUrls: ['./dialogs-search-item.component.scss'],
 })
-export class DialogsSearchItemComponent {
+export class DialogsSearchItemComponent implements OnInit {
     @Input() isSmallSize!: boolean
     @Input() name!: string
     @Input() userID!: number
@@ -19,7 +23,13 @@ export class DialogsSearchItemComponent {
         exitDuration: 1000,
     }
 
-    constructor(private readonly searchService: SearchService) {}
+    isDarkTheme$!: Observable<boolean>
+
+    constructor(private readonly searchService: SearchService, private readonly store: Store<AppState>) {}
+
+    ngOnInit(): void {
+        this.isDarkTheme$ = this.store.select(selectIsDarkTheme)
+    }
 
     onClick(): void {
         this.searchService.emitClear()

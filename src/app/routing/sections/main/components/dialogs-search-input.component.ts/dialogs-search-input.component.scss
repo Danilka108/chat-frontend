@@ -10,15 +10,15 @@
 .input-wrapper {
     width: 90%;
     padding: 0.2rem;
-    border: 1px solid var(--app-main-gray);
+    border: 1px solid var(--app-middle-main-additional-color);
     border-radius: 0.25rem;
     display: flex;
     align-items: center;
     box-sizing: content-box;
-    transition: 100ms;
+    transition: border 150ms;
 
     &:hover {
-        border: 1.5px solid var(--app-middle-dark-main-gray);
+        border: 1.5px solid var(--app-pre-pre-additional-color);
     }
 
     &:focus-within {
@@ -28,15 +28,41 @@
 
         border: 1.5px solid var(--app-primary);
     }
+
+    &.dark-theme {
+        background-color: var(--app-detail-background-color);
+        border: none;
+
+        .icon {
+            color: var(--app-pre-main-color);
+        }
+
+        &:hover {
+            border: 1.5px solid var(--app-pre-main-color);
+        }
+
+        &:focus-within {
+            .icon {
+                color: var(--app-primary);
+            }
+    
+            border: 1.5px solid var(--app-primary);
+        }
+
+        .input-placeholder::after {
+            color: var(--app-pre-pre-additional-color);
+        }
+    }
 }
 
 .icon {
     transition: color 200ms;
     user-select: none;
-    color: var(--app-middle-dark-main-gray);
+    color: var(--app-pre-pre-additional-color);
 }
 
 .input {
+    color: var(--app-pre-additional-color);
     height: 100%;
     padding: 0;
     font-size: 0.9rem;
@@ -69,7 +95,7 @@
         width: 100%;
         height: 100%;
         line-height: 1;
-        color: var(--app-middle-dark-main-gray);
+        color: var(--app-additional-color);
 
         transform: translateY(-50%) translateX(10%);
         opacity: 0;
@@ -77,7 +103,7 @@
 
     &:not(.not-active)::after {
         transform: translateY(-50%);
-        opacity: 1;
+        opacity: 0.5;
     }
 }
 
@@ -102,6 +128,7 @@
     box-sizing: content-box;
 
     mat-icon {
+        color: var(--app-pre-additional-color);
         width: 0.9rem;
         height: 0.9rem;
         font-size: 0.9rem;

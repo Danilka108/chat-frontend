@@ -3,12 +3,13 @@
     [matRippleAnimation]="RippleConfig"
     [matRippleColor]="active ? 'rgba(255, 255, 255, 0.04)' : 'rgba(0, 0, 0, 0.04)'"
     [class.active]="active"
+    [class.dark]="isDarkTheme$ | async"
     class="button"
     (click)="onClick()"
 >
     <div class="photo">
         <app-dialogs-avatar [name]="receiver" [size]="1.5" class="avatar"></app-dialogs-avatar>
-        <!-- <div class="status" *ngIf="connectionStatus === 'online'"></div> -->
+        <div class="status" *ngIf="connectionStatus === 'online'"></div>
         <div *ngIf="isSmallSize && notReadedMessagesCount !== 0" class="badge">{{notReadedMessagesCount}}</div>
     </div>
     <div *ngIf="!isSmallSize" class="info"> 

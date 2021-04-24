@@ -1,4 +1,4 @@
-<label class="input-wrapper">
+<label class="input-wrapper" [class.dark-theme]="isDarkTheme$ | async">
     <mat-icon class="icon">search</mat-icon>
     <div class="input-placeholder" [class.not-active]="inputValue.length">
         <input (input)="onInput()" class="input" [(ngModel)]="inputValue" type="text">

@@ -3,6 +3,7 @@
 * {
     box-sizing: border-box;
     font-size: 18px;
+    caret-color: var(--app-primary);
 }
 
 .cdk-overlay-container {
@@ -10,7 +11,8 @@
 }
 
 body {
-    background-color: var(--app-background);
+
+    background-color: var(--app-main-color);
 
     margin: 0;
     overflow: hidden;
@@ -26,10 +28,10 @@ body {
     }
     
     &::-webkit-scrollbar-thumb {
-        background-color: var(--app-middle-dark-main-gray);
+        background-color: var(--app-scrollbar-thumb-color);
     
         &:hover {
-            background-color: var(--app-dark-gray);
+            background-color: var(--app-scrollbar-thumb-hover-color);
         }
     }
 }

@@ -60,3 +60,5 @@ export const updateDialogMessages = createAction(
     '[Main] Update Dialog Messages',
     props<{ receiverID: number; messages: IMessage[] | null }>()
 )
+
+export const toggleDarkTheme = createAction('[Main] Toggle Dark Theme')

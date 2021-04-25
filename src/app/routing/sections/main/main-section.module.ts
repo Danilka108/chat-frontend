@@ -31,6 +31,7 @@ import { DialogsSearchItemComponent } from './components/dialogs-search-item/dia
 import { SearchService } from './services/search.service'
 import { DialogsMenuComponent } from './components/dialogs-menu/dialogs-menu.component'
 import { SessionModule } from 'src/app/session/session.module'
+import { StorageModule } from 'src/app/storage/storage.module'
 
 @NgModule({
     declarations: [
@@ -64,6 +65,7 @@ import { SessionModule } from 'src/app/session/session.module'
         WsModule,
         ScrollingModule,
         SessionModule,
+        StorageModule,
     ],
     providers: [MainHttpService, MessageService, ScrollService, SearchService],
 })

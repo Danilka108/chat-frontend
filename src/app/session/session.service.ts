@@ -4,17 +4,18 @@ import { Router } from '@angular/router'
 import { select, Store } from '@ngrx/store'
 import { forkJoin, Observable, of } from 'rxjs'
 import { catchError, first, map, switchMap, tap } from 'rxjs/operators'
+import { StorageService } from '../storage/storage.service'
 import { updateAccessToken, updateUserID } from '../store/actions/auth.actions'
+import { removeDarkTheme } from '../store/actions/main.actions'
 import { selectAccessToken, selectUserID } from '../store/selectors/auth.selectors'
 import { AppState } from '../store/state/app.state'
 import { SessionErrorService } from './session-error.service'
 import { SessionHttpService } from './session-http.service'
-import { SessionLocalStorageService } from './session-local-storage.service'
 
 @Injectable()
 export class SessionService {
     constructor(
-        private readonly localStorageService: SessionLocalStorageService,
+        private readonly storageService: StorageService,
         private readonly httpService: SessionHttpService,
         private readonly store: Store<AppState>,
         private readonly router: Router,
@@ -22,8 +23,8 @@ export class SessionService {
     ) {}
 
     update(): Observable<boolean> {
-        const localStorageUserID = this.localStorageService.getUserID()
-        const localStorageRefreshToken = this.localStorageService.getRefreshToken()
+        const localStorageUserID = this.storageService.getUserID()
+        const localStorageRefreshToken = this.storageService.getRefreshToken()
 
         if (localStorageRefreshToken && localStorageUserID) {
             return this.httpService
@@ -36,8 +37,8 @@ export class SessionService {
                         this.store.dispatch(updateAccessToken({ accessToken }))
                         this.store.dispatch(updateUserID({ userID }))
 
-                        this.localStorageService.setUserID(userID)
-                        this.localStorageService.setRefreshToken(refreshToken)
+                        this.storageService.setUserID(userID)
+                        this.storageService.setRefreshToken(refreshToken)
 
                         return true
                     }),
@@ -52,14 +53,16 @@ export class SessionService {
 
     remove(throwSessionError = true): void {
         if (throwSessionError) this.sessionErrorService.emit()
-        this.localStorageService.removeRefreshToken()
-        this.localStorageService.removeUserID()
+        this.storageService.removeIsDarkTheme()
+        this.store.dispatch(removeDarkTheme())
+        this.storageService.removeRefreshToken()
+        this.storageService.removeUserID()
         this.router.navigateByUrl('')
     }
 
     set(userID: number, accessToken: string, refreshToken: string): void {
-        this.localStorageService.setRefreshToken(refreshToken)
-        this.localStorageService.setUserID(userID)
+        this.storageService.setRefreshToken(refreshToken)
+        this.storageService.setUserID(userID)
 
         this.store.dispatch(updateAccessToken({ accessToken }))
         this.store.dispatch(updateUserID({ userID }))
@@ -71,14 +74,14 @@ export class SessionService {
             userID: this.store.pipe(select(selectUserID), first()),
         }).pipe(
             switchMap(({ accessToken, userID }) => {
-                const localStorageUserID = this.localStorageService.getUserID()
-                const localStorageRefreshToken = this.localStorageService.getRefreshToken()
+                const localStorageUserID = this.storageService.getUserID()
+                const localStorageRefreshToken = this.storageService.getRefreshToken()
 
                 if (userID && accessToken && localStorageUserID && localStorageRefreshToken) {
                     return of(false)
                 } else if (localStorageUserID && localStorageRefreshToken) {
-                    this.localStorageService.removeRefreshToken()
-                    this.localStorageService.removeUserID()
+                    this.storageService.removeRefreshToken()
+                    this.storageService.removeUserID()
 
                     return this.httpService
                         .refreshToken({
@@ -87,8 +90,8 @@ export class SessionService {
                         })
                         .pipe(
                             map(({ data: { accessToken, userID, refreshToken } }) => {
-                                this.localStorageService.setRefreshToken(refreshToken)
-                                this.localStorageService.setUserID(userID)
+                                this.storageService.setRefreshToken(refreshToken)
+                                this.storageService.setUserID(userID)
 
                                 this.store.dispatch(updateAccessToken({ accessToken }))
                                 this.store.dispatch(updateUserID({ userID }))

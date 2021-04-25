@@ -7,6 +7,7 @@ import {
     increaseDialogNewMessagesCount,
     markDialogMessageAsRead,
     markDialogMessagesAsRead,
+    removeDarkTheme,
     toggleDarkTheme,
     updateActiveReceiverID,
     updateDialogConnectionStatus,
@@ -290,6 +291,12 @@ export const mainReducer = createReducer(
         return {
             ...state,
             isDarkTheme: !state.isDarkTheme,
+        }
+    }),
+    on(removeDarkTheme, (state) => {
+        return {
+            ...state,
+            isDarkTheme: false,
         }
     })
 )

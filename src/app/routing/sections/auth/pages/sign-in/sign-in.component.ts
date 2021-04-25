@@ -6,9 +6,9 @@ import { FormControl, FormGroup, Validators } from '@angular/forms'
 import { Router } from '@angular/router'
 import { from, of, Subscription } from 'rxjs'
 import { catchError, switchMap } from 'rxjs/operators'
-import { SessionTypeService } from 'src/app/common/session-type.service'
 import { authSectionResetPasswordPath, authSectionSignUpPath } from 'src/app/routing/routing.constants'
 import { SessionService } from 'src/app/session/session.service'
+import { StorageTypeService } from 'src/app/storage/storage-type.service'
 import { AuthHttpService } from '../../services/auth-http.service'
 
 @Component({
@@ -38,7 +38,7 @@ export class SignInComponent implements OnDestroy {
         private readonly httpService: AuthHttpService,
         private readonly router: Router,
         private readonly sessionService: SessionService,
-        private readonly sessionTypeService: SessionTypeService
+        private readonly storageTypeService: StorageTypeService
     ) {
         this.onSubmit = this.onSubmit.bind(this)
     }
@@ -63,7 +63,7 @@ export class SignInComponent implements OnDestroy {
                 .pipe(
                     switchMap(({ data: { userID, accessToken, refreshToken } }) => {
                         this.httpErrorMessage = ''
-                        this.sessionTypeService.setStorage(rememberMe)
+                        this.storageTypeService.setStorage(rememberMe)
                         this.sessionService.set(userID, accessToken, refreshToken)
                         return from(this.router.navigateByUrl(''))
                     }),

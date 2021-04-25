@@ -47,6 +47,8 @@ $light-background-palette: map-get($theme, background);
     --app-pre-additional-color: #{mat-color($mat-grey, 600)};
     --app-additional-color: #{map-get($light-foreground-palette, text)};
 
+    --app-dialogs-outside-color: #{mat-color($mat-grey, 100)};
+
     --app-dialogs-border-color: #{mat-color($mat-grey, 300)};
     --app-auth-wrapper-border-color:  #{mat-color($mat-grey, 300)};
 
@@ -81,6 +83,8 @@ $dark-background-palette: map-get($dark-theme, background);
     --app-scrollbar-thumb-hover-color:  #{mat-color($mat-grey, 800)};
     --app-detail-background-color: #{darken(map-get($dark-background-palette, background), 8%)};
     --app-online: #{mat-color($mat-green, 500)};
+
+    --app-dialogs-outside-color: #{darken(map-get($dark-background-palette, background), 5%)};
 
     --app-dialogs-border-color: #{darken(map-get($dark-background-palette, background), 8%)};
     --app-auth-wrapper-border-color:  #{mat-color($mat-grey, 800)};

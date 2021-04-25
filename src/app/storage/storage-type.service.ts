@@ -3,10 +3,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { Injectable } from '@angular/core'
 
-@Injectable({
-    providedIn: 'root',
-})
-export class SessionTypeService {
+@Injectable()
+export class StorageTypeService {
     private storage: Storage | null = null
 
     setStorage(isLocalStorage: boolean): void {

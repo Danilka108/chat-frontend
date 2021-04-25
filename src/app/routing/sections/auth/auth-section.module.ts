@@ -14,6 +14,7 @@ import { ResetPasswordCheckEmailComponent } from './pages/reset-password-check-e
 import { HttpClientModule } from '@angular/common/http'
 import { AuthHttpService } from './services/auth-http.service'
 import { SessionModule } from 'src/app/session/session.module'
+import { StorageModule } from 'src/app/storage/storage.module'
 
 @NgModule({
     declarations: [
@@ -25,6 +26,7 @@ import { SessionModule } from 'src/app/session/session.module'
         ResetPasswordCheckEmailComponent,
     ],
     imports: [
+        StorageModule,
         SessionModule,
         GlobalComponentsModule,
         FormsModule,

@@ -62,3 +62,5 @@ export const updateDialogMessages = createAction(
 )
 
 export const toggleDarkTheme = createAction('[Main] Toggle Dark Theme')
+
+export const removeDarkTheme = createAction('[Main] Update Dark Theme')

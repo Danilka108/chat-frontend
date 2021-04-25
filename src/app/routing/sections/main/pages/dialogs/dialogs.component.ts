@@ -6,6 +6,7 @@ import { asyncScheduler, combineLatest, forkJoin, from, Observable, of, Subscrip
 import { filter, first, map, observeOn, startWith, switchMap, tap } from 'rxjs/operators'
 import { DateService } from 'src/app/common/date.service'
 import { mainSectionDialogsPath } from 'src/app/routing/routing.constants'
+import { StorageService } from 'src/app/storage/storage.service'
 import { updateUserName } from 'src/app/store/actions/auth.actions'
 import {
     addDialogMessages,
@@ -13,6 +14,7 @@ import {
     increaseDialogNewMessagesCount,
     markDialogMessageAsRead,
     markDialogMessagesAsRead,
+    toggleDarkTheme,
     updateActiveReceiverID,
     updateDialogConnectionStatus,
     updateDialogLastMessage,
@@ -54,7 +56,8 @@ export class DialogsComponent implements OnInit, OnDestroy {
         private readonly wsService: WsService,
         private readonly dateService: DateService,
         private readonly scrollService: ScrollService,
-        private readonly httpService: MainHttpService
+        private readonly httpService: MainHttpService,
+        private readonly storageService: StorageService
     ) {}
 
     set sub(sub: Subscription) {
@@ -64,13 +67,20 @@ export class DialogsComponent implements OnInit, OnDestroy {
     ngOnInit(): void {
         this.requestLoading$ = this.store.pipe(select(selectRequestLoading), observeOn(asyncScheduler))
 
+        const isDarkTheme = this.storageService.getIsDarkTheme()
+        if (isDarkTheme) {
+            this.store.dispatch(toggleDarkTheme())
+        }
+
         this.sub = this.store
             .pipe(
                 select(selectIsDarkTheme),
                 tap((isDarkTheme) => {
                     if (isDarkTheme) {
+                        this.storageService.setIsDarkTheme(true)
                         document.body.classList.add('dark-theme')
                     } else {
+                        this.storageService.setIsDarkTheme(false)
                         document.body.classList.remove('dark-theme')
                     }
                 })
@@ -241,10 +251,23 @@ export class DialogsComponent implements OnInit, OnDestroy {
                         activeReceiverID: this.store.pipe(select(selectActiveReceiverID), first()),
                     })
                 ),
-                tap(({ newDialog, activeReceiverID }) => {
+                switchMap(({ newDialog, activeReceiverID }) =>
+                    forkJoin({
+                        newDialog: of(newDialog),
+                        activeReceiverID: of(activeReceiverID),
+                        storeMessages:
+                            activeReceiverID === null
+                                ? of(null)
+                                : this.store.pipe(
+                                      select(selectDialogMessages, { receiverID: activeReceiverID }),
+                                      first()
+                                  ),
+                    })
+                ),
+                tap(({ newDialog, activeReceiverID, storeMessages }) => {
                     this.store.dispatch(addDialogs({ dialogs: [newDialog] }))
 
-                    if (newDialog.receiverID === activeReceiverID) {
+                    if (newDialog.receiverID === activeReceiverID && storeMessages === null) {
                         this.store.dispatch(updateDialogMessages({ receiverID: activeReceiverID, messages: [] }))
                     }
                 })

@@ -5,21 +5,32 @@
 .item-btn {
     display: flex;
     align-items: center;
+    padding: 0 1rem;
 }
 
 .item-name {
-    margin-left: 0.5rem;
     font-size: 1rem;
     line-height: 1;
 }
 
 .item-icon {
+    width: 36px;
+    margin-right: 8px !important;
     font-size: 1.2rem;
     display: flex;
     align-items: center;
     justify-content: center;
 }
 
-mat-slide-toggle {
+.change-theme-btn {
+    padding: 0;
+}
+
+.change-theme-slide-toggle {
     height: 100%;
+    &::ng-deep {
+        label {
+            padding: 0 1rem;
+        }
+    }
 }

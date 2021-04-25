@@ -1,6 +1,6 @@
 @import './app/styles/theme.scss';
 
-* {
+*, *::after, *::before {
     box-sizing: border-box;
     font-size: 18px;
     caret-color: var(--app-primary);
@@ -11,9 +11,7 @@
 }
 
 body {
-
-    background-color: var(--app-main-color);
-
+    background-color: var(--app-dialogs-outside-color);
     margin: 0;
     overflow: hidden;
 }

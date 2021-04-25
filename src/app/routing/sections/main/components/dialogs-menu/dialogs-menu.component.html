@@ -2,11 +2,11 @@
     <mat-icon class="menu-icon">menu</mat-icon>
 </button>
 <mat-menu #menu="matMenu">
+    <button mat-menu-item class="item-btn change-theme-btn" (click)="$event.stopPropagation()">
+        <mat-slide-toggle #slideToggle class="change-theme-slide-toggle">Dark mode</mat-slide-toggle>
+    </button>
     <button class="item-btn" mat-menu-item (click)="logout()">
         <mat-icon class="item-icon">logout</mat-icon>
         <span class="item-name">Logout</span>
-    </button>
-    <button mat-menu-item class="item-btn" (click)="$event.stopPropagation()">
-        <mat-slide-toggle #slideToggle (click)="toggleDarkMode()">Dark mode</mat-slide-toggle>
     </button>
 </mat-menu>

@@ -1,5 +1,5 @@
-import { IDialog } from 'src/app/routing/sections/main/interface/dialog.interface'
-import { IMessage } from 'src/app/routing/sections/main/interface/message.interface'
+import { IDialog } from 'src/app/routing/sections/main/dialogs/interface/dialog.interface'
+import { IMessage } from 'src/app/routing/sections/main/dialogs/interface/message.interface'
 
 export const mainKey = 'main'
 

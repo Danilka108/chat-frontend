@@ -1,5 +1,5 @@
 import { createReducer, on } from '@ngrx/store'
-import { IMessage } from 'src/app/routing/sections/main/interface/message.interface'
+import { IMessage } from 'src/app/routing/sections/main/dialogs/interface/message.interface'
 import {
     addDialogMessages,
     addDialogs,

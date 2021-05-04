@@ -1,3 +1,5 @@
+@import '../../../styles/vars.scss';
+
 :host {
     display: flex;
     justify-content: center;
@@ -18,4 +20,10 @@ form {
     padding: 3rem 2rem;
 
     color: var(--app-additional-color);
+}
+
+@media(max-width: $mobile-break-point) {
+    form {
+        border: none;
+    }
 }

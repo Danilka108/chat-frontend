@@ -1,0 +1,9 @@
+<div class="wrapper" [class.active]="(searchData$ | async)?.length !== 0">
+    <app-dialogs-search-item
+        *ngFor="let item of (searchData$ | async)"
+        (redirect)="onClick($event)"
+        [name]="item.name"
+        [userID]="item.id"
+    ></app-dialogs-search-item>
+</div>
+<p [class.active]="(searchData$ | async)?.length === 0" class="not-found">Users not found</p>

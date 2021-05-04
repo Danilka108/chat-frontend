@@ -1,0 +1,7 @@
+<button (click)="openSidebar()" [class.active]="!(isOpenSidebar$ | async)" mat-icon-button color="basic">
+    <mat-icon>arrow_forward</mat-icon>
+</button>
+
+<button (click)="closeSidebar()" [class.active]="isOpenSidebar$ | async" mat-icon-button color="basic">
+    <mat-icon>arrow_back</mat-icon>
+</button>

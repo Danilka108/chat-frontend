@@ -1,0 +1,69 @@
+:host {
+    width: 100%;
+    user-select: none;
+}
+
+button {
+    width: 100%;
+    height: 4rem;
+    margin: 0.3rem 0;
+    border-radius: 0.3rem;
+    padding: 0.5rem 0.35rem;
+    background: none;
+    border: none;
+    display: flex;
+    align-items: center;
+    transition: 0.25s;
+    justify-content: center;
+
+    &:focus {
+        outline: none;
+    }
+
+    &:hover,
+    &:focus {
+        background-color: var(--app-pre-main-color);
+
+        &.dark-theme {
+            background-color: var(--app-pre-pre-main-color);
+        }
+    }
+
+    &::ng-deep {
+        .mat-ripple-element {
+            z-index: 3000;
+        }
+    }
+}
+
+.name {
+    font-weight: 600;
+    color: var(--app-additional-color);
+    font-size: 1rem;
+    z-index: 2000;
+    flex: 1;
+    margin: 0;
+    text-align: left;
+    margin-left: 0.8rem;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.avatar {
+    z-index: 2000;
+}
+
+.photo {
+    width: 3rem;
+    height: 3rem;
+    flex-shrink: 0;
+    position: relative;
+
+    .avatar {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+    }
+}

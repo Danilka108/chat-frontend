@@ -1,0 +1,8 @@
+<app-dialogs-separator
+    class="separator"
+    [date]="sectionByDate.date"
+></app-dialogs-separator>
+<app-dialogs-messages-section-by-sender
+    *ngFor="let sectionBySender of sectionByDate.sectionsBySender; trackBy: sectionBySenderIdentity"
+    [sectionBySender]="sectionBySender"
+></app-dialogs-messages-section-by-sender>

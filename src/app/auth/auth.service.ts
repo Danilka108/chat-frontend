@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { Injectable } from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { of } from 'rxjs'
@@ -17,8 +18,11 @@ export class AuthService {
 
     private updatingCount = 0
 
-    authRequest<R>(request: (accessToken: string) => Observable<R>): Observable<R | null> {
-        return this.request(request).pipe(
+    authRequest<R>(
+        request: (accessToken: string) => Observable<R>,
+        ignoreNotAuthErrors?: boolean
+    ): Observable<R | null> {
+        return this.request(request, ignoreNotAuthErrors ?? false).pipe(
             tap(() => {
                 if (this.updatingCount !== UPDATE_TOKEN_MAX_COUNT) {
                     this.updatingCount = 0
@@ -27,7 +31,10 @@ export class AuthService {
         )
     }
 
-    private request<R>(request: (accessToken: string) => Observable<R>): Observable<R | null> {
+    private request<R>(
+        request: (accessToken: string) => Observable<R>,
+        ignoreNotAuthErrors: boolean
+    ): Observable<R | null> {
         return this.store.pipe(
             select(selectAccessToken),
             first(),
@@ -38,13 +45,17 @@ export class AuthService {
                     return of(null)
                 }
 
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
                 if (error.status === REQUEST_INVALID_TOKEN_ERROR_STATUS) {
                     this.updatingCount += 1
-                    return this.sessionService.update().pipe(switchMap(() => this.request(request)))
+                    return this.sessionService
+                        .update()
+                        .pipe(switchMap(() => this.request(request, ignoreNotAuthErrors)))
                 }
 
-                this.store.dispatch(updateConnectionError({ connectionError: true }))
+                if (!ignoreNotAuthErrors) {
+                    this.store.dispatch(updateConnectionError({ connectionError: true }))
+                }
+
                 return of(null)
             })
         )

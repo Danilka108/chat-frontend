@@ -1,0 +1,8 @@
+<div #messageWrapper class="wrapper" [style.maxWidth]="wrapperWidth * wrapperWidthFactor +'px'">
+    <span class="text">{{message}}</span>
+    <span class="float">
+        <span class="time mat-caption">{{parseDate(date)}}</span>
+        <span class="is-read" *ngIf="isOwnMsg"><mat-icon>{{isReaded ? 'done_all' : 'done'}}</mat-icon></span>
+    </span>
+    <div class="last"></div>
+</div>

@@ -40,6 +40,12 @@ export class DateService {
         }
     }
 
+    getIDFromDate(d: string): string {
+        const date = new Date(d)
+
+        return `${date.getFullYear()}-${date.getMonth()}-${date.getDate()}`
+    }
+
     parseDateWords(d: string): string {
         const now = Date.now()
         const date = new Date(d)
@@ -84,10 +90,14 @@ export class DateService {
     }
 
     isUnequalDays(dateA: string, dateB: string): boolean {
-        const dA = Math.ceil(new Date(dateA).getTime() / (1000 * 60 * 60 * 24))
-        const dB = Math.ceil(new Date(dateB).getTime() / (1000 * 60 * 60 * 24))
+        const dA = new Date(dateA)
+        const dB = new Date(dateB)
 
-        return dA !== dB
+        return !(
+            dA.getFullYear() === dB.getFullYear() &&
+            dA.getMonth() === dB.getMonth() &&
+            dA.getDate() === dB.getDate()
+        )
     }
 
     now(): string {

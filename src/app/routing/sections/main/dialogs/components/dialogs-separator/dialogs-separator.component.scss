@@ -1,0 +1,37 @@
+:host {
+    margin-bottom: 1rem;
+    margin-top: 1rem;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    z-index: 4000;
+}
+
+span {
+    z-index: 500;
+    padding: 0 0.4rem;
+    text-align: center;
+    color: var(--app-main-color);
+    position: relative;
+
+    &::after {
+        position: absolute;
+        display: block;
+        content: '';
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: var(--app-pre-pre-additional-color);
+        border-radius: 0.5rem;
+        z-index: -1;
+    }
+
+    &.dark-theme {
+        color: var(--app-pre-additional-color);
+
+        &::after {
+            background-color: var(--app-pre-main-color);
+        }
+    }
+}

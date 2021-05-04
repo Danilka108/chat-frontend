@@ -1,0 +1,16 @@
+<app-dialogs-avatar *ngIf="!sectionBySender.isOwnMessages" class="avatar" [size]="1" [name]="getReceiverName() | async"></app-dialogs-avatar>
+<div #wrapper [class.own-messages]="sectionBySender.isOwnMessages" class="messages-wrapper">
+    <app-dialogs-message
+        class="message"
+        *ngFor="let message of sectionBySender.messages; let i = index; trackBy: messageIdentify"
+        [isLastInGroup]="i === sectionBySender.messages.length - 1"
+        [wrapperWidth]="wrapperWidth"
+        [wrapperWidthFactor]="wrapperWidthFactor"
+        [message]="message.message"
+        [date]="message.createdAt"
+        [isOwnMsg]="sectionBySender.isOwnMessages"
+        [isReaded]="message.isReaded"
+        [messageID]="message.messageID"
+    ></app-dialogs-message>
+</div>
+<app-dialogs-avatar *ngIf="sectionBySender.isOwnMessages" class="avatar" [size]="1" [name]="getUserName() | async"></app-dialogs-avatar>

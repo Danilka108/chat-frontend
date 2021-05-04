@@ -1,0 +1,22 @@
+:host {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    position: relative;
+}
+
+.messages-wrapper {
+    flex: 1;
+    display: inline-block;
+    margin: 0 0.12rem;
+}
+
+.avatar {
+    z-index: 2000;
+    display: inline-block;
+    position: sticky;
+    bottom: 0.25rem;
+    flex-shrink: 1;
+    height: auto;
+    margin-bottom: 0.05rem;
+}

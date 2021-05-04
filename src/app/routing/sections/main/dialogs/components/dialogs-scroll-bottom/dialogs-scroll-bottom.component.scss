@@ -1,0 +1,26 @@
+:host {
+    position: absolute;
+    bottom: 2rem;
+    right: 0;
+    padding: 1rem;
+    z-index: 6000;
+    margin-right: 0.5vmax;
+}
+
+button {
+    width: 3rem;
+    height: 3rem;
+    mat-icon {
+        transform: scale(2.2);
+    }
+
+    opacity: 0;
+    transform: translateY(-100%);
+    transform: translateY(0.5rem);
+    transition: 150ms;
+
+    &.view {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

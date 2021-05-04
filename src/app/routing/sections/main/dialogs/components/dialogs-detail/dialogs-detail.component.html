@@ -1,0 +1,11 @@
+<app-dialogs-info class="info" [class.active]="isSelectedDialog$ | async"></app-dialogs-info>
+<div class="wrapper" [class.active]="isSelectedDialog$ | async">
+    <app-dialogs-scroll-bottom></app-dialogs-scroll-bottom>
+    <app-dialogs-scroll>
+        <app-dialogs-messages-section
+            *ngFor="let messagesSection of (messagesSections$ | async); trackBy: sectionIdentify"
+            [sectionByDate]="messagesSection"
+        ></app-dialogs-messages-section>
+    </app-dialogs-scroll>
+</div>
+<app-dialogs-input class="input" [class.active]="isSelectedDialog$ | async"></app-dialogs-input>

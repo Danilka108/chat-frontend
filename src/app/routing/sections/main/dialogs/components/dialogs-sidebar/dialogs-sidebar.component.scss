@@ -4,7 +4,8 @@
     display: block;
     width: 17rem;
     flex-shrink: 1;
-    height: 100vh;
+    // height: 100vh;
+    height: 100%;
     z-index: 6000;
     border-right: 1px solid var(--app-dialogs-border-color);
 

@@ -5,7 +5,8 @@
     display: flex;
     flex-direction: column;
     background-color: var(--app-detail-background-color);
-    height: 100vh;
+    // height: 100vh;
+    height: 100%;
     z-index: 7000;
     overflow: hidden;
 }

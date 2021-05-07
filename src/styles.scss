@@ -11,10 +11,14 @@
     z-index: 15000;
 }
 
-body {
-    background-color: var(--app-dialogs-outside-color);
+html, body {
+    height: 100%;
     margin: 0;
     overflow: hidden;
+}
+
+body {
+    background-color: var(--app-dialogs-outside-color);
 }
 
 .scrollbar {

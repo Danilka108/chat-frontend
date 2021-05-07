@@ -86,6 +86,7 @@
 @media(max-width: $mobile-break-point) {
     :host {
         padding: 0;
+        box-shadow: none;
     }
 
     .form {

@@ -99,15 +99,6 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
             )
             .subscribe()
 
-        this.sub = this.scrollService
-            .getNewMessage()
-            .pipe(
-                tap(() => {
-                    this.scrollService.emitScrolled()
-                })
-            )
-            .subscribe()
-
         /**
          * SCROLL BOTTOM
          */
@@ -122,16 +113,8 @@ export class DialogsScrollComponent implements AfterViewInit, AfterViewChecked, 
                     this.isDisableEvents = true
                     this.isDisableUserScroll = true
 
-                    if (
-                        viewport.scrollTop <
-                        viewport.scrollHeight - viewport.offsetHeight * (1 + SCROLLBAR_UPDATE_DISTANCE_FACTOR)
-                    ) {
-                        viewport.scrollTop =
-                            viewport.scrollHeight - viewport.offsetHeight * (1 + SCROLLBAR_UPDATE_DISTANCE_FACTOR)
-                    }
-
                     viewport.scrollTo({
-                        top: viewport.scrollHeight,
+                        top: viewport.scrollHeight - viewport.offsetHeight,
                         behavior: 'smooth',
                     })
                 })

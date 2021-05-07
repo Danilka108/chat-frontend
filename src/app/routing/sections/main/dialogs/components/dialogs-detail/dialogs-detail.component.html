@@ -1,5 +1,5 @@
 <app-dialogs-info class="info" [class.active]="isSelectedDialog$ | async"></app-dialogs-info>
-<div class="wrapper" [class.active]="isSelectedDialog$ | async">
+<div class="wrapper" #wrapper [class.active]="isSelectedDialog$ | async">
     <app-dialogs-scroll-bottom></app-dialogs-scroll-bottom>
     <app-dialogs-scroll>
         <app-dialogs-messages-section

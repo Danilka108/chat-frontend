@@ -95,9 +95,20 @@ export class DialogsMessageComponent implements OnInit, AfterViewInit, OnChanges
                 switchMap((result) => {
                     if (result === null) return of(null)
 
-                    const messageWrapperYPos = messageWrapper.getBoundingClientRect().y
+                    const viewport = this.scrollService.getViewport()
+                    const { y: messageWrapperYPos } = messageWrapper.getBoundingClientRect()
 
-                    if (messageWrapperYPos <= window.innerHeight) {
+                    if (viewport !== null) {
+                        const { y: viewportYPos, height: viewportHeight } = viewport.getBoundingClientRect()
+
+                        if (messageWrapperYPos > viewportYPos && messageWrapperYPos < viewportYPos + viewportHeight) {
+                            return this.httpService.messageRead(this.messageID)
+                        }
+
+                        return of(null)
+                    }
+
+                    if (messageWrapperYPos > 0 && messageWrapperYPos < window.innerHeight) {
                         return this.httpService.messageRead(this.messageID)
                     }
 

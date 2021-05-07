@@ -1,5 +1,17 @@
+.menu-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
 .menu-icon {
     color: var(--app-additional-color);
+    font-size: 1.8rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2rem;
 }
 
 .item-btn {

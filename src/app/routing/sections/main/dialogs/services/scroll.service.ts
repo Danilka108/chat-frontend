@@ -28,8 +28,17 @@ export class ScrollService {
     private allowScrollBottom: null | boolean = null
     private clearPrevDialogReceiverID: number | null = null
     private topAnchor: HTMLElement | null = null
+    private viewport: HTMLElement | null = null
 
     constructor(private readonly store: Store<AppState>) {}
+
+    updateViewport(element: HTMLElement): void {
+        this.viewport = element
+    }
+
+    getViewport(): HTMLElement | null {
+        return this.viewport
+    }
 
     updateTopAnchor(elementRef: HTMLElement): void {
         this.topAnchor = elementRef

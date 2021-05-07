@@ -1,4 +1,13 @@
-import { Component, HostBinding, HostListener, OnDestroy, OnInit } from '@angular/core'
+import {
+    AfterViewInit,
+    Component,
+    ElementRef,
+    HostBinding,
+    HostListener,
+    OnDestroy,
+    OnInit,
+    ViewChild,
+} from '@angular/core'
 import { select, Store } from '@ngrx/store'
 import { asyncScheduler, BehaviorSubject, forkJoin, merge, Observable, of, Subscription } from 'rxjs'
 import { filter, first, map, observeOn, switchMap, tap } from 'rxjs/operators'
@@ -29,7 +38,9 @@ import { SidebarService } from '../../services/sidebar.service'
     templateUrl: './dialogs-detail.component.html',
     styleUrls: ['./dialogs-detail.component.scss'],
 })
-export class DialogsDetailComponent implements OnInit, OnDestroy {
+export class DialogsDetailComponent implements OnInit, AfterViewInit, OnDestroy {
+    @ViewChild('wrapper') wrapperRef!: ElementRef<HTMLElement>
+
     @HostBinding('class.sidebar-open') isOpenSidebar = false
     @HostBinding('class.sidebar-closed') isClosedSidebar = false
     @HostBinding('class.not-selected') isNotSelected = false
@@ -170,6 +181,10 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
         )
     }
 
+    ngAfterViewInit(): void {
+        this.scrollService.updateViewport(this.wrapperRef.nativeElement)
+    }
+
     ngOnInit(): void {
         this.isSelectedDialog$ = this.store.pipe(
             select(selectActiveReceiverID),
@@ -249,6 +264,8 @@ export class DialogsDetailComponent implements OnInit, OnDestroy {
                 }),
                 observeOn(asyncScheduler),
                 tap(() => {
+                    this.scrollService.emitScrolled()
+
                     if (this.skip > this.take) {
                         this.scrollService.updateAllowScrollBottom(true)
                     } else {

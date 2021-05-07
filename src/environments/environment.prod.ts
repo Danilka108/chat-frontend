@@ -1,5 +1,5 @@
 export const environment = {
     production: true,
-    url: 'https://venerdichat.ru',
-    apiUrl: 'https://venerdichat.ru/api',
+    url: 'http://venerdichat.ru',
+    apiUrl: 'http://venerdichat.ru/api',
 }

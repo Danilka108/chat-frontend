@@ -1,3 +1,5 @@
+@import '../../../../../../styles/vars.scss';
+
 :host {
     display: block;
     width: 100%;
@@ -79,4 +81,14 @@
     align-items: center;
     justify-content: center;
     padding: 0.3rem;
+}
+
+@media(max-width: $mobile-break-point) {
+    :host {
+        padding: 0;
+    }
+
+    .form {
+        border-radius: 0;
+    }
 }

@@ -1,8 +1,11 @@
+@import '../../../../../../styles/vars.scss';
+
 :host {
     position: absolute;
     bottom: 2rem;
     right: 0;
     padding: 1rem;
+    padding-right: 0.5rem;
     z-index: 6000;
     margin-right: 0.5vmax;
 }
@@ -11,16 +14,24 @@ button {
     width: 3rem;
     height: 3rem;
     mat-icon {
-        transform: scale(2.2);
+        font-size: 3rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
     }
 
     opacity: 0;
-    transform: translateY(-100%);
     transform: translateY(0.5rem);
     transition: 150ms;
 
     &.view {
         opacity: 1;
         transform: translateY(0);
+    }
+}
+
+@media(max-width: $mobile-break-point) {
+    button mat-icon {
+        padding-top: 0.2rem;
     }
 }
